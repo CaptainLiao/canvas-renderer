@@ -1,17 +1,17 @@
 export class Stage implements IStage {
-  canvas: ICanvas;
-  width: number;
-  height: number;
 
-  constructor(canvasEle: ICanvas) {
-    this.canvas = canvasEle;
-  }
-
-  static install(ctor: any) {
+  public static install(ctor: any) {
     ctor.Stage = Stage;
   }
+  public canvas: ICanvas;
+  public width: number;
+  public height: number;
 
-  add: () => void;
-  clear: () => void;
-  print: () => void;
+  public add: () => void;
+  public clear: () => void;
+  public print: () => void;
+
+  public constructor(canvasEle: ICanvas) {
+    this.canvas = canvasEle;
+  }
 }
