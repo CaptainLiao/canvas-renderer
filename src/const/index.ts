@@ -1,5 +1,6 @@
 export const enum ETextPosition {
   BottomCenter = 'BottomCenter',
-  TopCenter = 'TopCenter'
+  TopCenter = 'TopCenter',
+  MiddleCenter = 'MiddleCenter'
 }
 

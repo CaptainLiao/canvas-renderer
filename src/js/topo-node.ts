@@ -1,39 +1,35 @@
-import { ETextPosition } from '../const/index';
-export class TopoNode implements ITopoNode {
 
+import { ETextPosition } from '../const/index';
+import { TopoTextNode } from './topo-node-text';
+import { paint } from './utils/paint';
+
+export class TopoNode extends TopoTextNode {
   public static install(ctor: any) {
     ctor.Node = TopoNode;
   }
-  public text = '';
-  public x = 0;
-  public y = 20;
-  public visible = true;
-  public font = '14px 微软雅黑';
-  public fontColor = '#000';
-  public textPosition = ETextPosition.BottomCenter;
-  public textBaseline = 'alphabetic';
+
+  public width = 0;
+  public height = 0;
+  public borderRadius: number;
+  public backgroundColor: string;
+  public borderColor: string;
+  public borderWidth: number;
+  public borderStyle: string;
 
   public constructor(text: string) {
+    super(text);
     this.text = text;
   }
 
-  public setLocation(x: number, y: number) {
-    this.x = x;
-    this.y = y;
+  public setSize(width: number, height: number) {
+    this.width = width;
+    this.height = height;
   }
 
   public paint(ctx: any, node: any) {
-    const {
-      text,
-      x,
-      y,
-      font,
-      textBaseline
-    } = node;
-
-    ctx.font = font;
-    ctx.textBaseline = textBaseline;
-    ctx.fillText(text, x, y);
+    paint.rect(ctx, node);
+    paint.text(ctx, node);
+    console.log(node);
   }
 
 }
