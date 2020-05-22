@@ -1,5 +1,5 @@
 declare interface IStage extends TopoEvents {
-  canvas: ICanvas;
+  canvas: HTMLCanvasElement;
   width: number;
   height: number;
 

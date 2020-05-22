@@ -32,23 +32,26 @@ export class TopoNode extends TopoTextNode {
     this.image = image;
   }
 
-  public paint(ctx: CanvasRenderingContext2D, node: any) {
-    ctx.font = node.font;
-    const mtext = ctx.measureText(node.text); // TextMetrics object
+  public paint(ctx: CanvasRenderingContext2D) {
+    ctx.font = this.font;
+    this.width = this.width || ctx.measureText(this.text).width;
+    this.height = this.height || this.lineHeight;
 
-    node.width = node.width || mtext.width;
-    node.height = node.height || node.lineHeight;
+    console.log(this);
 
-    if (node.image) {
-      return paint.drawImage(ctx, node)
+    this.drawSelectZone(ctx);
+
+    if (this.image) {
+      return paint.drawImage(ctx, this)
         .then(() => {
-          paint.text(ctx, node);
+          paint.drawText(ctx, this);
         });
     }
 
-    paint.rect(ctx, node);
-    console.log(node);
+    paint.drawRect(ctx, this);
+    paint.drawText(ctx, this);
   }
+
 
 }
 

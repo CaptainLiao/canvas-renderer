@@ -3,7 +3,7 @@ export class Stage implements IStage {
   public static install(ctor: any) {
     ctor.Stage = Stage;
   }
-  public canvas: ICanvas;
+  public canvas: HTMLCanvasElement;
   public width: number;
   public height: number;
 
@@ -11,7 +11,7 @@ export class Stage implements IStage {
   public clear: () => void;
   public print: () => void;
 
-  public constructor(canvasEle: ICanvas) {
+  public constructor(canvasEle: HTMLCanvasElement) {
     this.canvas = canvasEle;
   }
 }

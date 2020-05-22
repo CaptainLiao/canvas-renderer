@@ -12,7 +12,10 @@ export class Scene {
   }
 
   public add(node: TopoNode) {
-    node.paint(this._ctx, node);
+    node._setContext(this._ctx);
+    node.paint(this._ctx);
+
+    this._ctx.canvas.addEventListener('mousemove', node._mousemove);
   }
 }
 

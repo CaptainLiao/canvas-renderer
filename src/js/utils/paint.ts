@@ -1,12 +1,15 @@
 import { ETextPosition } from '../../const/index';
 
 export const paint = {
-  text: (ctx: any, node: any) => {
+  drawText: (ctx: any, node: any) => {
     const {
       text,
       font,
       fontColor
     } = node;
+
+    if (!text) return;
+
     const {
       x,
       y,
@@ -20,14 +23,14 @@ export const paint = {
   },
 
   // 绘制矩形块，对应 css block 块
-  rect,
+  drawRect,
 
   drawImage: (ctx: CanvasRenderingContext2D, node: any) => {
     const {
       x,
       y,
       width,
-      height,
+      height
     } = node;
 
     return new Promise((resolve, reject) => {
@@ -41,12 +44,11 @@ export const paint = {
 
       bgImg.onerror = reject;
     });
-
   }
 
  };
 
- function rect(ctx: CanvasRenderingContext2D, node: any) {
+ function drawRect(ctx: CanvasRenderingContext2D, node: any) {
   const {
     x,
     y,
