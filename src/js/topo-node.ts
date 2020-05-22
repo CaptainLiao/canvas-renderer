@@ -10,11 +10,13 @@ export class TopoNode extends TopoTextNode {
 
   public width = 0;
   public height = 0;
+  public lineHeight = 22;
   public borderRadius: number;
   public backgroundColor: string;
   public borderColor: string;
   public borderWidth: number;
   public borderStyle: string;
+  public image: string;
 
   public constructor(text: string) {
     super(text);
@@ -26,9 +28,25 @@ export class TopoNode extends TopoTextNode {
     this.height = height;
   }
 
-  public paint(ctx: any, node: any) {
+  public setImage(image: string) {
+    this.image = image;
+  }
+
+  public paint(ctx: CanvasRenderingContext2D, node: any) {
+    ctx.font = node.font;
+    const mtext = ctx.measureText(node.text); // TextMetrics object
+
+    node.width = node.width || mtext.width;
+    node.height = node.height || node.lineHeight;
+
+    if (node.image) {
+      return paint.drawImage(ctx, node)
+        .then(() => {
+          paint.text(ctx, node);
+        });
+    }
+
     paint.rect(ctx, node);
-    paint.text(ctx, node);
     console.log(node);
   }
 

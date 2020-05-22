@@ -9,9 +9,11 @@ export class TopoTextNode implements ITopoNode {
   public x = 0;
   public y = 0;
   public visible = true;
-  public font = '14px 微软雅黑';
+  public font = '12px Microsoft YaHei';
   public fontColor = '#000';
-  public textPosition = ETextPosition.MiddleCenter;
+  public lineHeight = 22;
+  public textPosition = ETextPosition.BottomCenter;
+  public textOffsetY = 0;
 
   public constructor(text: string) {
     this.text = text;
@@ -25,6 +27,5 @@ export class TopoTextNode implements ITopoNode {
   public paint(ctx: any, node: any) {
     paint.text(ctx, node);
   }
-
 }
 
