@@ -12,6 +12,12 @@ export class Scene {
   }
 
   public add(node: TopoNode) {
+    const ctx = this._ctx;
+    ctx.font = node.font;
+    node.width = node.width || ctx.measureText(node.text).width;
+    node.height = node.height || node.lineHeight;
+    node.__isActive = node.showSelected;
+
     node._setContext(this._ctx);
     node.paint(this._ctx);
 

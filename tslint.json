@@ -10,6 +10,7 @@
     // // @has-fixer 可自动修复
     // // @prettier 可交由 prettier 控制
     // "indent": [true, "spaces", 2]
-    "no-magic-numbers": [false]
+    "no-magic-numbers": [false],
+    "line-break": ["windows", "unix"],
   }
 }

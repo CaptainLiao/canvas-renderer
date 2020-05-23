@@ -17,7 +17,8 @@ export class TopoTextNode implements ITopoNode {
   public lineHeight = 22;
   public textPosition = ETextPosition.BottomCenter;
   public textOffsetY = 0;
-  public showSelected = false;
+  public showSelected = true;
+  public __isActive = false;
 
   private callback = {
     mousemove: () => {},
@@ -35,10 +36,6 @@ export class TopoTextNode implements ITopoNode {
 
   public mouseover(fn: any) {
     if (fn) fn();
-    if (this.showSelected) return;
-
-    this.showSelected = true;
-    this.paint(__ctx);
   }
   public mousemove(fn: any) {
     this.callback.mousemove = fn;
@@ -49,15 +46,13 @@ export class TopoTextNode implements ITopoNode {
 
     if (isPointInPath) {
       this.callback.mousemove();
-
-      if (this.showSelected) return;
-      this.showSelected = true;
-      this.drawSelectZone(__ctx);
+      this.__isActive = true;
+      paint.drawBorder(__ctx, this);
       return;
     }
 
-    this.showSelected = false;
-    this.drawSelectZone(__ctx);
+    this.__isActive = false;
+    paint.drawBorder(__ctx, this);
   }
 
   public mouseout(fn: any) {
@@ -69,22 +64,6 @@ export class TopoTextNode implements ITopoNode {
   }
   public paint(ctx: any) {
     paint.drawText(ctx, this);
-  }
-
-  public drawSelectZone(ctx: CanvasRenderingContext2D) {
-    const cNode = JSON.parse(JSON.stringify(this));
-    const pad = 2;
-    const c = this.showSelected ? 'rgba(0,0,0,0.2)' : 'transparent';
-
-    paint.drawRect(ctx, {
-      ...cNode,
-      x: cNode.x - pad,
-      y: cNode.y - pad,
-      width: cNode.width + 2 * pad,
-      height: cNode.height + 2 * pad,
-      borderColor: c,
-      backgroundColor: c
-    });
   }
 
 }

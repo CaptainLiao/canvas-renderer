@@ -44,9 +44,50 @@ export const paint = {
 
       bgImg.onerror = reject;
     });
+  },
+
+  
+  drawBorder: (ctx: CanvasRenderingContext2D, node: any) => {
+    if (!node.showSelected) return drawBorder(ctx, node, 'transparent')
+
+    if (node.__isActive) {
+      drawBorder(ctx, node)
+    } else {
+      drawBorder(ctx, node, '#fff')
+    }
   }
 
  };
+
+ let __lastBorderColor: any;
+ function drawBorder(ctx: CanvasRenderingContext2D, node: any, borderColor = '#ddd', borderWidth: number = 4) {
+  if (__lastBorderColor === borderColor) return;
+  __lastBorderColor = borderColor;
+  
+  let {
+    x,
+    y,
+    width,
+    height
+  } = node;
+
+  ctx.save();
+
+  x -= borderWidth / 2;
+  y -= borderWidth / 2 ;
+  width += borderWidth;
+  height += borderWidth;
+  ctx.lineWidth = borderWidth;
+  ctx.moveTo(x, y);
+  ctx.lineTo(x + width, y);
+  ctx.lineTo(x + width, y + height);
+  ctx.lineTo(x, y + height);
+  ctx.lineTo(x, y);
+
+  ctx.strokeStyle = borderColor;
+  ctx.stroke();
+  ctx.restore();
+ }
 
  function drawRect(ctx: CanvasRenderingContext2D, node: any) {
   const {
@@ -125,7 +166,7 @@ function __getTextPosition(ctx: any, node: any) {
 
   return {
     x: x + (width - mtext.width) / 2,
-    y: yOffset + textOffsetY,
+    y: yOffset + textOffsetY + 4,
     textBaseline
   };
 }

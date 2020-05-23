@@ -33,13 +33,9 @@ export class TopoNode extends TopoTextNode {
   }
 
   public paint(ctx: CanvasRenderingContext2D) {
-    ctx.font = this.font;
-    this.width = this.width || ctx.measureText(this.text).width;
-    this.height = this.height || this.lineHeight;
-
     console.log(this);
 
-    this.drawSelectZone(ctx);
+    paint.drawBorder(ctx, this)
 
     if (this.image) {
       return paint.drawImage(ctx, this)
