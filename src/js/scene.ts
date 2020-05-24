@@ -4,6 +4,7 @@ export class Scene {
   public static install(ctor: any) {
     ctor.Scene = Scene;
   }
+  public nodeList: any[] = [];
 
   private _ctx: any;
 
@@ -16,12 +17,20 @@ export class Scene {
     ctx.font = node.font;
     node.width = node.width || ctx.measureText(node.text).width;
     node.height = node.height || node.lineHeight;
-    node.__isActive = node.showSelected;
 
+    this.nodeList.push(node);
     node._setContext(this._ctx);
     node.paint(this._ctx);
 
-    this._ctx.canvas.addEventListener('mousemove', node._mousemove);
+    this._ctx.canvas.addEventListener('mousemove', (e: MouseEvent) => {
+      // node.__isActive = this._ctx.isPointInPath(e.x, e.y)
+      node.__isActive = isPointInPath(node, e);
+      node._mousemove(e, node)
+    });
   }
+}
+
+function isPointInPath(node: any, e: MouseEvent) {
+  return (e.x >= node.x && e.x <= node.x + node.width) && (e.y >= node.y && e.y <= node.y + node.height);
 }
 

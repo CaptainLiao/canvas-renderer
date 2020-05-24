@@ -48,22 +48,21 @@ export const paint = {
 
   
   drawBorder: (ctx: CanvasRenderingContext2D, node: any) => {
-    if (!node.showSelected) return drawBorder(ctx, node, 'transparent')
+    if (!node.showSelected) return _drawBorder(ctx, node, '#fff')
 
-    if (node.__isActive) {
-      drawBorder(ctx, node)
-    } else {
-      drawBorder(ctx, node, '#fff')
-    }
+    const borderColor = node.__isActive ? '#ddd' : '#fff'
+
+    _drawBorder(ctx, node, borderColor)
   }
 
- };
+};
 
- let __lastBorderColor: any;
- function drawBorder(ctx: CanvasRenderingContext2D, node: any, borderColor = '#ddd', borderWidth: number = 4) {
-  if (__lastBorderColor === borderColor) return;
-  __lastBorderColor = borderColor;
-  
+function _drawBorder(ctx: CanvasRenderingContext2D, node: any, borderColor = '#ddd', borderWidth: number = 2) {
+  if (node.__lastBorderColor === borderColor) return;
+  node.__lastBorderColor = borderColor;
+
+  console.log(JSON.parse(JSON.stringify(node)));
+
   let {
     x,
     y,
@@ -72,24 +71,24 @@ export const paint = {
   } = node;
 
   ctx.save();
-
-  x -= borderWidth / 2;
-  y -= borderWidth / 2 ;
-  width += borderWidth;
-  height += borderWidth;
-  ctx.lineWidth = borderWidth;
+  
+  x -= borderWidth;
+  y -= borderWidth;
+  width += borderWidth * 2;
+  height += borderWidth * 2;
+  ctx.lineWidth = borderWidth * 2;
   ctx.moveTo(x, y);
   ctx.lineTo(x + width, y);
   ctx.lineTo(x + width, y + height);
   ctx.lineTo(x, y + height);
-  ctx.lineTo(x, y);
+  ctx.lineTo(x, y - borderWidth);
 
   ctx.strokeStyle = borderColor;
   ctx.stroke();
   ctx.restore();
- }
+}
 
- function drawRect(ctx: CanvasRenderingContext2D, node: any) {
+function drawRect(ctx: CanvasRenderingContext2D, node: any) {
   const {
     x,
     y,

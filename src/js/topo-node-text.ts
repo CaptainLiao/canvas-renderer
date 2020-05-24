@@ -41,18 +41,11 @@ export class TopoTextNode implements ITopoNode {
     this.callback.mousemove = fn;
   }
 
-  public _mousemove = (e: MouseEvent) => {
-    const isPointInPath = __ctx.isPointInPath(e.x, e.y);
-
-    if (isPointInPath) {
+  public _mousemove = (e: MouseEvent, node: any) => {
+    if (this.__isActive) {
       this.callback.mousemove();
-      this.__isActive = true;
-      paint.drawBorder(__ctx, this);
-      return;
     }
-
-    this.__isActive = false;
-    paint.drawBorder(__ctx, this);
+    paint.drawBorder(__ctx, node);
   }
 
   public mouseout(fn: any) {
