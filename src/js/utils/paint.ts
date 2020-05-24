@@ -37,7 +37,6 @@ export const paint = {
       const bgImg = new Image();
       bgImg.src = node.image;
       bgImg.onload = () => {
-        console.log(1111);
         ctx.drawImage(bgImg, x, y, width, height);
         resolve();
       };
@@ -48,7 +47,7 @@ export const paint = {
 
   
   drawBorder: (ctx: CanvasRenderingContext2D, node: any) => {
-    if (!node.showSelected) return _drawBorder(ctx, node, '#fff')
+    if (!node.showSelected) return;
 
     const borderColor = node.__isActive ? '#ddd' : '#fff'
 
@@ -77,11 +76,13 @@ function _drawBorder(ctx: CanvasRenderingContext2D, node: any, borderColor = '#d
   width += borderWidth * 2;
   height += borderWidth * 2;
   ctx.lineWidth = borderWidth * 2;
+  ctx.beginPath(); // 创建一条新的路径，这样交互时不会影响其他路径
+  
   ctx.moveTo(x, y);
   ctx.lineTo(x + width, y);
   ctx.lineTo(x + width, y + height);
   ctx.lineTo(x, y + height);
-  ctx.lineTo(x, y - borderWidth);
+  ctx.closePath();
 
   ctx.strokeStyle = borderColor;
   ctx.stroke();

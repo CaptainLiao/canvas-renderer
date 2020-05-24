@@ -18,6 +18,7 @@ scene.add(node);
 const node2 = new MyTopo.Node('你好');
 node2.setLocation(50, 200);
 node2.setSize(80, 40);
+// node2.showSelected = false;
 // node.borderRadius = 5;
 node2.setImage('http://jp.rsscc.com/ticket/icon/ziying.png');
 scene.add(node2);
