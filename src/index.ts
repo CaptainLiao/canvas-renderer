@@ -20,6 +20,6 @@ node2.setLocation(50, 200);
 node2.setSize(80, 40);
 // node2.showSelected = false;
 // node.borderRadius = 5;
-node2.setImage('http://jp.rsscc.com/ticket/icon/ziying.png');
+// node2.setImage('http://jp.rsscc.com/ticket/icon/ziying.png');
 scene.add(node2);
 

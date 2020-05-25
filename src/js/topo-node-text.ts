@@ -2,6 +2,9 @@ import { ETextPosition } from '../const/index';
 import { paint } from './utils/paint';
 
 let __ctx: any;
+let __offsetWidth: number;
+let __offsetHeight: number;
+let __isMouseDown: boolean;
 
 export class TopoTextNode implements ITopoNode {
   public static install(ctor: any) {
@@ -34,18 +37,22 @@ export class TopoTextNode implements ITopoNode {
     this.y = y;
   }
 
-  public mouseover(fn: any) {
-    if (fn) fn();
+  public _mouseDown(e: MouseEvent) {
+    __offsetWidth = e.x - this.x;
+    __offsetHeight = e.y - this.y;
+    __isMouseDown = true;
   }
+
   public mousemove(fn: any) {
     this.callback.mousemove = fn;
   }
-
   public _mousemove = (e: MouseEvent, node: any) => {
     if (this.__isActive) {
       this.callback.mousemove();
     }
-    paint.drawBorder(__ctx, node);
+
+    this.paint(__ctx)
+    
   }
 
   public mouseout(fn: any) {
@@ -60,4 +67,9 @@ export class TopoTextNode implements ITopoNode {
   }
 
 }
+
+function isPointInPath(node: any, e: MouseEvent) {
+  return (e.x >= node.x && e.x <= node.x + node.width) && (e.y >= node.y && e.y <= node.y + node.height);
+}
+
 

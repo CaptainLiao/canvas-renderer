@@ -5,6 +5,7 @@ export const paint = {
     const {
       text,
       font,
+      width,
       fontColor
     } = node;
 
@@ -19,7 +20,7 @@ export const paint = {
     ctx.font = font;
     ctx.textBaseline = textBaseline;
     ctx.fillStyle = fontColor;
-    ctx.fillText(text, x, y);
+    ctx.fillText(text, x, y, width);
   },
 
   // 绘制矩形块，对应 css block 块
@@ -45,49 +46,23 @@ export const paint = {
     });
   },
 
-  
-  drawBorder: (ctx: CanvasRenderingContext2D, node: any) => {
-    if (!node.showSelected) return;
+  drawNodeActive: (ctx: CanvasRenderingContext2D, node: any) => {
+    const pad = 4;
+    ctx.clearRect(node.x - pad, node.y - pad, node.width + 2*pad, node.height + 2*pad + node.lineHeight)
 
-    const borderColor = node.__isActive ? '#ddd' : '#fff'
+    if (!node.showSelected || !node.__isActive) return;
 
-    _drawBorder(ctx, node, borderColor)
+    ctx.save();
+
+    ctx.globalAlpha = 0.3;
+    ctx.fillStyle = '#5cd';
+    ctx.fillRect( node.x - pad, node.y - pad, node.width + pad * 2, node.height + pad * 2)
+
+    ctx.restore();
   }
 
 };
 
-function _drawBorder(ctx: CanvasRenderingContext2D, node: any, borderColor = '#ddd', borderWidth: number = 2) {
-  if (node.__lastBorderColor === borderColor) return;
-  node.__lastBorderColor = borderColor;
-
-  console.log(JSON.parse(JSON.stringify(node)));
-
-  let {
-    x,
-    y,
-    width,
-    height
-  } = node;
-
-  ctx.save();
-  
-  x -= borderWidth;
-  y -= borderWidth;
-  width += borderWidth * 2;
-  height += borderWidth * 2;
-  ctx.lineWidth = borderWidth * 2;
-  ctx.beginPath(); // 创建一条新的路径，这样交互时不会影响其他路径
-  
-  ctx.moveTo(x, y);
-  ctx.lineTo(x + width, y);
-  ctx.lineTo(x + width, y + height);
-  ctx.lineTo(x, y + height);
-  ctx.closePath();
-
-  ctx.strokeStyle = borderColor;
-  ctx.stroke();
-  ctx.restore();
-}
 
 function drawRect(ctx: CanvasRenderingContext2D, node: any) {
   const {
@@ -97,7 +72,7 @@ function drawRect(ctx: CanvasRenderingContext2D, node: any) {
     height,
     borderRadius = 0,
     borderStyle,
-    borderWidth = 0.5,
+    borderWidth = 1,
     borderColor = '#000000',
     backgroundColor = '#ffffff'
   } = node;
@@ -111,8 +86,6 @@ function drawRect(ctx: CanvasRenderingContext2D, node: any) {
   if (borderStyle === 'dashed') {
     ctx.setLineDash([5, 5]);
   }
-  ctx.lineWidth = borderWidth;
-  ctx.strokeStyle = borderColor;
 
   // 圆角矩形
   ctx.beginPath();
@@ -122,7 +95,12 @@ function drawRect(ctx: CanvasRenderingContext2D, node: any) {
   ctx.arcTo(x, y + h, x, y, r);
   ctx.arcTo(x, y, x + w, y, r);
   ctx.closePath();
-  ctx.stroke();
+
+  if (borderWidth) {
+    ctx.lineWidth = borderWidth;
+    ctx.strokeStyle = borderColor;
+    ctx.stroke();
+  }
 
   // 填充背景色
   ctx.fillStyle = backgroundColor;

@@ -18,6 +18,8 @@ export class TopoNode extends TopoTextNode {
   public borderStyle: string;
   public image: string;
 
+  private __lastActive: boolean;
+
   public constructor(text: string) {
     super(text);
     this.text = text;
@@ -33,9 +35,10 @@ export class TopoNode extends TopoTextNode {
   }
 
   public paint(ctx: CanvasRenderingContext2D) {
-    console.log(this);
+    if (this.__lastActive === this.__isActive) return;
+    this.__lastActive = this.__isActive;
 
-    paint.drawBorder(ctx, this)
+    paint.drawNodeActive(ctx, this);
 
     if (this.image) {
       return paint.drawImage(ctx, this)

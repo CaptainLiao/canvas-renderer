@@ -15,7 +15,7 @@ export class Scene {
   public add(node: TopoNode) {
     const ctx = this._ctx;
     ctx.font = node.font;
-    node.width = node.width || ctx.measureText(node.text).width;
+    node.width = Math.max(node.width, ctx.measureText(node.text).width);
     node.height = node.height || node.lineHeight;
 
     this.nodeList.push(node);
@@ -23,9 +23,12 @@ export class Scene {
     node.paint(this._ctx);
 
     this._ctx.canvas.addEventListener('mousemove', (e: MouseEvent) => {
-      // node.__isActive = this._ctx.isPointInPath(e.x, e.y)
       node.__isActive = isPointInPath(node, e);
       node._mousemove(e, node)
+    });
+    this._ctx.canvas.addEventListener('mousedown', (e: MouseEvent) => {
+      node.__isActive = isPointInPath(node, e);
+      node._mouseDown(e)
     });
   }
 }
