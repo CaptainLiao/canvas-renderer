@@ -67,8 +67,4 @@ export class TopoTextNode implements ITopoNode {
 
 }
 
-function isPointInPath(node: any, e: MouseEvent) {
-  return (e.x >= node.x && e.x <= node.x + node.width) && (e.y >= node.y && e.y <= node.y + node.height);
-}
-
 
