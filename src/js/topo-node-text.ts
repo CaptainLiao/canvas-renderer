@@ -52,7 +52,6 @@ export class TopoTextNode implements ITopoNode {
     }
 
     this.paint(__ctx)
-    
   }
 
   public mouseout(fn: any) {
