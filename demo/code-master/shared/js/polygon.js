@@ -51,7 +51,7 @@ Polygon.prototype = {
           angle = this.startAngle || 0;
 
       for (var i=0; i < this.sides; ++i) {
-         points.push(new Point(this.x + this.radius * Math.sin(angle), this.y - this.radius * Math.cos(angle)));
+         points.push(new Point(this.x + this.radius * Math.cos(angle), this.y - this.radius * Math.sin(angle)));
          angle += 2*Math.PI/this.sides;
       }
       return points;

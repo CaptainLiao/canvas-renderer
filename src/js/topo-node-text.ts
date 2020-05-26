@@ -47,11 +47,14 @@ export class TopoTextNode implements ITopoNode {
     this.callback.mousemove = fn;
   }
   public _mousemove = (e: MouseEvent, node: any) => {
-    if (this.__isActive) {
+    
+    const isInPath = isPointInPath(node, e);
+    if (isInPath) {
+      node.__isActive = isInPath
+      __ctx.clearRect(0, 0, __ctx.canvas.width, __ctx.canvas.height);
       this.callback.mousemove();
+      this.paint(__ctx)
     }
-
-    this.paint(__ctx)
   }
 
   public mouseout(fn: any) {
@@ -66,5 +69,11 @@ export class TopoTextNode implements ITopoNode {
   }
 
 }
+
+function isPointInPath(node: any, e: MouseEvent) {
+  return (e.x >= node.x && e.x <= node.x + node.width) && (e.y >= node.y && e.y <= node.y + node.height);
+}
+
+
 
 

@@ -35,8 +35,6 @@ export class TopoNode extends TopoTextNode {
   }
 
   public paint(ctx: CanvasRenderingContext2D) {
-    if (this.__lastActive === this.__isActive) return;
-    this.__lastActive = this.__isActive;
 
     paint.drawNodeActive(ctx, this);
 
