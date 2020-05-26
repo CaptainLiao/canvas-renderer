@@ -23,10 +23,12 @@ export class Scene {
     node.paint(this._ctx);
 
     this._ctx.canvas.addEventListener('mousemove', (e: MouseEvent) => {
+      e.preventDefault(); // prevent selections
       node.__isActive = isPointInPath(node, e);
       node._mousemove(e, node)
     });
     this._ctx.canvas.addEventListener('mousedown', (e: MouseEvent) => {
+      e.preventDefault(); // prevent selections
       node.__isActive = isPointInPath(node, e);
       node._mouseDown(e)
     });
