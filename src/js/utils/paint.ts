@@ -1,5 +1,7 @@
 import { ETextPosition } from '../../const/index';
 
+const imageList: any = []
+
 export const paint = {
   drawText: (ctx: any, node: any) => {
     const {
@@ -35,14 +37,22 @@ export const paint = {
     } = node;
 
     return new Promise((resolve, reject) => {
+      const img = imageList.find((item: any) => item.src === node.image)
+      if (img) {
+        ctx.drawImage(img, x, y, width, height);
+        return resolve();
+      }
+ 
       const bgImg = new Image();
       bgImg.src = node.image;
+      
       bgImg.onload = () => {
+        imageList.push(bgImg);
         ctx.drawImage(bgImg, x, y, width, height);
         resolve();
       };
-
       bgImg.onerror = reject;
+      
     });
   },
 

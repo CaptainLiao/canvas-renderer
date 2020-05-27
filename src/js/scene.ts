@@ -30,6 +30,7 @@ export class Scene {
         node.__isActive = isInPath
         node.paint(__ctx)
       })
+
     });
 
     this._ctx.canvas.addEventListener('mousedown', (e: MouseEvent) => {
