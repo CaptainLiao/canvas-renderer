@@ -1,28 +1,30 @@
-import { ETextPosition } from '../../const/index';
+import { getTextPosition } from '../index'
 
-const imageList: any = []
+const IMAGE_LIST: any = []
+const PAD = 4;
 
-export const paint = {
+export const webPaint = {
+  // canvas 无法准确的测量文本高度，所以需要指定行高 line-height
+  // 对于单行文本来说，行高就是最小高度
   drawText: (ctx: any, node: any) => {
     const {
       text,
       font,
       width,
-      fontColor
+      fontColor,
+      textBaseline
     } = node;
 
     if (!text) return;
 
-    const {
-      x,
-      y,
-      textBaseline
-    } = __getTextPosition(ctx, node);
+    const { textX, textY } = getTextPosition(node)
+    node.textX = textX;
+    node.textY = textY;
 
     ctx.font = font;
     ctx.textBaseline = textBaseline;
     ctx.fillStyle = fontColor;
-    ctx.fillText(text, x, y, width);
+    ctx.fillText(text, textX, textY, width);
   },
 
   // 绘制矩形块，对应 css block 块
@@ -37,7 +39,7 @@ export const paint = {
     } = node;
 
     return new Promise((resolve, reject) => {
-      const img = imageList.find((item: any) => item.src === node.image)
+      const img = IMAGE_LIST.find((item: any) => item.src === node.image)
       if (img) {
         ctx.drawImage(img, x, y, width, height);
         return resolve();
@@ -47,7 +49,7 @@ export const paint = {
       bgImg.src = node.image;
       
       bgImg.onload = () => {
-        imageList.push(bgImg);
+        IMAGE_LIST.push(bgImg);
         ctx.drawImage(bgImg, x, y, width, height);
         resolve();
       };
@@ -57,20 +59,17 @@ export const paint = {
   },
 
   drawNodeActive: (ctx: CanvasRenderingContext2D, node: any) => {
-    const pad = 4;
-    ctx.clearRect(node.x - pad, node.y - pad, node.width + 2*pad, node.height + 2*pad + node.lineHeight)
-
     if (!node.showSelected || !node.__isActive) return;
 
     ctx.save();
 
     ctx.globalAlpha = 0.3;
     ctx.fillStyle = '#5cd';
-    ctx.fillRect( node.x - pad, node.y - pad, node.width + pad * 2, node.height + pad * 2)
+    ctx.fillRect( node.x - PAD, node.y - PAD, node.width + 2*PAD, node.height + 2*PAD)
 
     ctx.restore();
-  }
-
+  },
+  
 };
 
 
@@ -120,42 +119,5 @@ function drawRect(ctx: CanvasRenderingContext2D, node: any) {
 }
 
 
-function __getTextPosition(ctx: any, node: any) {
-  const {
-    x,
-    y,
-    width,
-    height,
-    font,
-    text,
-    textOffsetY,
-    textPosition
-  } = node;
 
-  let yOffset = y;
-  let textBaseline = '';
-  switch (textPosition) {
-    case ETextPosition.BottomCenter:
-      yOffset = y + height + 2;
-      textBaseline = 'top';
-      break;
-    case ETextPosition.TopCenter:
-      yOffset = y;
-      textBaseline = 'bottom';
-      break;
-    default:
-      yOffset = y + height / 2;
-      textBaseline = 'middle';
-      break;
-  }
-
-  ctx.font = font;
-  const mtext = ctx.measureText(text); // TextMetrics object
-
-  return {
-    x: x + (width - mtext.width) / 2,
-    y: yOffset + textOffsetY + 4,
-    textBaseline
-  };
-}
 

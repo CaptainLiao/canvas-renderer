@@ -1,5 +1,5 @@
 import { ETextPosition } from '../const/index';
-import { paint } from './utils/paint';
+import { paint } from './utils/index';
 
 let __ctx: any;
 let __offsetWidth: number;
@@ -11,15 +11,22 @@ export class TopoTextNode implements ITopoNode {
     ctor.TextNode = TopoTextNode;
   }
 
-  public text = '';
   public x = 0;
   public y = 0;
+  public text = '';
+  public textX = '';
+  public textY = '';
+  public textWidth = '';
+  public textHeight = '';
+  public textPosition = ETextPosition.MiddleCenter;
+  public textOffsetY = 0;
+  public lineHeight = 22;
+
   public visible = true;
+
   public font = '12px Microsoft YaHei';
   public fontColor = '#000';
-  public lineHeight = 22;
-  public textPosition = ETextPosition.BottomCenter;
-  public textOffsetY = 0;
+
   public showSelected = true;
   public __isActive = false;
 

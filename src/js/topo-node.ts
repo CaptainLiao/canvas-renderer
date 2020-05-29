@@ -1,7 +1,7 @@
 
 import { ETextPosition } from '../const/index';
 import { TopoTextNode } from './topo-node-text';
-import { paint } from './utils/paint';
+import { paint } from './utils/index';
 
 export class TopoNode extends TopoTextNode {
   public static install(ctor: any) {
@@ -35,14 +35,11 @@ export class TopoNode extends TopoTextNode {
   }
 
   public paint(ctx: CanvasRenderingContext2D) {
-
     paint.drawNodeActive(ctx, this);
 
     if (this.image) {
+      paint.drawText(ctx, this);
       return paint.drawImage(ctx, this)
-        .then(() => {
-          paint.drawText(ctx, this);
-        });
     }
 
     paint.drawRect(ctx, this);
