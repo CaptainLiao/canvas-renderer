@@ -32,11 +32,12 @@ export class Scene {
         dragging.y = e.clientY - __offsetHeight
       }
 
-      nodeList.forEach(node => {
+      // 按节点 add 的顺序进行绘制
+      nodeList.reduce((p, node) => {
         const isInPath = isPointInPath(node, e);
         node.__isActive = isInPath
-        node.paint(__ctx)
-      })
+        return p.then(() => node.paint(this._ctx))
+      }, Promise.resolve())
 
     });
 
@@ -71,11 +72,8 @@ export class Scene {
     this.__orderPaint();
   }
   private __orderPaint() {
-    setTimeout(() => {
-      nodeList.reduce((p, node) => {
-        return p.then(() => node.paint(this._ctx))
-      }, Promise.resolve())
-    })
+    // 保证后面增加的节点不被覆盖
+    setTimeout(() => nodeList.reduce((p, node) => p.then(() => node.paint(this._ctx)), Promise.resolve()), 0)
   }
 }
 
