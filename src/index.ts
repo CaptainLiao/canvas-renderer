@@ -1,4 +1,4 @@
-import { MyTopo } from './js/index';
+import { MyTopo } from './core/index';
 
 const canvasEle = document.getElementById('canvas') as HTMLCanvasElement;
 canvasEle.width = window.innerWidth;
@@ -22,6 +22,7 @@ node.setLocation(100, 100);
 node.setSize(80, 20);
 node.fontColor = '#fff'
 node.textPosition = 'BottomCenter'
+node.dragable = false;
 
 // node.borderRadius = 5;
 // node.setImage('./images/ziying.png');

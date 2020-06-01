@@ -17,6 +17,7 @@ export class Scene {
   private _ctx: any;
 
   public constructor(stage: IStage) {
+    console.log(2223);
     this._ctx = stage.canvas.getContext('2d');
     __canvasEle = this._ctx.canvas;
     __canvasRect = __canvasEle.getBoundingClientRect();
@@ -32,7 +33,7 @@ export class Scene {
       const __ctx = this._ctx;
       __ctx.clearRect(0, 0, __ctx.canvas.width, __ctx.canvas.height);
 
-      if (dragging) {
+      if (dragging && dragging.dragable) {
         dragging.x = point.x - __offsetWidth
         dragging.y = point.y - __offsetHeight
       }
@@ -57,22 +58,8 @@ export class Scene {
           __offsetWidth = point.x - node.x;
           __offsetHeight = point.y - node.y;
           dragging = node;
-          if (!dragging.dragable) dragging = null;
         }
       })
-
-      __canvasEle.toBlob(function(blob: any) {
-        var newImg = document.createElement("img"),
-            url = URL.createObjectURL(blob);
-      
-        newImg.onload = function() {
-          // no longer need to read the blob so it's revoked
-          URL.revokeObjectURL(url);
-        };
-      
-        newImg.src = url;
-        document.body.appendChild(newImg);
-      });
     });
     
     __canvasEle.addEventListener('mouseup', (e: MouseEvent) => {

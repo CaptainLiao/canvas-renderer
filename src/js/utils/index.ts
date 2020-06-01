@@ -1,8 +1,8 @@
 
 
-import { ETextPosition } from '../../const/index';
 import {wxPaint} from './paint/wxPaint'
 import {webPaint} from './paint/webPaint'
+import {getTextPosition} from './paint/util'
 
 let isWxMiniprograme = false;
 try {
@@ -24,36 +24,5 @@ export function getPoint(point: Points, canvasRect: BoundingRect): Points {
   }
 }
 
-export function getTextPosition(node: any) {
-  const {
-    x,
-    y,
-    width,
-    height,
-    textOffsetY,
-    textPosition
-  } = node;
+export {getTextPosition}
 
-  let yOffset = y;
-  let textBaseline = '';
-  switch (textPosition) {
-    case ETextPosition.BottomCenter:
-      yOffset = y + height + 2;
-      textBaseline = 'top';
-      break;
-    case ETextPosition.TopCenter:
-      yOffset = y;
-      textBaseline = 'bottom';
-      break;
-    default:
-      yOffset = y + height / 2;
-      textBaseline = 'middle';
-      break;
-  }
-
-  return {
-    textX: x + (width - node.textWidth) / 2,
-    textY: yOffset + textOffsetY,
-    textBaseline
-  };
-}

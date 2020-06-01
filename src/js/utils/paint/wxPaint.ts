@@ -1,4 +1,4 @@
-import { getTextPosition } from '../index'
+import { getTextPosition } from './util'
 
 const IMAGE_LIST: any = []
 const PAD = 4;
