@@ -1,12 +1,8 @@
 const buble = require('@rollup/plugin-buble'); 
 const typescript = require('@rollup/plugin-typescript');
 
-export default {
+const commonConifg = {
   input: 'src/js/index.ts',
-  output: {
-    dir: 'src/core',
-    format: 'esm'
-  },
   plugins: [
     typescript(),
     buble()
@@ -14,4 +10,21 @@ export default {
   watch: {
     include: 'src/js/**'
   }
-};
+}
+
+export default [
+  {
+    ...commonConifg,
+    output: {
+      file: 'src/core/index.js',
+      format: 'esm'
+    },
+  },
+  {
+    ...commonConifg,
+    output: {
+      file: 'src/wechat-miniprogram/MyTopo.js',
+      format: 'esm'
+    }
+  }
+];

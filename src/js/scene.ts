@@ -17,7 +17,6 @@ export class Scene {
   private _ctx: any;
 
   public constructor(stage: IStage) {
-    console.log(2223);
     this._ctx = stage.canvas.getContext('2d');
     __canvasEle = this._ctx.canvas;
     __canvasRect = __canvasEle.getBoundingClientRect();

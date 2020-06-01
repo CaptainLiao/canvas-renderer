@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   mode: 'development',
-  entry: path.resolve(__dirname, 'src/index.ts'),
+  entry: path.resolve(__dirname, 'src/web/index.ts'),
   devtool: 'inline-source-map',
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -25,8 +25,12 @@ module.exports = {
 
     new HtmlWebpackPlugin({
       title: 'canvas to image',
-      template: './src/index.html'
+      template: './src/web/index.html'
     }),
     new webpack.ProgressPlugin(),
   ],
+
+  watchOptions: {
+    ignored: ['src/js/**', 'node_modules']
+  }
 }
