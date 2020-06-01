@@ -56,15 +56,7 @@ export class TopoTextNode implements ITopoNode {
   }
   public _mousemove = (e: MouseEvent, node: any) => {
     
-    const isInPath = isPointInPath(node, e);
-    if (isInPath) {
-      node.__isActive = isInPath
-      __ctx.clearRect(0, 0, __ctx.canvas.width, __ctx.canvas.height);
-      this.callback.mousemove();
-      this.paint(__ctx)
-    }
   }
-
   public mouseout(fn: any) {
     this.callback.mouseout = fn;
   }
@@ -72,14 +64,11 @@ export class TopoTextNode implements ITopoNode {
   public _setContext(ctx: any) {
     __ctx = ctx;
   }
+  
   public paint(ctx: any) {
     paint.drawText(ctx, this);
   }
 
-}
-
-function isPointInPath(node: any, e: MouseEvent) {
-  return (e.x >= node.x && e.x <= node.x + node.width) && (e.y >= node.y && e.y <= node.y + node.height);
 }
 
 

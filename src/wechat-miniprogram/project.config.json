@@ -16,7 +16,7 @@
 		"scopeDataCheck": false
 	},
 	"compileType": "miniprogram",
-	"libVersion": "2.11.1",
+	"libVersion": "2.8.0",
 	"appid": "wx5a5ac39d0cc13dac",
 	"projectname": "canvas",
 	"debugOptions": {

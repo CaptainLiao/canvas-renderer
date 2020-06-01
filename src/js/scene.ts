@@ -18,6 +18,7 @@ export class Scene {
 
   public constructor(stage: IStage) {
     this._ctx = stage.canvas.getContext('2d');
+    this._ctx.$rowCanvasElement = stage.canvas;
     __canvasEle = this._ctx.canvas;
     __canvasRect = __canvasEle.getBoundingClientRect();
     

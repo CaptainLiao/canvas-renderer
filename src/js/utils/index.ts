@@ -6,7 +6,7 @@ import {getTextPosition} from './paint/util'
 
 let isWxMiniprograme = false;
 try {
-  isWxMiniprograme = wx && wx.miniProgram
+  isWxMiniprograme = !!(wx && wx.scanCode)
 } catch (e) {
   // ignore
 }

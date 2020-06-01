@@ -12,7 +12,7 @@ function getTextPosition(node) {
             textBaseline = 'bottom';
             break;
         default:
-            yOffset = y + height / 2;
+            yOffset = y + height / 2 + 2;
             textBaseline = 'middle';
             break;
     }
@@ -25,9 +25,86 @@ function getTextPosition(node) {
 
 var IMAGE_LIST = [];
 var PAD = 4;
-var wxPaint = {
-    // canvas 无法准确的测量文本高度，所以需要指定行高 line-height
-    // 对于单行文本来说，行高就是最小高度
+var WxPaint = /** @class */ (function () {
+    function WxPaint() {
+        this.drawText = function (ctx, node) {
+            var text = node.text, font = node.font, width = node.width, fontColor = node.fontColor, textBaseline = node.textBaseline;
+            if (!text)
+                { return; }
+            var _a = getTextPosition(node), textX = _a.textX, textY = _a.textY;
+            node.textX = textX;
+            node.textY = textY;
+            ctx.font = font;
+            ctx.textBaseline = textBaseline;
+            ctx.fillStyle = fontColor;
+            ctx.fillText(text, textX, textY, width);
+        };
+        this.drawRect = function drawRect(ctx, node) {
+            var x = node.x, y = node.y, width = node.width, height = node.height, _a = node.borderRadius, borderRadius = _a === void 0 ? 0 : _a, borderStyle = node.borderStyle, _b = node.borderWidth, borderWidth = _b === void 0 ? 1 : _b, _c = node.borderColor, borderColor = _c === void 0 ? '#000000' : _c, _d = node.backgroundColor, backgroundColor = _d === void 0 ? '#ffffff' : _d;
+            var r = borderRadius;
+            var w = width;
+            var h = height;
+            if (w < 2 * r)
+                { r = w / 2; }
+            if (h < 2 * r)
+                { r = h / 2; }
+            ctx.save();
+            if (borderStyle === 'dashed') {
+                ctx.setLineDash([5, 5]);
+            }
+            // 圆角矩形
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r);
+            ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r);
+            ctx.arcTo(x, y, x + w, y, r);
+            ctx.closePath();
+            if (borderWidth) {
+                ctx.lineWidth = borderWidth;
+                ctx.strokeStyle = borderColor;
+                ctx.stroke();
+            }
+            // 填充背景色
+            ctx.fillStyle = backgroundColor;
+            ctx.fill();
+            ctx.restore();
+        };
+        this.drawImage = function (ctx, node) {
+            var x = node.x, y = node.y, width = node.width, height = node.height;
+            return new Promise(function (resolve, reject) {
+                var img = IMAGE_LIST.find(function (item) { return item.src === node.image; });
+                if (img) {
+                    ctx.drawImage(img, x, y, width, height);
+                    return resolve();
+                }
+                var bgImg = ctx.$rowCanvasElement.createImage();
+                bgImg.src = node.image;
+                bgImg.onload = function () {
+                    IMAGE_LIST.push(bgImg);
+                    ctx.drawImage(bgImg, x, y, width, height);
+                    return resolve();
+                };
+                bgImg.onerror = function (e) { return reject(e); };
+            });
+        };
+        this.drawNodeActive = function (ctx, node) {
+            if (!node.showSelected || !node.__isActive)
+                { return; }
+            ctx.save();
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = '#5cd';
+            ctx.fillRect(node.x - PAD, node.y - PAD, node.width + 2 * PAD, node.height + 2 * PAD);
+            ctx.restore();
+        };
+    }
+    return WxPaint;
+}());
+var wxPaint = new WxPaint();
+
+var CACHE_IMAGE_LIST = [];
+var PAD$1 = 4;
+var webPaint = {
     drawText: function (ctx, node) {
         var text = node.text, font = node.font, width = node.width, fontColor = node.fontColor, textBaseline = node.textBaseline;
         if (!text)
@@ -45,15 +122,16 @@ var wxPaint = {
     drawImage: function (ctx, node) {
         var x = node.x, y = node.y, width = node.width, height = node.height;
         return new Promise(function (resolve, reject) {
-            var img = IMAGE_LIST.find(function (item) { return item.src === node.image; });
+            var img = CACHE_IMAGE_LIST.find(function (item) { return item.src === node.image; });
             if (img) {
                 ctx.drawImage(img, x, y, width, height);
                 return resolve();
             }
             var bgImg = new Image();
             bgImg.src = node.image;
+            // bgImg.setAttribute("crossOrigin",'Anonymous')
             bgImg.onload = function () {
-                IMAGE_LIST.push(bgImg);
+                CACHE_IMAGE_LIST.push(bgImg);
                 ctx.drawImage(bgImg, x, y, width, height);
                 resolve();
             };
@@ -66,7 +144,7 @@ var wxPaint = {
         ctx.save();
         ctx.globalAlpha = 0.3;
         ctx.fillStyle = '#5cd';
-        ctx.fillRect(node.x - PAD, node.y - PAD, node.width + 2 * PAD, node.height + 2 * PAD);
+        ctx.fillRect(node.x - PAD$1, node.y - PAD$1, node.width + 2 * PAD$1, node.height + 2 * PAD$1);
         ctx.restore();
     }
 };
@@ -102,87 +180,9 @@ function drawRect(ctx, node) {
     ctx.restore();
 }
 
-var CACHE_IMAGE_LIST = [];
-var PAD$1 = 4;
-var webPaint = {
-    drawText: function (ctx, node) {
-        var text = node.text, font = node.font, width = node.width, fontColor = node.fontColor, textBaseline = node.textBaseline;
-        if (!text)
-            { return; }
-        var _a = getTextPosition(node), textX = _a.textX, textY = _a.textY;
-        node.textX = textX;
-        node.textY = textY;
-        ctx.font = font;
-        ctx.textBaseline = textBaseline;
-        ctx.fillStyle = fontColor;
-        ctx.fillText(text, textX, textY, width);
-    },
-    // 绘制矩形块，对应 css block 块
-    drawRect: drawRect$1,
-    drawImage: function (ctx, node) {
-        var x = node.x, y = node.y, width = node.width, height = node.height;
-        return new Promise(function (resolve, reject) {
-            var img = CACHE_IMAGE_LIST.find(function (item) { return item.src === node.image; });
-            if (img) {
-                ctx.drawImage(img, x, y, width, height);
-                return resolve();
-            }
-            var bgImg = new Image();
-            bgImg.src = node.image;
-            // bgImg.setAttribute("crossOrigin",'Anonymous')
-            bgImg.onload = function () {
-                CACHE_IMAGE_LIST.push(bgImg);
-                ctx.drawImage(bgImg, x, y, width, height);
-                resolve();
-            };
-            bgImg.onerror = reject;
-        });
-    },
-    drawNodeActive: function (ctx, node) {
-        if (!node.showSelected || !node.__isActive)
-            { return; }
-        ctx.save();
-        ctx.globalAlpha = 0.3;
-        ctx.fillStyle = '#5cd';
-        ctx.fillRect(node.x - PAD$1, node.y - PAD$1, node.width + 2 * PAD$1, node.height + 2 * PAD$1);
-        ctx.restore();
-    }
-};
-function drawRect$1(ctx, node) {
-    var x = node.x, y = node.y, width = node.width, height = node.height, _a = node.borderRadius, borderRadius = _a === void 0 ? 0 : _a, borderStyle = node.borderStyle, _b = node.borderWidth, borderWidth = _b === void 0 ? 1 : _b, _c = node.borderColor, borderColor = _c === void 0 ? '#000000' : _c, _d = node.backgroundColor, backgroundColor = _d === void 0 ? '#ffffff' : _d;
-    var r = borderRadius;
-    var w = width;
-    var h = height;
-    if (w < 2 * r)
-        { r = w / 2; }
-    if (h < 2 * r)
-        { r = h / 2; }
-    ctx.save();
-    if (borderStyle === 'dashed') {
-        ctx.setLineDash([5, 5]);
-    }
-    // 圆角矩形
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
-    if (borderWidth) {
-        ctx.lineWidth = borderWidth;
-        ctx.strokeStyle = borderColor;
-        ctx.stroke();
-    }
-    // 填充背景色
-    ctx.fillStyle = backgroundColor;
-    ctx.fill();
-    ctx.restore();
-}
-
 var isWxMiniprograme = false;
 try {
-    isWxMiniprograme = wx && wx.miniProgram;
+    isWxMiniprograme = !!(wx && wx.scanCode);
 }
 catch (e) {
     // ignore
@@ -209,6 +209,7 @@ var Scene = /** @class */ (function () {
     function Scene(stage) {
         var _this = this;
         this._ctx = stage.canvas.getContext('2d');
+        this._ctx.$rowCanvasElement = stage.canvas;
         __canvasEle = this._ctx.canvas;
         __canvasRect = __canvasEle.getBoundingClientRect();
         __canvasEle.addEventListener('mousemove', function (e) {
@@ -318,12 +319,10 @@ function __extends(d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
 
-var __ctx;
 var __offsetWidth$1;
 var __offsetHeight$1;
 var TopoTextNode = /** @class */ (function () {
     function TopoTextNode(text) {
-        var _this = this;
         this.x = 0;
         this.y = 0;
         this.text = '';
@@ -345,13 +344,6 @@ var TopoTextNode = /** @class */ (function () {
             mouseout: function () { }
         };
         this._mousemove = function (e, node) {
-            var isInPath = isPointInPath$1(node, e);
-            if (isInPath) {
-                node.__isActive = isInPath;
-                __ctx.clearRect(0, 0, __ctx.canvas.width, __ctx.canvas.height);
-                _this.callback.mousemove();
-                _this.paint(__ctx);
-            }
         };
         this.text = text;
     }
@@ -373,16 +365,12 @@ var TopoTextNode = /** @class */ (function () {
         this.callback.mouseout = fn;
     };
     TopoTextNode.prototype._setContext = function (ctx) {
-        __ctx = ctx;
     };
     TopoTextNode.prototype.paint = function (ctx) {
         paint.drawText(ctx, this);
     };
     return TopoTextNode;
 }());
-function isPointInPath$1(node, e) {
-    return (e.x >= node.x && e.x <= node.x + node.width) && (e.y >= node.y && e.y <= node.y + node.height);
-}
 
 var TopoNode = /** @class */ (function (_super) {
     __extends(TopoNode, _super);

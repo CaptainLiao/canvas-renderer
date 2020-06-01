@@ -29,7 +29,7 @@ node.dragable = false;
 node.setImage('http://jp.rsscc.com/ticket/icon/ziying.png');
 scene.add(node);
 
-const node2 = new MyTopo.Node('good study');
+const node2 = new MyTopo.Node('吃了吗liaofy');
 node2.setLocation(100, 200);
 node2.setSize(80, 40);
 // node2.showSelected = false;

@@ -22,7 +22,7 @@ export function getTextPosition(node: any) {
       textBaseline = 'bottom';
       break;
     default:
-      yOffset = y + height / 2;
+      yOffset = y + height / 2 + 2;
       textBaseline = 'middle';
       break;
   }
