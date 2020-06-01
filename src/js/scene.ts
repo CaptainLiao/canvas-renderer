@@ -1,11 +1,13 @@
 import { TopoNode } from './topo-node';
-import { getTextPosition, measureTextWidth } from './utils/index';
+import { getTextPosition, measureTextWidth, getPoint } from './utils/index';
 
 const nodeList: any[] = []
 
 let __offsetWidth = 0;
 let __offsetHeight = 0
 let dragging: any = null;
+let __canvasEle: any;
+let __canvasRect: any;
 
 export class Scene {
   public static install(ctor: any) {
@@ -16,48 +18,68 @@ export class Scene {
 
   public constructor(stage: IStage) {
     this._ctx = stage.canvas.getContext('2d');
-
-    this._ctx.canvas.addEventListener('mousemove', (e: MouseEvent) => {
+    __canvasEle = this._ctx.canvas;
+    __canvasRect = __canvasEle.getBoundingClientRect();
+    
+    __canvasEle.addEventListener('mousemove', (e: MouseEvent) => {
       e.preventDefault(); // prevent selections
-      
-      // 会导致拖动节点卡顿
-      // const hasMove = nodeList.some(node => isPointInPath(node, e))
-      // if (!hasMove) return;
+
+      const point = getPoint({x: e.clientX, y: e.clientY}, __canvasRect)
+    
+      const hasMove = nodeList.some(node => isPointInPath(node, e))
+      if (!hasMove) return;
 
       const __ctx = this._ctx;
       __ctx.clearRect(0, 0, __ctx.canvas.width, __ctx.canvas.height);
 
       if (dragging) {
-        dragging.x = e.clientX - __offsetWidth
-        dragging.y = e.clientY - __offsetHeight
+        dragging.x = point.x - __offsetWidth
+        dragging.y = point.y - __offsetHeight
       }
 
       // 按节点 add 的顺序进行绘制
       nodeList.reduce((p, node) => {
         const isInPath = isPointInPath(node, e);
         node.__isActive = isInPath
-        return p.then(() => node.paint(this._ctx))
+        return p.then(() => node.paint(__ctx))
       }, Promise.resolve())
 
     });
 
-    this._ctx.canvas.addEventListener('mousedown', (e: MouseEvent) => {
+    __canvasEle.addEventListener('mousedown', (e: MouseEvent) => {
       e.preventDefault(); // prevent selections
+
+      const point = getPoint({x: e.clientX, y: e.clientY}, __canvasRect)
+
       nodeList.forEach(node => {
         const isInPath = isPointInPath(node, e);
         if (isInPath) {
-          __offsetWidth = e.x - node.x;
-          __offsetHeight = e.y - node.y;
+          __offsetWidth = point.x - node.x;
+          __offsetHeight = point.y - node.y;
           dragging = node;
+          if (!dragging.dragable) dragging = null;
         }
       })
+
+      __canvasEle.toBlob(function(blob: any) {
+        var newImg = document.createElement("img"),
+            url = URL.createObjectURL(blob);
+      
+        newImg.onload = function() {
+          // no longer need to read the blob so it's revoked
+          URL.revokeObjectURL(url);
+        };
+      
+        newImg.src = url;
+        document.body.appendChild(newImg);
+      });
     });
     
-    this._ctx.canvas.addEventListener('mouseup', (e: MouseEvent) => {
+    __canvasEle.addEventListener('mouseup', (e: MouseEvent) => {
       e.preventDefault();
       dragging = null;
     });
-    this._ctx.canvas.addEventListener('mouseout', (e: MouseEvent) => {
+    __canvasEle.addEventListener('mouseout', (e: MouseEvent) => {
       e.preventDefault();
       dragging = null;
     });
@@ -86,6 +108,7 @@ function mergeNode(ctx: CanvasRenderingContext2D, node: any) {
 }
 
 function isPointInPath(node: any, e: MouseEvent) {
-  return (e.x >= node.x && e.x <= node.x + node.width) && (e.y >= node.y && e.y <= node.y + node.height);
+  const point = getPoint({x: e.clientX, y: e.clientY}, __canvasRect)
+  return (point.x >= node.x && point.x <= node.x + node.width) && (point.y >= node.y && point.y <= node.y + node.height);
 }
 

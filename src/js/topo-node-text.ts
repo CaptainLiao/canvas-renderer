@@ -23,6 +23,7 @@ export class TopoTextNode implements ITopoNode {
   public lineHeight = 22;
 
   public visible = true;
+  public dragable = true;
 
   public font = '12px Microsoft YaHei';
   public fontColor = '#000';

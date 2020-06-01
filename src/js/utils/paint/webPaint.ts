@@ -1,11 +1,9 @@
 import { getTextPosition } from '../index'
 
-const IMAGE_LIST: any = []
+const CACHE_IMAGE_LIST: any = []
 const PAD = 4;
 
 export const webPaint = {
-  // canvas 无法准确的测量文本高度，所以需要指定行高 line-height
-  // 对于单行文本来说，行高就是最小高度
   drawText: (ctx: any, node: any) => {
     const {
       text,
@@ -39,7 +37,7 @@ export const webPaint = {
     } = node;
 
     return new Promise((resolve, reject) => {
-      const img = IMAGE_LIST.find((item: any) => item.src === node.image)
+      const img = CACHE_IMAGE_LIST.find((item: any) => item.src === node.image)
       if (img) {
         ctx.drawImage(img, x, y, width, height);
         return resolve();
@@ -47,9 +45,10 @@ export const webPaint = {
  
       const bgImg = new Image();
       bgImg.src = node.image;
+      // bgImg.setAttribute("crossOrigin",'Anonymous')
       
       bgImg.onload = () => {
-        IMAGE_LIST.push(bgImg);
+        CACHE_IMAGE_LIST.push(bgImg);
         ctx.drawImage(bgImg, x, y, width, height);
         resolve();
       };

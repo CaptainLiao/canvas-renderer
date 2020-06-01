@@ -13,6 +13,8 @@ const scene = new MyTopo.Scene(stage);
 const bg = new MyTopo.Node();
 bg.setSize(canvasEle.width, canvasEle.width);
 bg.setImage(BG_IMAGE);
+bg.showSelected = false;
+bg.dragable = false;
 scene.add(bg)
 
 const node = new MyTopo.Node('是离开对方');
@@ -22,6 +24,7 @@ node.fontColor = '#fff'
 node.textPosition = 'BottomCenter'
 
 // node.borderRadius = 5;
+// node.setImage('./images/ziying.png');
 node.setImage('http://jp.rsscc.com/ticket/icon/ziying.png');
 scene.add(node);
 
