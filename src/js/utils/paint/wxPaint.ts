@@ -75,13 +75,17 @@ class WxPaint implements IPainter {
       x,
       y,
       width,
-      height
+      height,
+      pixelRatio
     } = node;
 
     return new Promise((resolve, reject) => {
       const img = IMAGE_LIST.find((item: any) => item.src === node.image)
       if (img) {
+        ctx.save()
+        ctx.scale(1/pixelRatio, 1/pixelRatio)
         ctx.drawImage(img, x, y, width, height);
+        ctx.restore();
         return resolve();
       }
 
@@ -90,7 +94,12 @@ class WxPaint implements IPainter {
       
       bgImg.onload = () => {
         IMAGE_LIST.push(bgImg);
+        
+        ctx.save()
+        ctx.scale(1/pixelRatio, 1/pixelRatio)
         ctx.drawImage(bgImg, x, y, width, height);
+        ctx.restore();
+        
         return resolve();
       };
       bgImg.onerror = e => reject(e);

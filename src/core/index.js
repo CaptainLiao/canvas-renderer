@@ -71,18 +71,24 @@ var WxPaint = /** @class */ (function () {
             ctx.restore();
         };
         this.drawImage = function (ctx, node) {
-            var x = node.x, y = node.y, width = node.width, height = node.height;
+            var x = node.x, y = node.y, width = node.width, height = node.height, pixelRatio = node.pixelRatio;
             return new Promise(function (resolve, reject) {
                 var img = IMAGE_LIST.find(function (item) { return item.src === node.image; });
                 if (img) {
+                    ctx.save();
+                    ctx.scale(1 / pixelRatio, 1 / pixelRatio);
                     ctx.drawImage(img, x, y, width, height);
+                    ctx.restore();
                     return resolve();
                 }
                 var bgImg = ctx.$rowCanvasElement.createImage();
                 bgImg.src = node.image;
                 bgImg.onload = function () {
                     IMAGE_LIST.push(bgImg);
+                    ctx.save();
+                    ctx.scale(1 / pixelRatio, 1 / pixelRatio);
                     ctx.drawImage(bgImg, x, y, width, height);
+                    ctx.restore();
                     return resolve();
                 };
                 bgImg.onerror = function (e) { return reject(e); };

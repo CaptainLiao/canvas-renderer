@@ -28,6 +28,8 @@ export class TopoTextNode implements ITopoNode {
   public font = '12px Microsoft YaHei';
   public fontColor = '#000';
 
+  public pixelRatio = 1;
+
   public showSelected = true;
   public __isActive = false;
 
