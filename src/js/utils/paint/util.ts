@@ -33,3 +33,18 @@ export function getTextPosition(node: any) {
     textBaseline
   };
 }
+
+export function drawImage(ctx, node, img) {
+  const {
+    x,
+    y,
+    width,
+    height,
+    pixelRatio
+  } = node;
+
+  ctx.save()
+  ctx.scale(1/pixelRatio, 1/pixelRatio)
+  ctx.drawImage(img, x, y, width, height);
+  ctx.restore();
+}

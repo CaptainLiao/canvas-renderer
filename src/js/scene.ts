@@ -82,7 +82,12 @@ export class Scene {
   }
   private __orderPaint() {
     // 保证后面增加的节点不被覆盖
-    setTimeout(() => nodeList.reduce((p, node) => p.then(() => node.paint(this._ctx)), Promise.resolve()), 0)
+    //setTimeout(() => nodeList.reduce((p, node) => p.then(() => node.paint(this._ctx)), Promise.resolve()), 0)
+    setTimeout(async () => {
+      for (const node of nodeList) {
+        await node.paint(this._ctx)
+      }
+    }, 0)
   }
 }
 
