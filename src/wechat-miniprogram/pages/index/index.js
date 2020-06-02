@@ -41,7 +41,6 @@ Page({
     const stage = new MyTopo.Stage(canvasEle);
     const scene = new MyTopo.Scene(stage);
 
-
     const bg = new MyTopo.Node();
     bg.setSize(canvasEle.width, canvasEle.width);
     bg.setImage(BG_IMAGE);
@@ -52,7 +51,7 @@ Page({
 
     const node = new MyTopo.Node('是离开对方');
     node.setLocation(50, 50);
-    node.lineHeight = 80
+    node.lineHeight = 50
     node.dragable = false;
     node.font = '40px Microsoft YaHei'
     scene.add(node)
@@ -64,5 +63,10 @@ Page({
     // node.borderRadius = 5;
     //node2.setImage('http://jp.rsscc.com/ticket/icon/ziying.png');
     scene.add(node2);
+
+    setTimeout(() => {
+      console.log(stage.toDataURL());
+      
+    }, 1500)
   }
 })

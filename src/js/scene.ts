@@ -78,17 +78,23 @@ export class Scene {
 
     nodeList.push(node);
     node._setContext(this._ctx);
-    this.__orderPaint();
+    __orderPaint(this._ctx);
   }
-  private __orderPaint() {
-    // 保证后面增加的节点不被覆盖
-    //setTimeout(() => nodeList.reduce((p, node) => p.then(() => node.paint(this._ctx)), Promise.resolve()), 0)
-    setTimeout(async () => {
-      for (const node of nodeList) {
-        await node.paint(this._ctx)
-      }
-    }, 0)
-  }
+}
+
+let isPainted = false;
+function __orderPaint(ctx) {
+  // 保证后面增加的节点不被覆盖
+  setTimeout(async () => {
+    if (isPainted) return
+    isPainted = true
+
+    const startTime = Date.now()
+    for (const node of nodeList) {
+      await node.paint(ctx)
+    }
+    console.log(`****** End Of Drawing: ${Date.now() - startTime}ms ******`);
+  }, 0)
 }
 
 function mergeNode(ctx: CanvasRenderingContext2D, node: any) {

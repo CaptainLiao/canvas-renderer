@@ -6,4 +6,5 @@ declare interface IStage extends TopoEvents {
   add: () => void;
   clear: () => void;
   print: () => void;
+  toDataURL: () => string;
 }

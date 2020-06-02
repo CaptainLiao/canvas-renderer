@@ -12,7 +12,7 @@ class WebPaint extends Painter {
  
       const bgImg = new Image();
       bgImg.src = node.image;
-      // bgImg.setAttribute("crossOrigin",'Anonymous')
+      bgImg.setAttribute("crossOrigin",'Anonymous')
       
       bgImg.onload = () => {
         CACHE_IMAGE_LIST.push(bgImg);

@@ -26,7 +26,7 @@ node.dragable = false;
 
 // node.borderRadius = 5;
 // node.setImage('./images/ziying.png');
-node.setImage('http://jp.rsscc.com/ticket/icon/ziying.png');
+// node.setImage('http://jp.rsscc.com/ticket/icon/ziying.png');
 scene.add(node);
 
 const node2 = new MyTopo.Node('吃了吗liaofy');
@@ -36,3 +36,8 @@ node2.setSize(80, 40);
 // node.borderRadius = 5;
 //node2.setImage('http://jp.rsscc.com/ticket/icon/ziying.png');
 scene.add(node2);
+
+setTimeout(() => {
+  console.log(stage.toDataURL());
+  
+}, 1500)

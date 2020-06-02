@@ -198,7 +198,7 @@ var WebPaint = /** @class */ (function (_super) {
                 }
                 var bgImg = new Image();
                 bgImg.src = node.image;
-                // bgImg.setAttribute("crossOrigin",'Anonymous')
+                bgImg.setAttribute("crossOrigin", 'Anonymous');
                 bgImg.onload = function () {
                     CACHE_IMAGE_LIST.push(bgImg);
                     drawImage(ctx, node, bgImg);
@@ -292,36 +292,42 @@ var Scene = /** @class */ (function () {
         mergeNode(this._ctx, node);
         nodeList.push(node);
         node._setContext(this._ctx);
-        this.__orderPaint();
-    };
-    Scene.prototype.__orderPaint = function () {
-        var _this = this;
-        // 保证后面增加的节点不被覆盖
-        //setTimeout(() => nodeList.reduce((p, node) => p.then(() => node.paint(this._ctx)), Promise.resolve()), 0)
-        setTimeout(function () { return __awaiter(_this, void 0, void 0, function () {
-            var _i, nodeList_1, node;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _i = 0, nodeList_1 = nodeList;
-                        _a.label = 1;
-                    case 1:
-                        if (!(_i < nodeList_1.length)) { return [3 /*break*/, 4]; }
-                        node = nodeList_1[_i];
-                        return [4 /*yield*/, node.paint(this._ctx)];
-                    case 2:
-                        _a.sent();
-                        _a.label = 3;
-                    case 3:
-                        _i++;
-                        return [3 /*break*/, 1];
-                    case 4: return [2 /*return*/];
-                }
-            });
-        }); }, 0);
+        __orderPaint(this._ctx);
     };
     return Scene;
 }());
+var isPainted = false;
+function __orderPaint(ctx) {
+    var _this = this;
+    // 保证后面增加的节点不被覆盖
+    setTimeout(function () { return __awaiter(_this, void 0, void 0, function () {
+        var startTime, _i, nodeList_1, node;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (isPainted)
+                        { return [2 /*return*/]; }
+                    isPainted = true;
+                    startTime = Date.now();
+                    _i = 0, nodeList_1 = nodeList;
+                    _a.label = 1;
+                case 1:
+                    if (!(_i < nodeList_1.length)) { return [3 /*break*/, 4]; }
+                    node = nodeList_1[_i];
+                    return [4 /*yield*/, node.paint(ctx)];
+                case 2:
+                    _a.sent();
+                    _a.label = 3;
+                case 3:
+                    _i++;
+                    return [3 /*break*/, 1];
+                case 4:
+                    console.log("****** End Of Drawing: " + (Date.now() - startTime) + "ms ******");
+                    return [2 /*return*/];
+            }
+        });
+    }); }, 0);
+}
 function mergeNode(ctx, node) {
     var textWidth = measureTextWidth(ctx, node);
     node.width = Math.max(node.width, textWidth);
@@ -340,6 +346,28 @@ var Stage = /** @class */ (function () {
     }
     Stage.install = function (ctor) {
         ctor.Stage = Stage;
+    };
+    Stage.prototype.toDataURL = function (type, encoderOptions) {
+        if (this.canvas.toDataURL)
+            { return this.canvas.toDataURL(type, encoderOptions); }
+        // const {
+        //   _top,
+        //   _left,
+        //   _width,
+        //   _height,
+        // } = this.canvas
+        // wx.canvasToTempFilePath({
+        //   x: _top,
+        //   y: _left,
+        //   width: _width,
+        //   height: _height,
+        //   destWidth: _width,
+        //   destHeight: _height,
+        //   canvasId: 'canvas',
+        //   success(res) {
+        //     console.log(res)
+        //   }
+        // })
     };
     return Stage;
 }());
