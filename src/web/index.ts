@@ -1,4 +1,4 @@
-import { MyTopo } from '../core/index';
+import { MyTopo } from './MyTopo';
 
 const canvasEle = document.getElementById('canvas') as HTMLCanvasElement;
 canvasEle.width = window.innerWidth;

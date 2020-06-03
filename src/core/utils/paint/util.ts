@@ -1,4 +1,4 @@
-import { ETextPosition } from '../../../const/index';
+import { ETextPosition } from '../../const';
 
 export function getTextPosition(node: any) {
   const {

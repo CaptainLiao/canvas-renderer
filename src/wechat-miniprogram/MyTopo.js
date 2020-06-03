@@ -92,7 +92,6 @@ function getTextPosition(node) {
 function drawImage(ctx, node, img) {
     var x = node.x, y = node.y, width = node.width, height = node.height, pixelRatio = node.pixelRatio;
     ctx.save();
-    ctx.scale(1 / pixelRatio, 1 / pixelRatio);
     ctx.drawImage(img, x, y, width, height);
     ctx.restore();
 }

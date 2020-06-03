@@ -1,5 +1,5 @@
 
-import { ETextPosition } from '../const/index';
+import { ETextPosition } from './const/index';
 import { TopoTextNode } from './topo-node-text';
 import { paint } from './utils/index';
 

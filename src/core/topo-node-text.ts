@@ -1,4 +1,4 @@
-import { ETextPosition } from '../const/index';
+import { ETextPosition } from './const/index';
 import { paint } from './utils/index';
 
 let __ctx: any;
