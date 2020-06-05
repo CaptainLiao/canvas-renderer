@@ -7,10 +7,13 @@ export class MyTopo implements Topo {
   public static Stage: any;
   public static Scene: any;
   public static Node: any;
+  public static use(chajian) {
+    chajian.install(MyTopo)
+  }
 }
 
-Stage.install(MyTopo);
-Scene.install(MyTopo);
-TopoNode.install(MyTopo);
+MyTopo.use(Stage);
+MyTopo.use(Scene);
+MyTopo.use(TopoNode);
 
 

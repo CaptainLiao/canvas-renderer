@@ -461,10 +461,13 @@ var TopoNode = /** @class */ (function (_super) {
 var MyTopo = /** @class */ (function () {
     function MyTopo() {
     }
+    MyTopo.use = function (chajian) {
+        chajian.install(MyTopo);
+    };
     return MyTopo;
 }());
-Stage.install(MyTopo);
-Scene.install(MyTopo);
-TopoNode.install(MyTopo);
+MyTopo.use(Stage);
+MyTopo.use(Scene);
+MyTopo.use(TopoNode);
 
 export { MyTopo };
