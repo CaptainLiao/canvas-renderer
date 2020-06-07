@@ -4,7 +4,7 @@ export default [
   {
     ...commonConifg,
     output: {
-      file: 'src/web/MyTopo.js',
+      file: 'example/web/MyTopo.js',
       format: 'esm'
     },
   }

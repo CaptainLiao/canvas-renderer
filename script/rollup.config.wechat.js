@@ -4,7 +4,7 @@ export default [
   {
     ...commonConifg,
     output: {
-      file: 'src/wechat-miniprogram/MyTopo.js',
+      file: 'example/wechat-miniprogram/MyTopo.js',
       format: 'esm'
     },
   }
