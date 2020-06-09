@@ -3,7 +3,7 @@ declare interface BoundingRect {
   left: number;
   top: number;
 }
-declare interface Points {
+declare interface Point {
   x: number;
   y: number;
 }

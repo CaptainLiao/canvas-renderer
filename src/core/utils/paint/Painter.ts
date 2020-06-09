@@ -1,8 +1,10 @@
-import { getTextPosition } from './util'
+import { getTextPosition, drawImage } from './util'
 const PAD = 4;
 
 export abstract class Painter implements IPainter {
-  abstract drawImage (ctx: any, node: any): Promise<{}>;
+  drawImage = (ctx: CanvasRenderingContext2D, node: any) => {
+    drawImage(ctx, node);
+  }
 
   drawText = (ctx: any, node: any) => {
     const {

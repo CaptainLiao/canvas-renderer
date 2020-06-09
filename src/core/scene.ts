@@ -110,3 +110,32 @@ function isPointInPath(node: any, e: MouseEvent) {
   return (point.x >= node.x && point.x <= node.x + node.width) && (point.y >= node.y && point.y <= node.y + node.height);
 }
 
+function isPointInPolygon(point: Point, polygon: any) {
+  let crossNumbers: number = 0;
+  const len = polygon.length;
+  for (let i = 0; i < polygon.length; i++) {
+    if (__isIntersection(point, polygon[i], polygon[(i + 1) % len])) {
+      crossNumbers += 1;
+    }
+  }
+  return crossNumbers % 2 === 1;
+}
+
+function isPointInCircle(point: number, circle: any) {
+
+}
+
+function __isIntersection(p: Point, p1: Point, p2: Point) {
+  // 假设 p1、p2 连成线段为 l  
+  // 1. l 水平
+  if (p1.y === p2.y) return false;
+  // 2. p 点在 l 上方
+  if (p.y > Math.max(p1.x, p2.x)) return false;
+  // 3. p 点在 l 下方
+  if (p.y < Math.min(p1.x, p2.x)) return false;
+
+  const crossPointX = p2.x - (p2.x - p1.x) / (p2.y - p1.y) * (p2.y - p.y);
+
+  return crossPointX > p.x;
+}
+

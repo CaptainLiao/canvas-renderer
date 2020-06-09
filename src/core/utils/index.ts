@@ -17,7 +17,7 @@ export function measureTextWidth(ctx: CanvasRenderingContext2D, node: any) {
   return ctx.measureText(node.text).width;
 }
 
-export function getPoint(point: Points, canvasRect: BoundingRect): Points {
+export function getPoint(point: Point, canvasRect: BoundingRect): Point {
   return {
     x: point.x - canvasRect.left,
     y: point.y - canvasRect.top,
