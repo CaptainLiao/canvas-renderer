@@ -35,15 +35,23 @@ Page({
     })
   },
 
-  init(canvasEle) {
+  async init(canvasEle) {
     const BG_IMAGE = 'https://cn.bing.com/th?id=OIP.geUSJfZRvMHFVz6KSyp8jgHaHa&pid=Api&rs=1'
+
+    const loadImage = img => new Promise(function (resolve, reject) {
+      const bgImg = canvasEle.createImage();
+      bgImg.src = img;
+      bgImg.onload = () => resolve(bgImg);
+      bgImg.onerror = e => reject(e);
+  });
 
     const stage = new MyTopo.Stage(canvasEle);
     const scene = new MyTopo.Scene(stage);
 
     const bg = new MyTopo.Node();
+    const img = await loadImage(BG_IMAGE);
     bg.setSize(canvasEle.width, canvasEle.width);
-    bg.setImage(BG_IMAGE);
+    bg.setImage(img);
     bg.pixelRatio = __pixelRatio;
     bg.showSelected = false;
     bg.dragable = false;

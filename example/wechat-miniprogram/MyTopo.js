@@ -89,16 +89,38 @@ function getTextPosition(node) {
         textBaseline: textBaseline
     };
 }
-function drawImage(ctx, node, img) {
-    var x = node.x, y = node.y, width = node.width, height = node.height, pixelRatio = node.pixelRatio;
+function drawImage(ctx, node) {
+    var x = node.x, y = node.y, width = node.width, height = node.height, image = node.image, pixelRatio = node.pixelRatio;
     ctx.save();
-    ctx.drawImage(img, x, y, width, height);
+    drawRectPath(ctx, node);
+    ctx.drawImage(image, 0, 0, image.width, image.height, x, y, width, height);
     ctx.restore();
+}
+function drawRectPath(ctx, node) {
+    var x = node.x, y = node.y, width = node.width, height = node.height, _a = node.borderRadius, borderRadius = _a === void 0 ? 0 : _a;
+    var r = borderRadius;
+    var w = width;
+    var h = height;
+    if (w < 2 * r)
+        { r = w / 2; }
+    if (h < 2 * r)
+        { r = h / 2; }
+    // 矩形路径(可带圆角)
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
 }
 
 var PAD = 4;
 var Painter = /** @class */ (function () {
     function Painter() {
+        this.drawImage = function (ctx, node) {
+            drawImage(ctx, node);
+        };
         this.drawText = function (ctx, node) {
             var text = node.text, font = node.font, width = node.width, fontColor = node.fontColor, textBaseline = node.textBaseline;
             if (!text)
@@ -155,58 +177,19 @@ var Painter = /** @class */ (function () {
     return Painter;
 }());
 
-var IMAGE_LIST = [];
 var WxPaint = /** @class */ (function (_super) {
     __extends(WxPaint, _super);
     function WxPaint() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.drawImage = function (ctx, node) {
-            return new Promise(function (resolve, reject) {
-                var img = IMAGE_LIST.find(function (item) { return item.src === node.image; });
-                if (img) {
-                    drawImage(ctx, node, img);
-                    return resolve();
-                }
-                var bgImg = ctx.$rowCanvasElement.createImage();
-                bgImg.src = node.image;
-                bgImg.onload = function () {
-                    IMAGE_LIST.push(bgImg);
-                    drawImage(ctx, node, bgImg);
-                    return resolve();
-                };
-                bgImg.onerror = function (e) { return reject(e); };
-            });
-        };
-        return _this;
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     return WxPaint;
 }(Painter));
 var wxPaint = new WxPaint();
 
-var CACHE_IMAGE_LIST = [];
 var WebPaint = /** @class */ (function (_super) {
     __extends(WebPaint, _super);
     function WebPaint() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.drawImage = function (ctx, node) {
-            return new Promise(function (resolve, reject) {
-                var img = CACHE_IMAGE_LIST.find(function (item) { return item.src === node.image; });
-                if (img) {
-                    drawImage(ctx, node, img);
-                    return resolve();
-                }
-                var bgImg = new Image();
-                bgImg.src = node.image;
-                bgImg.setAttribute("crossOrigin", 'Anonymous');
-                bgImg.onload = function () {
-                    CACHE_IMAGE_LIST.push(bgImg);
-                    drawImage(ctx, node, bgImg);
-                    resolve();
-                };
-                bgImg.onerror = reject;
-            });
-        };
-        return _this;
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     return WebPaint;
 }(Painter));
@@ -460,10 +443,13 @@ var TopoNode = /** @class */ (function (_super) {
 var MyTopo = /** @class */ (function () {
     function MyTopo() {
     }
+    MyTopo.use = function (chajian) {
+        chajian.install(MyTopo);
+    };
     return MyTopo;
 }());
-Stage.install(MyTopo);
-Scene.install(MyTopo);
-TopoNode.install(MyTopo);
+MyTopo.use(Stage);
+MyTopo.use(Scene);
+MyTopo.use(TopoNode);
 
 export { MyTopo };
