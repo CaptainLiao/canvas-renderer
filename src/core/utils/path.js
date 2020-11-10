@@ -35,3 +35,22 @@ export function drawRoundRectPath(cxt,width,height,radius){
 	cxt.lineTo(width,height-radius);
 	cxt.closePath();
 }
+
+function roundRect(ctx, layoutBox) {
+	const style = this.style || {};
+	const box   = layoutBox  || this.layoutBox;
+
+	const w = box.width;
+	const h = box.height;
+	const r = style.borderRadius;
+	const x = box.absoluteX;
+	const y = box.absoluteY;
+
+	ctx.moveTo(x + r, y)
+	ctx.arcTo(x + w, y, x + w, y + h, r);
+	ctx.arcTo(x + w, y + h, x, y + h, r);
+	ctx.arcTo(x, y + h, x, y, r);
+	ctx.arcTo(x, y, x + w, y, r);
+
+	ctx.clip();
+}
