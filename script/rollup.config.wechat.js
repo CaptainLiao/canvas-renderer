@@ -4,7 +4,7 @@ export default [
   {
     ...commonConifg,
     output: {
-      file: 'example/wechat-miniprogram/MyTopo.js',
+      file: 'example/wechat-miniprogram/CanvasStage.js',
       format: 'esm'
     },
   }

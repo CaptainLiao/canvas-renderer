@@ -1,58 +1,59 @@
-import { MyTopo } from './MyTopo';
+import {
+  CanvasStage,
+  Text,
+  Node,
+  Block
+} from './CanvasStage'
 
-const canvasEle = document.getElementById('canvas') as HTMLCanvasElement;
-canvasEle.width = window.innerWidth;
-canvasEle.height = window.innerHeight;
+const data = {
+  text: {
+    color: '#8d8d8d',
+    fontSize: '14px',
+    fontFamily: `-apple-system, BlinkMacSystemFont, "PingFang SC", "PingFangSC",\
+      "Microsoft YaHei", "Microsoft JhengHei", "Source Han Sans SC",\
+      "Source Han Sans TC", "Noto Sans CJK TC", "WenQuanYi Micro Hei", SimSun,sans-serif\
+    `,
+    text: '速度力量的算法理论考试的付款了',
 
-const BG_IMAGE = 'https://cn.bing.com/th?id=OIP.geUSJfZRvMHFVz6KSyp8jgHaHa&pid=Api&rs=1'
-
-const loadImage = img => new Promise((resolve, reject) => {
-  const bgImg = new Image();
-  bgImg.src = img;
-  bgImg.setAttribute("crossOrigin",'Anonymous')
-  
-  bgImg.onload = () => resolve(bgImg)
-  bgImg.onerror = reject;
-});
-
-async function draw() {
-  const stage = new MyTopo.Stage(canvasEle);
-  const scene = new MyTopo.Scene(stage);
-  
-  const bg = new MyTopo.Node();
-  const bgImg = await loadImage(BG_IMAGE);
-  bg.setSize(canvasEle.width, canvasEle.width);
-  bg.setImage(bgImg);
-  bg.showSelected = false;
-  bg.dragable = false;
-  scene.add(bg)
-  
-  const node = new MyTopo.Node('是离开对方');
-  node.setLocation(100, 100);
-  node.setSize(80, 20);
-  node.fontColor = '#fff'
-  node.textPosition = 'BottomCenter'
-  node.dragable = false;
-  
-  // node.borderRadius = 5;
-  // node.setImage('./images/ziying.png');
-  // node.setImage('http://jp.rsscc.com/ticket/icon/ziying.png');
-  scene.add(node);
-  
-  const node2 = new MyTopo.Node('吃了吗liaofy');
-  node2.setLocation(100, 200);
-  node2.setSize(80, 40);
-  // node2.showSelected = false;
-  // node.borderRadius = 5;
-  //node2.setImage('http://jp.rsscc.com/ticket/icon/ziying.png');
-  scene.add(node2);
-
-  setTimeout(() => {
-    console.log(stage.toDataURL());
+    marginTop: 40,
+    marginLeft: 10,
     
-  }, 1500)
-  
+    paddingTop: 20,
+    paddingBottom: 20,
+    paddingLeft: 10,
+    paddingRight: 10,
+    
+    backgroundColor: '#eee',
+    borderColor: '#8d8d8d',
+    borderWidth: 2,
+    broderRadius: 8
+  },
+  Block: {
+    x: 0,
+    y: 0,
+    width: 300,
+    height: 300,
+    borderColor: '#ccc',
+
+    text: {
+      color: '#333',
+      text: '点我啊'
+    }
+  }
 }
 
-draw();
+
+var stage = new CanvasStage({
+  el: document.getElementById('canvas'),
+  width: 300,
+  height: 300,
+  ratio: window.devicePixelRatio || 1
+})
+stage.add(Node)
+
+var text = new Text(data.text)
+
+var block = new Block(data.Block)
+
+
 

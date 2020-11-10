@@ -1,22 +1,22 @@
-````
+````js
 class Node {}
 
 ````
 
-````
+````js
 class Path extends Node {}
 
 class Polygon extends Path {}
 class Rect extends Polygon
 class Triangle extends Polygon
-class Paralell extends Polygon
+class Parallel extends Polygon
 
 class Arc extends Path {}
 class Circle extends Arc
 class Ellipse extends Arc
 class Curve extends Arc
 ````
-````
+````js
 class Block extends Node {}
 
 class Image extends Block

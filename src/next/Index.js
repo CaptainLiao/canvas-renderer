@@ -2,13 +2,13 @@ import Stage from './Stage'
 import Layer from './Layer'
 import Group from './Group'
 
-export default class CanvasDance {
+export default class ECanvas {
   static use(plugin) {
-    plugin.install(CanvasDance)
+    plugin.install(ECanvas)
   }
 }
 
-CanvasDance.use(Stage)
-CanvasDance.use(Layer)
-CanvasDance.use(Group)
+ECanvas.use(Stage)
+ECanvas.use(Layer)
+ECanvas.use(Group)
 
