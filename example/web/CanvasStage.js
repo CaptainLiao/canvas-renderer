@@ -181,9 +181,16 @@ function drawRoundRectPath(cxt, width, height, radius) {
 var Node = /*#__PURE__*/function () {
   function Node() {
     _classCallCheck(this, Node);
+
+    this.children = [];
   }
 
   _createClass(Node, [{
+    key: "add",
+    value: function add(node) {
+      this.children.push(node);
+    }
+  }, {
     key: "setFont",
     value: function setFont(fontObj) {
       var t = fontObj;
@@ -220,10 +227,7 @@ var Block = /*#__PURE__*/function (_Node) {
     _classCallCheck(this, Block);
 
     _this = _super.call(this);
-    _this.blockObj = blockObj;
-
-    _this.render();
-
+    Object.assign(_assertThisInitialized(_this), blockObj);
     return _this;
   }
 
@@ -254,46 +258,6 @@ var Block = /*#__PURE__*/function (_Node) {
   }]);
 
   return Block;
-}(Node);
-
-var Line = /*#__PURE__*/function (_Node) {
-  _inherits(Line, _Node);
-
-  var _super = _createSuper(Line);
-
-  function Line(lineObj) {
-    var _this;
-
-    _classCallCheck(this, Line);
-
-    _this = _super.call(this);
-    _this.lineObj = lineObj;
-    return _this;
-  }
-
-  _createClass(Line, [{
-    key: "render",
-    value: function render() {
-      this.ctx.save();
-      this.drawPath();
-      this.setStrokeStyle(this.lineObj.color);
-      this.setLineWidth(this.lineObj.lineWidth);
-      this.ctx.stroke();
-      this.ctx.restore();
-    }
-  }, {
-    key: "drawPath",
-    value: function drawPath() {
-      var _this$lineObj = this.lineObj,
-          startPoint = _this$lineObj.startPoint,
-          endPoint = _this$lineObj.endPoint;
-      this.ctx.beginPath();
-      this.ctx.moveTo(startPoint[0], startPoint[1]);
-      this.ctx.lineTo(endPoint[0], endPoint[1]);
-    }
-  }]);
-
-  return Line;
 }(Node);
 
 function measureText(_ref) {
@@ -425,4 +389,112 @@ var CanvasStage = /*#__PURE__*/function () {
   return CanvasStage;
 }();
 
-export { Block, CanvasStage, Line, Node, Text };
+var parser = require('./libs/fast-xml-parser/parser');
+
+var computeLayout = require('css-layout');
+
+var stage = new CanvasStage({
+  el: document.getElementById('canvas'),
+  width: 300,
+  height: 300,
+  ratio: window.devicePixelRatio || 1
+});
+stage.add(Node);
+var options = {
+  attributeNamePrefix: "",
+  attrNodeName: false,
+  //default is 'false'
+  textNodeName: "#text",
+  ignoreAttributes: false,
+  ignoreNameSpace: false,
+  allowBooleanAttributes: false,
+  parseNodeValue: true,
+  parseAttributeValue: false,
+  trimValues: true,
+  cdataTagName: "__cdata",
+  //default is 'false'
+  cdataPositionChar: "\\c",
+  parseTrueNumberOnly: false,
+  arrayMode: false,
+  //"strict"
+  format: true,
+  stopNodes: ["parse-me-as-string"]
+};
+var xmlData = "\n<view id=\"container\">\n  <view id=\"testText\" class=\"redText\" value=\"hello canvas\">adsdf</view>\n  <view class=\"t2\">\u8FD9\u662Ft2</view>\n</view>\n";
+var style = {
+  container: {
+    margin: 8,
+    padding: 2,
+    backgroundColor: '#ffffff',
+    justContent: 'center',
+    alignItems: 'center'
+  },
+  testText: {
+    color: '#ff0000',
+    width: 200,
+    height: 100,
+    lineHeight: 100,
+    fontSize: 30,
+    textAlign: 'center'
+  }
+};
+var jsonObj = parser.parse(xmlData, options);
+var nodeTree = createRenderTree(jsonObj.children[0], style);
+console.log(jsonObj);
+computeLayout(nodeTree);
+console.log(nodeTree);
+
+function createRenderTree(node, style) {
+  var _this = this;
+
+  // 记录每一个标签应该用什么类来处理
+  var constructorMap = _defineProperty({
+    view: Block,
+    text: Text,
+    image: Block
+  }, '!xml', Block);
+
+  var _constructor = constructorMap[node.name];
+  var children = node.children || [];
+  var attr = node.attr || {};
+  var id = attr.id || ''; // 实例化标签需要的参数，主要为收集样式和属性
+
+  var args = Object.keys(attr).reduce(function (obj, key) {
+    var value = attr[key];
+    var attribute = key;
+
+    if (key === 'id') {
+      obj.style = Object.assign(obj.style || {}, style[id] || {});
+      return obj;
+    }
+
+    if (key === 'class') {
+      obj.style = value.split(/\s+/).reduce(function (res, oneClass) {
+        return Object.assign(res, style[oneClass]);
+      }, obj.style || {});
+      return obj;
+    }
+
+    if (value === 'true') {
+      obj[attribute] = true;
+    } else if (value === 'false') {
+      obj[attribute] = false;
+    } else {
+      obj[attribute] = value;
+    }
+
+    return obj;
+  }, {}); // 用于后续元素查询
+
+  args.idName = id;
+  args.className = attr["class"] || '';
+  args.text = node['#text'] || '';
+  var element = new _constructor(args);
+  element.root = this; // 递归处理
+
+  children.forEach(function (childNode) {
+    var childElement = createRenderTree.call(_this, childNode, style);
+    element.add(childElement);
+  });
+  return element;
+}

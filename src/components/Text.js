@@ -1,4 +1,4 @@
-import measureText from './utils/measureText'
+import measureText from '../utils/measureText'
 import Node from './Node';
 import Block from './Block';
 

@@ -1,4 +1,10 @@
 export default class Node {
+  constructor() {
+    this.children = []
+  }
+  add(node) {
+    this.children.push(node)
+  }
   setFont(fontObj) {
     const t = fontObj
     this.ctx.font = `${t.fontSize} ${t.fontFamily}`

@@ -3,7 +3,7 @@ const typescript = require('@rollup/plugin-typescript');
 const { babel } = require('@rollup/plugin-babel');
 
 module.exports = {
-  input: 'src/core/index.js',
+  input: 'src/index.js',
   plugins: [
     typescript(),
     babel({
@@ -11,6 +11,6 @@ module.exports = {
     }),
   ],
   watch: {
-    include: 'src/core/**'
+    include: 'src/**'
   }
 }

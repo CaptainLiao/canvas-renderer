@@ -21,8 +21,8 @@ function parse(xmlData, options, validationOption) {
 
 const getTraversalObj = xmlToNodeobj.getTraversalObj
 
-export default {
-  parse,
-  getTraversalObj
-}
+
+
+exports.parse = parse
+exports.getTraversalObj = getTraversalObj
 

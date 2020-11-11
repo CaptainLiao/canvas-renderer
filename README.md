@@ -3,25 +3,15 @@
 npm install
 ````
 
-# web 开发测试 src/web
-## web 打包
-````
-npm run build:web
-````
-## web测试
-````
-npm run start
-````
-
-# 小程序开发测试 src/wechat-miniprogram
-## 小程序打包
-````
-npm run build:wechat
-````
-## 小程序测试
-
 # 功能
-[x] 文本节点
-[x] 图片节点
-[x] 节点拖拽
+[√] 解析 xml 为 dom tree
+[√] cssdom
+[x] render tree
+[x] 布局 layout
+[x] 绘制
+[x] 重绘和重排
+[x] 事件
+[x] 滚动
+
+referer: https://segmentfault.com/a/1190000021297495?_ea=27021986
 

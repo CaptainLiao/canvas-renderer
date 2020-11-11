@@ -1,14 +1,14 @@
 
 import Block from './Block';
-import Line from './Line';
 import Node from './Node';
 import Text from './Text';
+import Element from './Element';
 
 export {
   Block,
-  Line,
   Node,
   Text,
+  Element,
   CanvasStage
 }
 

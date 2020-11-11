@@ -1,14 +1,13 @@
 import {
   drawRoundRectPath
-} from './utils/path'
+} from '../utils/path'
 import Node from './Node';
 
 export default class Block extends Node {
   constructor(blockObj) {
     super()
-    this.blockObj = blockObj
+    Object.assign(this, blockObj)
 
-    this.render()
   }
   render() {
     const radius = this.blockObj.broderRadius || 0

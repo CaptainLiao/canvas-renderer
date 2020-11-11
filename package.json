@@ -29,5 +29,7 @@
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11"
   },
-  "dependencies": {}
+  "dependencies": {
+    "css-layout": "^1.1.1"
+  }
 }
