@@ -34,14 +34,17 @@ export default class Element extends Node{
     className = '',
     id = ++uuid,
   }) {
-    this.children = [];
-    this.parent = null;
-    this.parentId = 0;
+    super();
+
     this.id = id;
+    this.style = style;
     this.props = props;
     this.idName = idName;
     this.className = className;
-    this.style = style;
+    
+    this.children = [];
+    this.parent = null;
+    this.parentId = 0;
 
     this.root = null;
     this.isDestroyed = false;
@@ -55,13 +58,13 @@ export default class Element extends Node{
       style.backgroundColor = getRgba(style.backgroundColor, style.opacity);
     }
 
-    for (let key in this.style) {
-      if (scalableStyles.indexOf(key) > -1) {
-        this.style[key] *= dpr;
-      }
-    }
+    // for (let key in this.style) {
+    //   if (scalableStyles.indexOf(key) > -1) {
+    //     this.style[key] *= dpr;
+    //   }
+    // }
 
-    this.initRepaint();
+    // this.initRepaint();
   }
 
   // 子类填充实现

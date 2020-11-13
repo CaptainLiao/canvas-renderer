@@ -1,11 +1,11 @@
 
-import Block from './Block';
+import View from './View';
 import Node from './Node';
 import Text from './Text';
 import Element from './Element';
 
 export {
-  Block,
+  View,
   Node,
   Text,
   Element,

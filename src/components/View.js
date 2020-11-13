@@ -1,14 +1,25 @@
 import {
   drawRoundRectPath
 } from '../utils/path'
-import Node from './Node';
+import Element from './Element';
 
-export default class Block extends Node {
-  constructor(blockObj) {
-    super()
-    Object.assign(this, blockObj)
-
+export default class View extends Element {
+  constructor({
+    style = {},
+    props = {},
+    idName = '',
+    className = '',
+  }) {
+    super({
+      style,
+      props,
+      idName,
+      className
+    })
+    this.type = 'View';
   }
+
+
   render() {
     const radius = this.blockObj.broderRadius || 0
 
@@ -35,3 +46,4 @@ export default class Block extends Node {
     this.ctx.restore()
   }
 }
+

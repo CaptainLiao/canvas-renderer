@@ -1,6 +1,6 @@
 import measureText from '../utils/measureText'
 import Node from './Node';
-import Block from './Block';
+import View from './View';
 
 const defaultTextProps = {
   paddingLeft: 0,
@@ -57,7 +57,7 @@ export default class Text extends Node {
       broderRadius: this.textObj.broderRadius
     }
 
-    new Block(contentBlock)
+    new View(contentBlock)
 
     this.textObj.x = this.textObj.marginLeft
       + this.textObj.paddingLeft
