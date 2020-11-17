@@ -216,22 +216,215 @@ var Node = /*#__PURE__*/function () {
   return Node;
 }();
 
-var Block = /*#__PURE__*/function (_Node) {
-  _inherits(Block, _Node);
+var uuid = 0;
 
-  var _super = _createSuper(Block);
+function hexToRgb(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
+}
 
-  function Block(blockObj) {
+function getRgba(hex, opacity) {
+  var rgbObj = hexToRgb(hex);
+
+  if (opacity == undefined) {
+    opacity = 1;
+  }
+
+  return "rgba(".concat(rgbObj.r, ", ").concat(rgbObj.g, ", ").concat(rgbObj.b, ", ").concat(opacity, ")");
+}
+
+var Element = /*#__PURE__*/function (_Node) {
+  _inherits(Element, _Node);
+
+  var _super = _createSuper(Element);
+
+  function Element(_ref) {
     var _this;
 
-    _classCallCheck(this, Block);
+    var _ref$style = _ref.style,
+        style = _ref$style === void 0 ? {} : _ref$style,
+        _ref$props = _ref.props,
+        props = _ref$props === void 0 ? {} : _ref$props,
+        _ref$idName = _ref.idName,
+        idName = _ref$idName === void 0 ? '' : _ref$idName,
+        _ref$className = _ref.className,
+        className = _ref$className === void 0 ? '' : _ref$className,
+        _ref$id = _ref.id,
+        id = _ref$id === void 0 ? ++uuid : _ref$id;
+
+    _classCallCheck(this, Element);
 
     _this = _super.call(this);
-    Object.assign(_assertThisInitialized(_this), blockObj);
+    _this.id = id;
+    _this.style = style;
+    _this.props = props;
+    _this.idName = idName;
+    _this.className = className;
+    _this.children = [];
+    _this.parent = null;
+    _this.parentId = 0;
+    _this.root = null;
+    _this.isDestroyed = false;
+    _this.layoutBox = {};
+
+    if (style.opacity !== undefined && style.color && style.color.indexOf('#') > -1) {
+      style.color = getRgba(style.color, style.opacity);
+    }
+
+    if (style.opacity !== undefined && style.backgroundColor && style.backgroundColor.indexOf('#') > -1) {
+      style.backgroundColor = getRgba(style.backgroundColor, style.opacity);
+    } // for (let key in this.style) {
+    //   if (scalableStyles.indexOf(key) > -1) {
+    //     this.style[key] *= dpr;
+    //   }
+    // }
+    // this.initRepaint();
+
+
+    return _this;
+  } // 子类填充实现
+
+
+  _createClass(Element, [{
+    key: "repaint",
+    value: function repaint() {} // 子类填充实现
+
+  }, {
+    key: "insert",
+    value: function insert() {}
+  }, {
+    key: "checkNeedRender",
+    value: function checkNeedRender() {
+      return true;
+    } // 子类填充实现
+
+  }, {
+    key: "destroy",
+    value: function destroy() {}
+  }, {
+    key: "add",
+    value: function add(element) {
+      element.parent = this;
+      element.parentId = this.id;
+      this.children.push(element);
+    } // 方便子类实现borderRadius
+
+  }, {
+    key: "roundRectPath",
+    value: function roundRectPath(ctx, layoutBox) {
+      var style = this.style;
+      var box = layoutBox || this.layoutBox;
+      var w = box.width;
+      var h = box.height;
+      var r = style.borderRadius;
+      var x = box.absoluteX;
+      var y = box.absoluteY;
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.clip();
+    }
+  }, {
+    key: "renderBorder",
+    value: function renderBorder(ctx, layoutBox) {
+      var style = this.style;
+
+      if (style.borderRadius) {
+        this.roundRectPath(ctx, layoutBox);
+      }
+
+      ctx.save();
+      var box = layoutBox || this.layoutBox;
+      var borderWidth = style.borderWidth || 0;
+      var borderLeftWidth = style.borderLeftWidth || 0;
+      var borderRightWidth = style.borderRightWidth || 0;
+      var borderTopWidth = style.borderTopWidth || 0;
+      var borderBottomWidth = style.borderBottomWidth || 0;
+      var radius = style.borderRadius || 0;
+      var borderColor = style.borderColor;
+      var drawX = box.absoluteX;
+      var drawY = box.absoluteY;
+      ctx.beginPath();
+
+      if (borderWidth && borderColor) {
+        ctx.setLineWidth(borderWidth);
+        ctx.setStrokeStyle(borderColor);
+        ctx.strokeRect(drawX, drawY, box.width, box.height);
+      }
+
+      if (borderTopWidth && (borderColor || style.borderTopColor)) {
+        ctx.setLineWidth(borderTopWidth);
+        ctx.setStrokeStyle(style.borderTopColor || borderColor);
+        ctx.moveTo(radius ? drawX + radius : drawX, drawY + borderTopWidth / 2);
+        ctx.lineTo(radius ? drawX + box.width - radius : drawX + box.width, drawY + borderTopWidth / 2);
+      }
+
+      if (borderBottomWidth && (borderColor || style.borderBottomColor)) {
+        ctx.lineWidth = borderBottomWidth;
+        ctx.strokeStyle = style.borderBottomColor || borderColor;
+        ctx.moveTo(radius ? drawX + radius : drawX, drawY + box.height - borderBottomWidth / 2);
+        ctx.lineTo(radius ? drawX + box.width - radius : drawX + box.width, drawY + box.height - borderBottomWidth / 2);
+      }
+
+      if (borderLeftWidth && (borderColor || style.borderLeftColor)) {
+        ctx.lineWidth = borderLeftWidth;
+        ctx.strokeStyle = style.borderLeftColor || borderColor;
+        ctx.moveTo(drawX + borderLeftWidth / 2, radius ? drawY + radius : drawY);
+        ctx.lineTo(drawX + borderLeftWidth / 2, radius ? drawY + box.height - radius : drawY + box.height);
+      }
+
+      if (borderRightWidth && (borderColor || style.borderRightColor)) {
+        ctx.lineWidth = borderRightWidth;
+        ctx.strokeStyle = style.borderRightColor || borderColor;
+        ctx.moveTo(drawX + box.width - borderRightWidth / 2, radius ? drawY + radius : drawY);
+        ctx.lineTo(drawX + box.width - borderRightWidth / 2, radius ? drawY + box.height - radius : drawY + box.height);
+      }
+
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+    }
+  }]);
+
+  return Element;
+}(Node);
+
+var View = /*#__PURE__*/function (_Element) {
+  _inherits(View, _Element);
+
+  var _super = _createSuper(View);
+
+  function View(_ref) {
+    var _this;
+
+    var _ref$style = _ref.style,
+        style = _ref$style === void 0 ? {} : _ref$style,
+        _ref$props = _ref.props,
+        props = _ref$props === void 0 ? {} : _ref$props,
+        _ref$idName = _ref.idName,
+        idName = _ref$idName === void 0 ? '' : _ref$idName,
+        _ref$className = _ref.className,
+        className = _ref$className === void 0 ? '' : _ref$className;
+
+    _classCallCheck(this, View);
+
+    _this = _super.call(this, {
+      style: style,
+      props: props,
+      idName: idName,
+      className: className
+    });
+    _this.type = 'View';
     return _this;
   }
 
-  _createClass(Block, [{
+  _createClass(View, [{
     key: "render",
     value: function render() {
       var radius = this.blockObj.broderRadius || 0; //圆的直径必然要小于矩形的宽高		
@@ -257,8 +450,8 @@ var Block = /*#__PURE__*/function (_Node) {
     }
   }]);
 
-  return Block;
-}(Node);
+  return View;
+}(Element);
 
 function measureText(_ref) {
   var _ref$text = _ref.text,
@@ -335,7 +528,7 @@ var Text = /*#__PURE__*/function (_Node) {
       backgroundColor: _this.textObj.backgroundColor,
       broderRadius: _this.textObj.broderRadius
     };
-    new Block(contentBlock);
+    new View(contentBlock);
     _this.textObj.x = _this.textObj.marginLeft + _this.textObj.paddingLeft + textRect.halfLineSpace;
     _this.textObj.y = _this.textObj.marginTop - textRect.halfLineSpace;
 
@@ -358,119 +551,41 @@ var Text = /*#__PURE__*/function (_Node) {
   return Text;
 }(Node);
 
-var CanvasStage = /*#__PURE__*/function () {
-  function CanvasStage(_ref) {
-    var el = _ref.el,
-        width = _ref.width,
-        height = _ref.height,
-        _ref$ratio = _ref.ratio,
-        ratio = _ref$ratio === void 0 ? 1 : _ref$ratio;
-
-    _classCallCheck(this, CanvasStage);
-
-    this.canvas = el; // 解决字体/图片模糊
-
-    this.canvas.width = width * ratio;
-    this.canvas.height = height * ratio;
-    this.canvas.style.width = width + 'px';
-    this.canvas.style.height = height + 'px';
-    this.ctx = this.canvas.getContext('2d');
-    this.ctx.scale(ratio, ratio);
-  }
-
-  _createClass(CanvasStage, [{
-    key: "add",
-    value: function add(Node) {
-      Node.prototype.ctx = this.ctx;
-      Node.prototype.canvas = this.canvas;
-    }
-  }]);
-
-  return CanvasStage;
-}();
+var STATE = {
+  "UNINIT": "UNINIT",
+  "INITED": "INITED",
+  "RENDERED": "RENDERED",
+  "CLEAR": "CLEAR"
+};
 
 var parser = require('./libs/fast-xml-parser/parser');
 
 var computeLayout = require('css-layout');
 
-var stage = new CanvasStage({
-  el: document.getElementById('canvas'),
-  width: 300,
-  height: 300,
-  ratio: window.devicePixelRatio || 1
-});
-stage.add(Node);
-var options = {
-  attributeNamePrefix: "",
-  attrNodeName: false,
-  //default is 'false'
-  textNodeName: "#text",
-  ignoreAttributes: false,
-  ignoreNameSpace: false,
-  allowBooleanAttributes: false,
-  parseNodeValue: true,
-  parseAttributeValue: false,
-  trimValues: true,
-  cdataTagName: "__cdata",
-  //default is 'false'
-  cdataPositionChar: "\\c",
-  parseTrueNumberOnly: false,
-  arrayMode: false,
-  //"strict"
-  format: true,
-  stopNodes: ["parse-me-as-string"]
+var nodeMap = {
+  view: View,
+  text: Text,
+  image: View,
+  scrollview: View
 };
-var xmlData = "\n<view id=\"container\">\n  <view id=\"testText\" class=\"redText\" value=\"hello canvas\">adsdf</view>\n  <view class=\"t2\">\u8FD9\u662Ft2</view>\n</view>\n";
-var style = {
-  container: {
-    margin: 8,
-    padding: 2,
-    backgroundColor: '#ffffff',
-    justContent: 'center',
-    alignItems: 'center'
-  },
-  testText: {
-    color: '#ff0000',
-    width: 200,
-    height: 100,
-    lineHeight: 100,
-    fontSize: 30,
-    textAlign: 'center'
-  }
-};
-var jsonObj = parser.parse(xmlData, options);
-var nodeTree = createRenderTree(jsonObj.children[0], style);
-console.log(jsonObj);
-computeLayout(nodeTree);
-console.log(nodeTree);
 
-function createRenderTree(node, style) {
+var createRenderTree = function createRenderTree(node, style) {
   var _this = this;
 
-  // 记录每一个标签应该用什么类来处理
-  var constructorMap = _defineProperty({
-    view: Block,
-    text: Text,
-    image: Block
-  }, '!xml', Block);
-
-  var _constructor = constructorMap[node.name];
-  var children = node.children || [];
   var attr = node.attr || {};
-  var id = attr.id || ''; // 实例化标签需要的参数，主要为收集样式和属性
-
+  var id = attr.id || '';
   var args = Object.keys(attr).reduce(function (obj, key) {
     var value = attr[key];
     var attribute = key;
 
     if (key === 'id') {
-      obj.style = Object.assign(obj.style || {}, style[id] || {});
+      obj.style = _objectSpread2(_objectSpread2({}, obj.style), style[id]);
       return obj;
     }
 
     if (key === 'class') {
       obj.style = value.split(/\s+/).reduce(function (res, oneClass) {
-        return Object.assign(res, style[oneClass]);
+        return _objectSpread2(_objectSpread2({}, res), style[oneClass]);
       }, obj.style || {});
       return obj;
     }
@@ -484,17 +599,159 @@ function createRenderTree(node, style) {
     }
 
     return obj;
-  }, {}); // 用于后续元素查询
-
+  }, {});
   args.idName = id;
   args.className = attr["class"] || '';
-  args.text = node['#text'] || '';
-  var element = new _constructor(args);
-  element.root = this; // 递归处理
-
-  children.forEach(function (childNode) {
+  var NODE = nodeMap[node.name];
+  var element = new NODE(args);
+  element.root = this;
+  node.children.forEach(function (childNode) {
     var childElement = createRenderTree.call(_this, childNode, style);
     element.add(childElement);
   });
   return element;
+};
+
+function layoutHelper(children) {
+  var _this2 = this;
+
+  children.forEach(function (child) {
+    var parentBox = child.parent.layoutBox;
+    child.layoutBox = {
+      x: ~~parentBox.x + child.layout.left,
+      y: ~~parentBox.y + child.layout.top,
+      width: child.layout.width,
+      height: child.layout.height
+    };
+    layoutHelper.call(_this2, child.children);
+  });
 }
+
+var Layout = /*#__PURE__*/function (_Element) {
+  _inherits(Layout, _Element);
+
+  var _super = _createSuper(Layout);
+
+  function Layout() {
+    var _this3;
+
+    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+        style = _ref.style,
+        name = _ref.name;
+
+    _classCallCheck(this, Layout);
+
+    _this3 = _super.call(this, {
+      style: style,
+      id: 0,
+      name: name
+    });
+    _this3.renderContext = null;
+    _this3.renderport = {};
+    _this3.viewport = {};
+    _this3.__cost_time = {};
+    _this3.hasViewPortSet = false;
+    _this3.layoutBox = {
+      x: 0,
+      y: 0
+    };
+    return _this3;
+  }
+
+  _createClass(Layout, [{
+    key: "init",
+    value: function init(template, style) {
+      var start = new Date();
+      var parseConfig = {
+        attributeNamePrefix: "",
+        attrNodeName: "attr",
+        //default is 'false'
+        textNodeName: "#text",
+        ignoreAttributes: false,
+        ignoreNameSpace: true,
+        allowBooleanAttributes: true,
+        parseNodeValue: false,
+        parseAttributeValue: false,
+        trimValues: true,
+        parseTrueNumberOnly: false
+      };
+      var jsonObj = parser.parse(template, parseConfig, true);
+      var xmlTree = jsonObj.children[0];
+      this.__cost_time.xmlTree = new Date() - start; // XML树生成渲染树
+
+      var renderTree = createRenderTree.call(this, xmlTree, style);
+      this.__cost_time.renderTree = new Date() - start;
+      this.add(renderTree); // 计算布局树
+
+      computeLayout(renderTree);
+      this.__cost_time.layoutTree = new Date() - start;
+      var rootEle = this.children[0];
+
+      if (rootEle.style.width === undefined || rootEle.style.height === undefined) {
+        console.error('Please set width and height property for root element');
+      } else {
+        this.renderport.width = rootEle.style.width;
+        this.renderport.height = rootEle.style.height;
+      }
+
+      this.state = STATE.INITED;
+      layoutHelper.call(this, this.children);
+    }
+  }, {
+    key: "layout",
+    value: function layout(context) {
+      this.renderContext = context;
+
+      if (this.renderContext) {
+        this.renderContext.clearRect(0, 0, this.renderport.width, this.renderport.height);
+      }
+    }
+  }, {
+    key: "initRepaint",
+    value: function initRepaint() {// this.on('repaint', () => {
+      //   this.repaint();
+      // });
+    }
+  }]);
+
+  return Layout;
+}(Element);
+
+var layout = new Layout({
+  style: {
+    width: 0,
+    height: 0
+  },
+  name: 'layout'
+});
+var xmlData = "\n<view id=\"container\">\n  <view id=\"testText\" class=\"redText\" value=\"hello canvas\">adsdf</view>\n  <view class=\"t2\">\u8FD9\u662Ft2</view>\n</view>\n";
+var style = {
+  container: {
+    diplay: 'flex',
+    flexDirection: 'row',
+    width: 200,
+    height: 200,
+    margin: 8,
+    padding: 2,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderRadius: 8
+  },
+  testText: {
+    flex: 1,
+    color: '#ff0000',
+    fontSize: 30,
+    textAlign: 'center'
+  },
+  t2: {
+    flex: 1,
+    position: 'absolute',
+    top: 20,
+    left: 20
+  }
+};
+layout.init(xmlData, style);
+console.log(layout);
+
+export default layout;
+export { STATE };

@@ -1,8 +1,8 @@
 import measureText from '../utils/measureText'
 import Node from './Node';
-import View from './View';
+import Element from './Element';
 
-const defaultTextProps = {
+const defaultTextStyle = {
   paddingLeft: 0,
   paddingRight: 0,
   paddingTop: 0,
@@ -25,53 +25,70 @@ const defaultTextProps = {
   broderRadius: 0
 }
 
-export default class Text extends Node {
-  constructor(textObj) {
-    super()
-
-    this.textObj = {
-      ...defaultTextProps,
-      ...textObj
-    };
-    
-    const textRect = measureText(this.textObj)
-    this.textObj.width = textRect.width
-    this.textObj.height = textRect.height
-
-    // 内容盒子
-    const contentBlock = {
-      x: this.textObj.marginLeft,
-      y: this.textObj.marginTop - this.textObj.paddingTop,
-
-      width: textRect.width
-        + this.textObj.paddingLeft
-        + this.textObj.paddingRight
-        + 2 * textRect.halfLineSpace,
-      height: textRect.height
-        + this.textObj.paddingTop
-        + this.textObj.paddingBottom,
-        
-      borderColor: this.textObj.borderColor,
-      borderWidth: this.textObj.borderWidth,
-      backgroundColor: this.textObj.backgroundColor,
-      broderRadius: this.textObj.broderRadius
-    }
-
-    new View(contentBlock)
-
-    this.textObj.x = this.textObj.marginLeft
-      + this.textObj.paddingLeft
-      + textRect.halfLineSpace
-    this.textObj.y = this.textObj.marginTop
-      - textRect.halfLineSpace
-
-    this.render()
+export default class Text extends Element {
+  constructor({
+    style = {},
+    _text_,
+    idName = '',
+    className = '',
+  }) {
+    super({
+      style: {
+        ...defaultTextStyle,
+        ...style,
+      },
+      idName,
+      className
+    })
+    this._text_ = _text_
+    this.type = 'Text';
   }
-  render() {
+
+  
+
+  render(ctx) {
+    this.ctx = ctx
     this.ctx.save()
-    this.setFont(this.textObj)
-    this.setFillStyle(this.textObj.color)
-    this.ctx.fillText(this.textObj.text, this.textObj.x, this.textObj.y + this.textObj.height)
+    this.setFont(this.style)
+    this.setFillStyle(this.style.color)
+    this.ctx.fillText(this._text_, this.layoutBox.x, this.layoutBox.y + parseInt(this.style.fontSize))
     this.ctx.restore()
   }
 }
+
+  // constructor(textObj) {
+
+    
+  //   const textRect = measureText(this.textObj)
+  //   this.textObj.width = textRect.width
+  //   this.textObj.height = textRect.height
+
+  //   // 内容盒子
+  //   const contentBlock = {
+  //     x: this.textObj.marginLeft,
+  //     y: this.textObj.marginTop - this.textObj.paddingTop,
+
+  //     width: textRect.width
+  //       + this.textObj.paddingLeft
+  //       + this.textObj.paddingRight
+  //       + 2 * textRect.halfLineSpace,
+  //     height: textRect.height
+  //       + this.textObj.paddingTop
+  //       + this.textObj.paddingBottom,
+        
+  //     borderColor: this.textObj.borderColor,
+  //     borderWidth: this.textObj.borderWidth,
+  //     backgroundColor: this.textObj.backgroundColor,
+  //     broderRadius: this.textObj.broderRadius
+  //   }
+
+  //   new View(contentBlock)
+
+  //   this.textObj.x = this.textObj.marginLeft
+  //     + this.textObj.paddingLeft
+  //     + textRect.halfLineSpace
+  //   this.textObj.y = this.textObj.marginTop
+  //     - textRect.halfLineSpace
+
+  //   this.render()
+  // }

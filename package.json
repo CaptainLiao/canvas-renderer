@@ -5,10 +5,8 @@
   "private": true,
   "scripts": {
     "start": "webpack --watch --config webpack.config.js",
-    "build:web": "rollup -c script/rollup.config.web.js",
-    "dev:web": "rollup -w -c script/rollup.config.web.js",
-    "build:wx": "rollup -c script/rollup.config.wechat.js",
-    "dev:wx": "rollup -w -c script/rollup.config.wechat.js",
+    "build": "rollup -c script/rollup.config.web.js",
+    "dev": "rollup -w -c script/rollup.config.web.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

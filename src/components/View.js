@@ -20,26 +20,27 @@ export default class View extends Element {
   }
 
 
-  render() {
-    const radius = this.blockObj.broderRadius || 0
+  render(ctx) {
+    this.ctx = ctx;
+    const radius = this.style.borderRadius || 0
 
     //圆的直径必然要小于矩形的宽高		
-    if(2*radius>this.blockObj.width || 2*radius>this.blockObj.height) return console.error('圆的直径必然要大于矩形的宽高')
+    if(2*radius>this.layoutBox.width || 2*radius>this.layoutBox.height) return console.error('圆的直径必然要大于矩形的宽高')
 
     this.ctx.save()
-    this.ctx.translate(this.blockObj.x, this.blockObj.y)
-    this.setLineWidth(this.blockObj.borderWidth)
+    this.ctx.translate(this.layoutBox.x, this.layoutBox.y)
+    this.setLineWidth(this.style.borderWidth)
 
     //绘制圆角矩形的各个边
-    drawRoundRectPath(this.ctx, this.blockObj.width, this.blockObj.height, radius)
+    drawRoundRectPath(this.ctx, this.layoutBox.width, this.layoutBox.height, radius)
     
-    if (this.blockObj.borderColor) {
-      this.setStrokeStyle(this.blockObj.borderColor)
+    if (this.style.borderColor) {
+      this.setStrokeStyle(this.style.borderColor)
       this.ctx.stroke();
     }
 
-    if (this.blockObj.backgroundColor) {
-      this.setFillStyle(this.blockObj.backgroundColor)
+    if (this.style.backgroundColor) {
+      this.setFillStyle(this.style.backgroundColor)
       this.ctx.fill()
     }
 

@@ -60,6 +60,7 @@ const createRenderTree = function (node, style) {
 
   args.idName = id
   args.className = attr.class || ''
+  args._text_ = node._text_
 
   const NODE = nodeMap[node.name];
   const element = new NODE(args)
@@ -118,7 +119,7 @@ class Layout extends Element {
     const parseConfig = {
       attributeNamePrefix: "",
       attrNodeName: "attr", //default is 'false'
-      textNodeName: "#text",
+      textNodeName: "_text_",
       ignoreAttributes: false,
       ignoreNameSpace: true,
       allowBooleanAttributes: true,
@@ -130,7 +131,6 @@ class Layout extends Element {
 
     const jsonObj = parser.parse(template, parseConfig, true);
     const xmlTree = jsonObj.children[0];
-
     this.__cost_time.xmlTree = new Date() - start;
 
     // XML树生成渲染树
@@ -151,28 +151,25 @@ class Layout extends Element {
       this.renderport.height = rootEle.style.height;
     }
 
-    this.state = STATE.INITED;
-
-    layoutHelper.call(this, this.children);
+    layoutHelper.call(this, this.children)
+    
+    return this
   }
 
-  layout(context) {
-    this.renderContext = context;
+  render(ctx) {
+    this.renderContext = ctx;
 
     if (this.renderContext) {
       this.renderContext.clearRect(0, 0, this.renderport.width, this.renderport.height);
     }
-
-    
-    
+    const renderChildren = children => {
+      children.forEach(child => {
+        child.render(ctx)
+        return renderChildren(child.children)
+      })
+    }
+    renderChildren(this.children)
   }
-
-  initRepaint() {
-    // this.on('repaint', () => {
-    //   this.repaint();
-    // });
-  }
-
 }
 
 let layout = new Layout({
@@ -189,8 +186,8 @@ export default layout;
 
 let xmlData = `
 <view id="container">
+  <text class="t2" value="这是t2 value">这是t2</text>
   <view id="testText" class="redText" value="hello canvas">adsdf</view>
-  <view class="t2">这是t2</view>
 </view>
 `;
 
@@ -202,25 +199,36 @@ const style = {
     height: 200,
     margin: 8,
     padding: 2,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ccc',
     borderWidth: 1,
     borderRadius: 8
   },
-  testText: {
-    flex: 1,
-    color: '#ff0000',
-    fontSize: 30,
-    textAlign: 'center',
-  },
   t2: {
     flex: 1,
-    position: 'absolute',
-    top: 20,
-    left: 20
-  }
+    backgroundColor: 'rgb(0, 120, 255)'
+  },
+  testText: {
+    flex: 1,
+    backgroundColor: 'rgba(237,241,247,1)',
+    borderRadius: 30,
+    textAlign: 'center',
+  },
 }
 
+const canvas = document.querySelector('#canvas')
+
+const ctx = canvas.getContext('2d')
+const dpr = window.devicePixelRatio
+const w = window.innerWidth
+const h = window.innerHeight
+canvas.width = w * dpr
+canvas.height = h * dpr
+canvas.style.backgroundColor = '#eee'
+ctx.scale(dpr, dpr)
+
 layout.init(xmlData, style)
+  .render(ctx)
+
 
 
 console.log(layout);
