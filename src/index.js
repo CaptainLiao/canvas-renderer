@@ -1,6 +1,7 @@
 import {
   Text,
   View,
+  canvasRenderer,
   Element
 } from './components'
 
@@ -75,7 +76,7 @@ const createRenderTree = function (node, style) {
   return element;
 }
 
-function layoutHelper(children) {
+function setLayoutBox(children) {
   children.forEach(child => {
     const parentBox = child.parent.layoutBox
     child.layoutBox = {
@@ -85,7 +86,7 @@ function layoutHelper(children) {
       height: child.layout.height
     }
 
-    layoutHelper.call(this, child.children)
+    setLayoutBox.call(this, child.children)
   })
 }
 
@@ -151,12 +152,13 @@ class Layout extends Element {
       this.renderport.height = rootEle.style.height;
     }
 
-    layoutHelper.call(this, this.children)
+    setLayoutBox.call(this, this.children)
     
     return this
   }
 
   render(ctx) {
+    canvasRenderer(ctx);
     this.renderContext = ctx;
 
     if (this.renderContext) {
@@ -186,15 +188,17 @@ export default layout;
 
 let xmlData = `
 <view id="container">
-  <text class="t2" value="这是t2 value">这是t2</text>
-  <view id="testText" class="redText" value="hello canvas">adsdf</view>
+  <view class="t2" id="t2">
+    <text class="t3" value="这是t2 value">这是t2廖大爷这是t2廖大爷这是t2廖大爷这是t2廖大爷</text>
+  </view>
+  <view class="redText" value="hello canvas">adsdf</view>
 </view>
 `;
 
 const style = {
   container: {
     diplay: 'flex',
-    flexDirection: 'row',
+    flexDirection: 'column',
     width: 200,
     height: 200,
     margin: 8,
@@ -205,12 +209,21 @@ const style = {
   },
   t2: {
     flex: 1,
-    backgroundColor: 'rgb(0, 120, 255)'
+    borderWidth: 1,
+    borderRadius: 8,
   },
-  testText: {
+  t3: {
+    backgroundColor: 'rgb(0, 120, 255)',
+    borderWidth: 1,
+    borderRadius: 8,
+    borderTopColor: '#ffffff',
+  },
+  redText: {
+    marginTop: 20,
     flex: 1,
+
     backgroundColor: 'rgba(237,241,247,1)',
-    borderRadius: 30,
+    borderRadius: 6,
     textAlign: 'center',
   },
 }
@@ -229,6 +242,5 @@ ctx.scale(dpr, dpr)
 layout.init(xmlData, style)
   .render(ctx)
 
-
-
 console.log(layout);
+

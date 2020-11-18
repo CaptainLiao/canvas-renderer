@@ -2,8 +2,6 @@ import {
   scalableStyles
 } from './style.js';
 
-import Node from './Node';
-
 let uuid = 0;
 let dpr = 1;
 
@@ -26,7 +24,12 @@ function getRgba(hex, opacity) {
   return `rgba(${rgbObj.r}, ${rgbObj.g}, ${rgbObj.b}, ${opacity})`;
 }
 
-export default class Element extends Node{
+const defaultStyle = {
+  diplay: 'flex',
+  flexDirection: 'row',
+}
+
+export default class Element{
   constructor({
     style = {},
     props = {},
@@ -34,10 +37,11 @@ export default class Element extends Node{
     className = '',
     id = ++uuid,
   }) {
-    super();
-
     this.id = id;
-    this.style = style;
+    this.style = {
+      ...defaultStyle,
+      ...style,
+    };
     this.props = props;
     this.idName = idName;
     this.className = className;
@@ -70,8 +74,7 @@ export default class Element extends Node{
   // 子类填充实现
   repaint() {}
 
-  // 子类填充实现
-  insert() {}
+  render() {}
 
   checkNeedRender() {
     return true;
@@ -90,15 +93,16 @@ export default class Element extends Node{
   }
 
   // 方便子类实现borderRadius
-  roundRectPath(ctx, layoutBox) {
+  roundRectPath() {
+    const ctx = this.ctx
     const style = this.style
-    const box = layoutBox || this.layoutBox
+    const box = this.layoutBox
 
     const w = box.width
     const h = box.height
     const r = style.borderRadius
-    const x = box.absoluteX
-    const y = box.absoluteY
+    const x = box.x
+    const y = box.y
 
     ctx.moveTo(x + r, y)
     ctx.arcTo(x + w, y, x + w, y + h, r)
@@ -109,97 +113,133 @@ export default class Element extends Node{
     ctx.clip()
   }
 
-  renderBorder(ctx, layoutBox) {
+  renderBox() {
+    const ctx = this.ctx
     const style = this.style
-
-    if (style.borderRadius) {
-      this.roundRectPath(ctx, layoutBox);
-    }
-
+    
     ctx.save();
 
-    const box = layoutBox || this.layoutBox;
+    const box = this.layoutBox;
     const borderWidth = style.borderWidth || 0;
-    const borderLeftWidth = style.borderLeftWidth || 0;
-    const borderRightWidth = style.borderRightWidth || 0;
-    const borderTopWidth = style.borderTopWidth || 0;
-    const borderBottomWidth = style.borderBottomWidth || 0;
+    const borderLeftWidth = style.borderLeftWidth === 0 ? 0 : borderWidth;
+    const borderRightWidth = style.borderRightWidth === 0 ? 0 : borderWidth;
+    const borderTopWidth = style.borderTopWidth === 0 ? 0 : borderWidth;
+    const borderBottomWidth = style.borderBottomWidth === 0 ? 0 : borderWidth;
     const radius = style.borderRadius || 0;
     const borderColor = style.borderColor;
-    const drawX = box.absoluteX;
-    const drawY = box.absoluteY;
-
-    ctx.beginPath();
+    const drawX = box.x;
+    const drawY = box.y;
 
     if (borderWidth && borderColor) {
       ctx.setLineWidth(borderWidth)
       ctx.setStrokeStyle(borderColor)
-      ctx.strokeRect(drawX, drawY, box.width, box.height)
     }
 
-    if (borderTopWidth && (borderColor || style.borderTopColor)) {
-      ctx.setLineWidth(borderTopWidth)
-      ctx.setStrokeStyle(style.borderTopColor || borderColor)
+    const borderTopColor = style.borderTopColor
 
-      ctx.moveTo(
-        radius ? drawX + radius : drawX,
-        drawY + borderTopWidth / 2
-      );
-
-      ctx.lineTo(
-        radius ? drawX + box.width - radius : drawX + box.width,
-        drawY + borderTopWidth / 2
-      );
+    if (borderTopWidth && borderTopColor) {
+      __renderHelper.call(this, () => {
+        ctx.setLineWidth(borderTopWidth)
+        ctx.setStrokeStyle(borderTopColor)
+  
+        ctx.moveTo(
+          radius ? drawX + radius : drawX,
+          drawY + borderTopWidth / 2
+        );
+  
+        ctx.lineTo(
+          radius ? drawX + box.width - radius : drawX + box.width,
+          drawY + borderTopWidth / 2
+        );
+        ctx.stroke()
+      })
     }
 
-    if (borderBottomWidth && (borderColor || style.borderBottomColor)) {
-      ctx.lineWidth = borderBottomWidth;
-      ctx.strokeStyle = style.borderBottomColor || borderColor;
-
-      ctx.moveTo(
-        radius ? drawX + radius : drawX,
-        drawY + box.height - borderBottomWidth / 2
-      );
-
-      ctx.lineTo(
-        radius ? drawX + box.width - radius : drawX + box.width,
-        drawY + box.height - borderBottomWidth / 2
-      )
+    const borderBottomColor = style.borderBottomColor || borderColor
+    if (borderBottomWidth && borderBottomColor) {
+      __renderHelper.call(this, () => {
+        ctx.setLineWidth(borderBottomWidth)
+        ctx.setStrokeStyle(borderBottomColor)
+  
+        ctx.moveTo(
+          radius ? drawX + radius : drawX,
+          drawY + box.height - borderBottomWidth / 2
+        );
+  
+        ctx.lineTo(
+          radius ? drawX + box.width - radius : drawX + box.width,
+          drawY + box.height - borderBottomWidth / 2
+        )
+        ctx.stroke()
+      })
     }
 
-    if (borderLeftWidth && (borderColor || style.borderLeftColor)) {
-      ctx.lineWidth = borderLeftWidth;
-      ctx.strokeStyle = style.borderLeftColor || borderColor;
-
-      ctx.moveTo(
-        drawX + borderLeftWidth / 2,
-        radius ? drawY + radius : drawY,
-      );
-
-      ctx.lineTo(
-        drawX + borderLeftWidth / 2,
-        radius ? drawY + box.height - radius : drawY + box.height,
-      )
+    const borderLeftColor = style.borderLeftColor || borderColor
+    if (borderLeftWidth && borderLeftColor) {
+      __renderHelper.call(this, () => {
+        ctx.setLineWidth(borderLeftWidth)
+        ctx.setStrokeStyle(borderLeftColor)
+  
+        ctx.moveTo(
+          drawX + borderLeftWidth / 2,
+          radius ? drawY + radius : drawY,
+        );
+  
+        ctx.lineTo(
+          drawX + borderLeftWidth / 2,
+          radius ? drawY + box.height - radius : drawY + box.height,
+        )
+        ctx.stroke()
+      })
     }
 
-    if (borderRightWidth && (borderColor || style.borderRightColor)) {
-      ctx.lineWidth = borderRightWidth;
-      ctx.strokeStyle = style.borderRightColor || borderColor;
-
-      ctx.moveTo(
-        drawX + box.width - borderRightWidth / 2,
-        radius ? drawY + radius : drawY,
-      );
-
-      ctx.lineTo(
-        drawX + box.width - borderRightWidth / 2,
-        radius ? drawY + box.height - radius : drawY + box.height,
-      )
+    const borderRightColor = style.borderRightColor || borderColor
+    if (borderRightWidth && borderRightColor) {
+      __renderHelper.call(this, () => {
+        ctx.setLineWidth(borderRightWidth)
+        ctx.setStrokeStyle(borderRightColor)
+  
+        ctx.moveTo(
+          drawX + box.width - borderRightWidth / 2,
+          radius ? drawY + radius : drawY,
+        );
+  
+        ctx.lineTo(
+          drawX + box.width - borderRightWidth / 2,
+          radius ? drawY + box.height - radius : drawY + box.height,
+        )
+        ctx.stroke()
+      })
     }
-
-    ctx.closePath();
-    ctx.stroke();
 
     ctx.restore();
   }
+
+  renderBackground() {
+    if (this.style.backgroundColor) {
+      const ctx = this.ctx
+      
+      ctx.save();
+      ctx.beginPath();
+      this.roundRectPath()
+
+      this.ctx.setFillStyle(this.style.backgroundColor)
+
+      ctx.closePath();
+      
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+}
+
+function __renderHelper(fn) {
+  const ctx = this.ctx
+  ctx.save();
+  ctx.beginPath();
+  
+  fn(ctx)
+
+  ctx.closePath();
+  ctx.restore();
 }
