@@ -188,10 +188,8 @@ export default layout;
 
 let xmlData = `
 <view id="container">
-  <view class="t2" id="t2">
-    <text class="t3" value="这是t2 value">这是t2廖大爷这是t2廖大爷这是t2廖大爷这是t2廖大爷</text>
-  </view>
-  <view class="redText" value="hello canvas">adsdf</view>
+  <text class="t3" value="这是t2 value">这是t2廖大爷这是t2廖大爷这是t2廖大爷这是t2廖大爷</text>
+  <view class="redText"></view>
 </view>
 `;
 
@@ -204,19 +202,17 @@ const style = {
     margin: 8,
     padding: 2,
     backgroundColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 8
+
+    borderRadius: 12
   },
   t2: {
     flex: 1,
-    borderWidth: 1,
-    borderRadius: 8,
   },
   t3: {
     backgroundColor: 'rgb(0, 120, 255)',
-    borderWidth: 1,
-    borderRadius: 8,
-    borderTopColor: '#ffffff',
+
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
   },
   redText: {
     marginTop: 20,

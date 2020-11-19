@@ -2,16 +2,6 @@ import measureText from '../utils/measureText'
 import Element from './Element';
 
 const defaultTextStyle = {
-  paddingLeft: 0,
-  paddingRight: 0,
-  paddingTop: 0,
-  paddingBottom: 0,
-
-  marginTop: 0,
-  marginBottom: 0,
-  marginLeft: 0,
-  marginRight: 0,
-
   fontSize: '12px',
   lineHeight: 14,
   fontFamily: `-apple-system, BlinkMacSystemFont, "PingFang SC", "PingFangSC",\
@@ -19,10 +9,6 @@ const defaultTextStyle = {
   text: '',
 
   color: '#000',
-  backgroundColor: '',
-  borderColor: '#000',
-  borderWidth: 0,
-  borderRadius: 0
 }
 
 let context = null;
@@ -67,13 +53,18 @@ export default class Text extends Element {
 
     ctx.save()
 
-    this.renderBackground()
     this.renderBox()
 
 
     ctx.setFont(this.style)
     ctx.setFillStyle(this.style.color)
-    ctx.fillText(this.text, this.layoutBox.x, this.layoutBox.y + parseInt(this.style.fontSize))
+    const borderLeftWidth = this.style.borderLeftWidth || this.style.borderWidth
+    ctx.fillText(
+      this.text, 
+      this.layoutBox.x + this.style.borderWidth/2, 
+      this.layoutBox.y + this.style.borderWidth/2 + 
+      parseInt(this.style.fontSize)
+    )
 
     ctx.restore()
   }

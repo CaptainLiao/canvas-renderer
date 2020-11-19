@@ -1,5 +1,6 @@
 import {
-  scalableStyles
+  defaultStyle,
+  parseStyle
 } from './style.js';
 
 let uuid = 0;
@@ -24,11 +25,6 @@ function getRgba(hex, opacity) {
   return `rgba(${rgbObj.r}, ${rgbObj.g}, ${rgbObj.b}, ${opacity})`;
 }
 
-const defaultStyle = {
-  diplay: 'flex',
-  flexDirection: 'row',
-}
-
 export default class Element{
   constructor({
     style = {},
@@ -38,10 +34,10 @@ export default class Element{
     id = ++uuid,
   }) {
     this.id = id;
-    this.style = {
+    this.style = parseStyle({
       ...defaultStyle,
       ...style,
-    };
+    });
     this.props = props;
     this.idName = idName;
     this.className = className;
@@ -105,6 +101,7 @@ export default class Element{
     const y = box.y
 
     ctx.moveTo(x + r, y)
+
     ctx.arcTo(x + w, y, x + w, y + h, r)
     ctx.arcTo(x + w, y + h, x, y + h, r)
     ctx.arcTo(x, y + h, x, y, r)
@@ -114,132 +111,94 @@ export default class Element{
   }
 
   renderBox() {
+    // 从左上角开始，顺时针画一个盒子
     const ctx = this.ctx
     const style = this.style
     
     ctx.save();
+    ctx.beginPath();
 
-    const box = this.layoutBox;
-    const borderWidth = style.borderWidth || 0;
-    const borderLeftWidth = style.borderLeftWidth === 0 ? 0 : borderWidth;
-    const borderRightWidth = style.borderRightWidth === 0 ? 0 : borderWidth;
-    const borderTopWidth = style.borderTopWidth === 0 ? 0 : borderWidth;
-    const borderBottomWidth = style.borderBottomWidth === 0 ? 0 : borderWidth;
-    const radius = style.borderRadius || 0;
-    const borderColor = style.borderColor;
+    const box = this.layoutBox
+    const borderLeftWidth = style.borderLeftWidth
+    const borderRightWidth = style.borderRightWidth
+    const borderTopWidth = style.borderTopWidth
+    const borderBottomWidth = style.borderBottomWidth
+    const borderColor = style.borderColor
     const drawX = box.x;
     const drawY = box.y;
 
-    if (borderWidth && borderColor) {
-      ctx.setLineWidth(borderWidth)
-      ctx.setStrokeStyle(borderColor)
-    }
-
-    const borderTopColor = style.borderTopColor
-
+    const borderTopRightRadius = style.borderTopRightRadius
+    let _x = drawX + box.width - borderTopRightRadius
+    let _y = drawY + borderTopWidth / 2
+    ctx.moveTo(drawX + (style.borderTopLeftRadius), _y);
+    ctx.lineTo(_x, _y);
+    // 上右圆角
+    ctx.arc(_x, _y + borderTopRightRadius, borderTopRightRadius, 3/2 * Math.PI, 0, false);
+    const borderTopColor = style.borderTopColor || borderColor
     if (borderTopWidth && borderTopColor) {
-      __renderHelper.call(this, () => {
+      __renderHelper.call(this, (ctx) => {
         ctx.setLineWidth(borderTopWidth)
         ctx.setStrokeStyle(borderTopColor)
-  
-        ctx.moveTo(
-          radius ? drawX + radius : drawX,
-          drawY + borderTopWidth / 2
-        );
-  
-        ctx.lineTo(
-          radius ? drawX + box.width - radius : drawX + box.width,
-          drawY + borderTopWidth / 2
-        );
         ctx.stroke()
       })
     }
 
-    const borderBottomColor = style.borderBottomColor || borderColor
-    if (borderBottomWidth && borderBottomColor) {
-      __renderHelper.call(this, () => {
-        ctx.setLineWidth(borderBottomWidth)
-        ctx.setStrokeStyle(borderBottomColor)
-  
-        ctx.moveTo(
-          radius ? drawX + radius : drawX,
-          drawY + box.height - borderBottomWidth / 2
-        );
-  
-        ctx.lineTo(
-          radius ? drawX + box.width - radius : drawX + box.width,
-          drawY + box.height - borderBottomWidth / 2
-        )
-        ctx.stroke()
-      })
-    }
-
-    const borderLeftColor = style.borderLeftColor || borderColor
-    if (borderLeftWidth && borderLeftColor) {
-      __renderHelper.call(this, () => {
-        ctx.setLineWidth(borderLeftWidth)
-        ctx.setStrokeStyle(borderLeftColor)
-  
-        ctx.moveTo(
-          drawX + borderLeftWidth / 2,
-          radius ? drawY + radius : drawY,
-        );
-  
-        ctx.lineTo(
-          drawX + borderLeftWidth / 2,
-          radius ? drawY + box.height - radius : drawY + box.height,
-        )
-        ctx.stroke()
-      })
-    }
-
+    const borderBottomRightRadius = style.borderBottomRightRadius
+    _x = drawX + box.width
+    _y = drawY + box.height - borderBottomRightRadius - borderRightWidth / 2
+    ctx.lineTo(_x, _y);
+    // 下右圆角
+    ctx.arc(_x - borderBottomRightRadius, _y, borderBottomRightRadius, 0, 1/2 * Math.PI, false);
     const borderRightColor = style.borderRightColor || borderColor
     if (borderRightWidth && borderRightColor) {
       __renderHelper.call(this, () => {
         ctx.setLineWidth(borderRightWidth)
         ctx.setStrokeStyle(borderRightColor)
-  
-        ctx.moveTo(
-          drawX + box.width - borderRightWidth / 2,
-          radius ? drawY + radius : drawY,
-        );
-  
-        ctx.lineTo(
-          drawX + box.width - borderRightWidth / 2,
-          radius ? drawY + box.height - radius : drawY + box.height,
-        )
+        ctx.stroke()
+      })
+    }
+          
+    const borderBottomLeftRadius = style.borderBottomLeftRadius
+    _x = drawX + borderBottomLeftRadius + borderLeftWidth / 2
+    _y = drawY + box.height - borderBottomWidth / 2
+    ctx.lineTo(_x, _y);
+    // 下左圆角
+    ctx.arc(_x, _y - borderBottomLeftRadius, borderBottomLeftRadius, 1/2 * Math.PI, Math.PI, false);
+    const borderBottomColor = style.borderBottomColor || borderColor
+    if (borderBottomWidth && borderBottomColor) {
+      __renderHelper.call(this, () => {
+        ctx.setLineWidth(borderBottomWidth)
+        ctx.setStrokeStyle(borderBottomColor)
+        ctx.stroke()
+      })
+    }
+      
+    const borderTopLeftRadius = style.borderTopLeftRadius
+    _x =  drawX + borderLeftWidth / 2
+    _y = drawY + borderTopLeftRadius + borderTopWidth / 2
+    ctx.lineTo(_x, drawY + box.height - (style.borderBottomLeftRadius))
+    // 上左圆角
+    ctx.arc(_x + borderTopLeftRadius, _y, borderTopLeftRadius, Math.PI, 1.5 * Math.PI, false)
+    const borderLeftColor = style.borderLeftColor || borderColor
+    if (borderLeftWidth && borderLeftColor) {
+      __renderHelper.call(this, () => {
+        ctx.setLineWidth(borderLeftWidth)
+        ctx.setStrokeStyle(borderLeftColor)
         ctx.stroke()
       })
     }
 
-    ctx.restore();
-  }
-
-  renderBackground() {
     if (this.style.backgroundColor) {
-      const ctx = this.ctx
-      
-      ctx.save();
-      ctx.beginPath();
-      this.roundRectPath()
-
-      this.ctx.setFillStyle(this.style.backgroundColor)
-
-      ctx.closePath();
-      
-      ctx.fill();
-      ctx.restore();
+      ctx.setFillStyle(this.style.backgroundColor)
+      ctx.fill()
     }
+    ctx.restore();
   }
 }
 
 function __renderHelper(fn) {
   const ctx = this.ctx
   ctx.save();
-  ctx.beginPath();
-  
   fn(ctx)
-
-  ctx.closePath();
   ctx.restore();
 }

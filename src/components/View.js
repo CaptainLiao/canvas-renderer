@@ -24,7 +24,6 @@ export default class View extends Element {
     this.ctx = ctx;
     
     ctx.save()
-    this.renderBackground()
     this.renderBox()
 
     ctx.restore()
