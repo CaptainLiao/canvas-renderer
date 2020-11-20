@@ -5,6 +5,9 @@ export default function (ctx){
       ctx.font = `${t.fontSize} ${t.fontFamily}`
       
     },
+    setTextBaseline(textBaseline) {
+      ctx.textBaseline = textBaseline
+    },
     setFillStyle(fillStyle) {
       ctx.fillStyle = fillStyle
     },

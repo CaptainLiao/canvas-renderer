@@ -5,6 +5,8 @@ import {
   Element
 } from './components'
 
+import measureText from './utils/measureText'
+
 export const STATE = {
   "UNINIT": "UNINIT",
   "INITED": "INITED",
@@ -83,7 +85,7 @@ function setLayoutBox(children) {
       x: ~~parentBox.x + child.layout.left,
       y: ~~parentBox.y + child.layout.top,
       width: child.layout.width,
-      height: child.layout.height
+      height: child.layout.height,
     }
 
     setLayoutBox.call(this, child.children)
@@ -131,17 +133,25 @@ class Layout extends Element {
     }
 
     const jsonObj = parser.parse(template, parseConfig, true);
-    const xmlTree = jsonObj.children[0];
+    this.__xmlTree = jsonObj.children[0];
+    console.log(jsonObj.children);
+    
+    this.__style = style
     this.__cost_time.xmlTree = new Date() - start;
 
     // XML树生成渲染树
-    const renderTree = createRenderTree.call(this, xmlTree, style);
+    const renderTree = createRenderTree.call(this, this.__xmlTree, this.__style);
     this.__cost_time.renderTree = new Date() - start;
-    this.add(renderTree);
-
     // 计算布局树
     computeLayout(renderTree);
     this.__cost_time.layoutTree = new Date() - start;
+
+    // TODO: 优化文字换行的问题
+    const renderTree2 = createRenderTree.call(this, this.__xmlTree, this.__style)
+    reCalculate([renderTree2], [renderTree])
+    computeLayout(renderTree2);
+
+    this.add(renderTree2);
 
     const rootEle = this.children[0];
 
@@ -174,6 +184,52 @@ class Layout extends Element {
   }
 }
 
+function reCalculate(list, layoutList) {
+  list.forEach((child, index) => {
+    // 处理文字换行
+    if (child.type === "Text") {
+      const currentLayoutNode = layoutList[index]
+      const parent = currentLayoutNode.parent
+      const contentWidth = getContentWidth(parent)
+        - child.style.marginLeft
+        - child.style.marginRight
+        - child.style.borderLeftWidth
+        - child.style.borderRightWidth
+
+      let lineIndex = 1
+      let lineText = ''
+      for (let i = 0; i < child.text.length; i++) {
+        let _layout = measureText({text: lineText + child.text[i], style: child.style})
+        if (_layout.width > contentWidth) {
+          child.__lines.push({text: lineText})
+          lineText = ''
+          lineIndex += 1
+        }
+        lineText += child.text[i]
+      }
+      child.__lines.push({text: lineText})
+
+      child.style.width = Math.min(contentWidth, currentLayoutNode.layout.width)
+        + child.style.borderLeftWidth
+        + child.style.borderRightWidth
+      child.style.height = parseFloat(child.style.lineHeight) * lineIndex
+        + child.style.paddingBottom
+        + child.style.paddingTop
+        + child.style.borderTopWidth
+        + child.style.borderBottomWidth
+    }
+    reCalculate(child.children, layoutList[index].children)
+  })
+}
+
+function getContentWidth(node) {
+  return node.layout.width
+    - node.style.paddingLeft 
+    - node.style.paddingRight
+    - node.style.borderLeftWidth
+    - node.style.borderRightWidth;
+}
+
 let layout = new Layout({
   style: {
     width: 0,
@@ -188,7 +244,7 @@ export default layout;
 
 let xmlData = `
 <view id="container">
-  <text class="t3" value="这是t2 value">这是t2廖大爷这是t2廖大爷这是t2廖大爷这是t2廖大爷</text>
+  <text class="t3" value="这是t2 value">这真的是一条非常长非常长非常 长非常长非常长非常长 非常长非常长非常长非常长的字符串</text>
   <view class="redText"></view>
 </view>
 `;
@@ -205,10 +261,11 @@ const style = {
 
     borderRadius: 12
   },
-  t2: {
-    flex: 1,
-  },
+
   t3: {
+    margin: 10,
+    padding: 6,
+    borderWidth: 14,
     backgroundColor: 'rgb(0, 120, 255)',
 
     borderTopLeftRadius: 10,

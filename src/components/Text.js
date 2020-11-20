@@ -3,11 +3,11 @@ import Element from './Element';
 
 const defaultTextStyle = {
   fontSize: '12px',
-  lineHeight: 14,
+  lineHeight: 12*1.2 + 'px',
   fontFamily: `-apple-system, BlinkMacSystemFont, "PingFang SC", "PingFangSC",\
     "Microsoft YaHei", "Microsoft JhengHei", "Source Han Sans SC", "WenQuanYi Micro Hei", SimSun,sans-serif`,
   text: '',
-
+  textBaseline: 'top',
   color: '#000',
 }
 
@@ -26,25 +26,30 @@ export default class Text extends Element {
       ...style
     }
 
-    let text = _text_
-    if (style.width === undefined) {
-      const r = measureText({
-        text,
-        style
-      })
-      style.width = r.width;
-      style.height = r.height;
-    } else if (style.textOverflow === 'ellipsis') {
-      text = getTextWithEllipsis(style, text);
-    }
-
     super({
       style,
       idName,
       className
     })
 
+    style = this.style
+    let text = _text_
+    if (style.width === undefined) {
+      const r = measureText({
+        text,
+        style
+      })
+      
+      style.width = r.width;
+      style.height = r.height;
+    } else if (style.textOverflow === 'ellipsis') {
+      text = getTextWithEllipsis(style, text);
+    }
+
+
+
     this.text = text
+    this.__lines = []
     this.type = 'Text';
   }
 
@@ -58,66 +63,20 @@ export default class Text extends Element {
 
     ctx.setFont(this.style)
     ctx.setFillStyle(this.style.color)
-    const borderLeftWidth = this.style.borderLeftWidth || this.style.borderWidth
-    ctx.fillText(
-      this.text, 
-      this.layoutBox.x + this.style.borderWidth/2, 
-      this.layoutBox.y + this.style.borderWidth/2 + 
-      parseInt(this.style.fontSize)
-    )
+    ctx.setTextBaseline(this.style.textBaseline)
+
+    let startX = this.layoutBox.x + this.style.borderLeftWidth + this.style.paddingLeft
+    let startY = this.layoutBox.y + this.style.borderTopWidth + this.style.paddingTop
+    this.__lines.forEach((line, index) => {
+      ctx.fillText(
+        line.text, 
+        startX,
+        startY + index * parseFloat(this.style.lineHeight),
+      )
+    })
+
 
     ctx.restore()
-  }
-
-  _calcLine() {
-    const { width: textWidth, height: textHeight } = this.layoutBox
-
-    let { width: parentContentWidth } = this.parent.layoutBox
-    const { width: parentWidth } = this.parent.styles
-
-    // 如果一行宽度够，或者父级宽度是auto
-    if ((parentContentWidth && parentContentWidth >= textWidth)) {
-      this._lines = [{
-        text: this.text,
-        layoutBox: this.layoutBox
-      }]
-    } else {
-      this._lines = []
-      let lineIndex = 1
-      let lineText = ''
-      let _layout = null
-      let lastLayout = null
-      for (let i = 0; i < this.text.length; i++) {
-        _layout = measureText({text: lineText + this.text[i], style: this.style})
-        
-        if (_layout.width > parentContentWidth) {
-          // if (lineIndex >= this.renderStyles.maxLine) {
-          //   // 最大行数限制 以及maxline省略号实现
-          //   lineText = lineText.substring(0, lineText.length - 2) + '...'
-          //   break
-          // }
-          // 超出了
-          this._lines.push({
-            text: lineText,
-            layout: lastLayout
-          })
-          lineText = ''
-          lineIndex += 1
-
-        }
-
-        lineText += this.text[i]
-
-        lastLayout = _layout
-      }
-      this._layout.width = parentContentWidth
-      this._lines.push({
-        text: lineText,
-        layout: measureText({text: lineText, style: this.style})
-      })
-      // 根据lineheihgt更新height
-      this.layoutBox.height = this._lines.length * this.style.lineHeight
-    }
   }
 }
 

@@ -127,10 +127,10 @@ export default class Element{
     const drawX = box.x;
     const drawY = box.y;
 
-    const borderTopRightRadius = style.borderTopRightRadius
-    let _x = drawX + box.width - borderTopRightRadius
+    const borderTopRightRadius = style.borderTopRightRadius || style.borderRadius
+    let _x = drawX + box.width - borderTopRightRadius - borderRightWidth / 2
     let _y = drawY + borderTopWidth / 2
-    ctx.moveTo(drawX + (style.borderTopLeftRadius), _y);
+    ctx.moveTo(drawX + (style.borderTopLeftRadius || style.borderRadius) + borderLeftWidth/2 , _y);
     ctx.lineTo(_x, _y);
     // 上右圆角
     ctx.arc(_x, _y + borderTopRightRadius, borderTopRightRadius, 3/2 * Math.PI, 0, false);
@@ -143,8 +143,8 @@ export default class Element{
       })
     }
 
-    const borderBottomRightRadius = style.borderBottomRightRadius
-    _x = drawX + box.width
+    const borderBottomRightRadius = style.borderBottomRightRadius || style.borderRadius
+    _x = drawX + box.width - borderRightWidth / 2
     _y = drawY + box.height - borderBottomRightRadius - borderRightWidth / 2
     ctx.lineTo(_x, _y);
     // 下右圆角
@@ -158,7 +158,7 @@ export default class Element{
       })
     }
           
-    const borderBottomLeftRadius = style.borderBottomLeftRadius
+    const borderBottomLeftRadius = style.borderBottomLeftRadius || style.borderRadius
     _x = drawX + borderBottomLeftRadius + borderLeftWidth / 2
     _y = drawY + box.height - borderBottomWidth / 2
     ctx.lineTo(_x, _y);
@@ -173,10 +173,10 @@ export default class Element{
       })
     }
       
-    const borderTopLeftRadius = style.borderTopLeftRadius
+    const borderTopLeftRadius = style.borderTopLeftRadius || style.borderRadius
     _x =  drawX + borderLeftWidth / 2
     _y = drawY + borderTopLeftRadius + borderTopWidth / 2
-    ctx.lineTo(_x, drawY + box.height - (style.borderBottomLeftRadius))
+    ctx.lineTo(_x, drawY + box.height - (style.borderBottomLeftRadius || style.borderRadius))
     // 上左圆角
     ctx.arc(_x + borderTopLeftRadius, _y, borderTopLeftRadius, Math.PI, 1.5 * Math.PI, false)
     const borderLeftColor = style.borderLeftColor || borderColor

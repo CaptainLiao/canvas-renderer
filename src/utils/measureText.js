@@ -2,10 +2,13 @@ export default function measureText({
   text = 'm', 
   style,
 }) {
+  
   const tmpDiv = document.createElement('span');
   tmpDiv.innerHTML = text
   tmpDiv.style.fontSize = style.fontSize
   tmpDiv.style.fontFamily = style.fontFamily
+  tmpDiv.style.display = 'inline-block'
+
   if (style.lineHeight) {
     tmpDiv.style.lineHeight = style.lineHeight
   }
@@ -18,8 +21,8 @@ export default function measureText({
   const halfLineSpace = (rect.height - parseInt(style.fontSize)) / 2
   
   return {
-    width: Math.ceil(rect.width),
-    height: rect.height,
+    width: Math.ceil(rect.width) + style.paddingLeft + style.paddingRight,
+    height: rect.height + style.paddingTop + style.paddingBottom,
     halfLineSpace
   }
 }
