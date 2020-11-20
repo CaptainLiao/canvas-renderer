@@ -46,8 +46,6 @@ export default class Text extends Element {
       text = getTextWithEllipsis(style, text);
     }
 
-
-
     this.text = text
     this.__lines = []
     this.type = 'Text';

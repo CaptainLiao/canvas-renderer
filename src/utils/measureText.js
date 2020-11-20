@@ -1,9 +1,9 @@
+const tmpDiv = document.createElement('span');
+
 export default function measureText({
   text = 'm', 
   style,
 }) {
-  
-  const tmpDiv = document.createElement('span');
   tmpDiv.innerHTML = text
   tmpDiv.style.fontSize = style.fontSize
   tmpDiv.style.fontFamily = style.fontFamily
@@ -17,6 +17,7 @@ export default function measureText({
   document.body.appendChild(tmpDiv)
 
   const rect = tmpDiv.getBoundingClientRect()
+  document.body.removeChild(tmpDiv);
   // 半行距
   const halfLineSpace = (rect.height - parseInt(style.fontSize)) / 2
   

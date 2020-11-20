@@ -244,7 +244,7 @@ export default layout;
 
 let xmlData = `
 <view id="container">
-  <text class="t3" value="这是t2 value">这真的是一条非常长非常长非常 长非常长非常长非常长 非常长非常长非常长非常长的字符串</text>
+  <text class="t3" value="这是t2 value">这真的是一条非常长非常长非常 长非常长非常长非常长 非常长非常长非常长非常长的字符串.</text>
   <view class="redText"></view>
 </view>
 `;
@@ -255,24 +255,25 @@ const style = {
     flexDirection: 'column',
     width: 200,
     height: 200,
-    margin: 8,
+    margin: 10,
     padding: 2,
-    backgroundColor: '#ccc',
+    backgroundColor: '#999',
 
-    borderRadius: 12
+    borderRadius: 12,
+    borderWidth: 10
   },
 
   t3: {
     margin: 10,
     padding: 6,
-    borderWidth: 14,
+    borderWidth: 10,
     backgroundColor: 'rgb(0, 120, 255)',
 
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
   redText: {
-    marginTop: 20,
+    marginTop: 10,
     flex: 1,
 
     backgroundColor: 'rgba(237,241,247,1)',
@@ -285,15 +286,43 @@ const canvas = document.querySelector('#canvas')
 
 const ctx = canvas.getContext('2d')
 const dpr = window.devicePixelRatio
-const w = window.innerWidth
-const h = window.innerHeight
-canvas.width = w * dpr
-canvas.height = h * dpr
+const w = 500
+const h = 500
+canvas.width = w*dpr
+canvas.height = h*dpr
+canvas.style.width = `${w}px`
+canvas.style.height = `${h}px`
 canvas.style.backgroundColor = '#eee'
+
 ctx.scale(dpr, dpr)
+
+
 
 layout.init(xmlData, style)
   .render(ctx)
 
 console.log(layout);
+drawGrid(ctx)
+
+
+
+function drawGrid(ctx) {
+  ctx.save()
+  const gap = 10
+  for (let i = 1; i < w/gap; ++i) {
+    ctx.moveTo(i * gap, 0)
+    ctx.lineTo(i*gap, h)
+  }
+  for (let i = 1; i < w/gap; ++i) {
+    ctx.moveTo(0, i*gap)
+    ctx.lineTo(w, i*gap)
+  }
+  for (let i = 0; i < w; i += 2) {
+    ctx.fillText(i*gap*2, i*gap*2 - 6, 10)
+  }
+
+  ctx.strokeStyle = 'rgba(0, 0, 0,.15)'
+  ctx.stroke()
+  ctx.restore()
+}
 
