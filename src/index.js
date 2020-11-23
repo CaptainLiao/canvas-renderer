@@ -266,11 +266,16 @@ const style = {
   t3: {
     margin: 10,
     padding: 6,
-    borderWidth: 10,
+    
     backgroundColor: 'rgb(0, 120, 255)',
 
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
+    borderWidth: 10,
+    borderLeftColor: '#000',
+    borderTopColor: '#fff',
+    borderRightColor: '#000',
+    borderRadius: 10,
+    borderBottomWidth: 6,
+    borderBottomColor: '#fff'
   },
   redText: {
     marginTop: 10,
