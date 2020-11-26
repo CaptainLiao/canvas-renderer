@@ -190,11 +190,13 @@ function reCalculate(list, layoutList) {
     if (child.type === "Text") {
       const currentLayoutNode = layoutList[index]
       const parent = currentLayoutNode.parent
-      const contentWidth = getContentWidth(parent)
-        - child.style.marginLeft
-        - child.style.marginRight
+      child.style.width = parent.layout.width - 2 * currentLayoutNode.layout.left
+
+      const contentWidth = child.style.width
         - child.style.borderLeftWidth
         - child.style.borderRightWidth
+        // - child.style.paddingLeft
+        // - child.style.paddingRight
 
       let lineIndex = 1
       let lineText = ''
@@ -209,9 +211,6 @@ function reCalculate(list, layoutList) {
       }
       child.__lines.push({text: lineText})
 
-      child.style.width = Math.min(contentWidth, currentLayoutNode.layout.width)
-        + child.style.borderLeftWidth
-        + child.style.borderRightWidth
       child.style.height = parseFloat(child.style.lineHeight) * lineIndex
         + child.style.paddingBottom
         + child.style.paddingTop
@@ -264,8 +263,9 @@ const style = {
   },
 
   t3: {
-    margin: 10,
-    padding: 6,
+    margin: 8,
+    padding: 20,
+    paddingRight: 10,
     
     backgroundColor: 'rgb(0, 120, 255)',
 
@@ -274,7 +274,7 @@ const style = {
     borderTopColor: '#fff',
     borderRightColor: '#000',
     borderRadius: 10,
-    borderBottomWidth: 6,
+    borderBottomWidth: 1,
     borderBottomColor: '#fff'
   },
   redText: {
@@ -291,8 +291,8 @@ const canvas = document.querySelector('#canvas')
 
 const ctx = canvas.getContext('2d')
 const dpr = window.devicePixelRatio
-const w = 500
-const h = 500
+const w = 600
+const h = 600
 canvas.width = w*dpr
 canvas.height = h*dpr
 canvas.style.width = `${w}px`

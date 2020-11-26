@@ -4,7 +4,6 @@ import {
 } from './style.js';
 
 let uuid = 0;
-let dpr = 1;
 
 function hexToRgb(hex) {
   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -31,9 +30,8 @@ export default class Element{
     props = {},
     idName = '',
     className = '',
-    id = ++uuid,
   }) {
-    this.id = id;
+    this.id = ++uuid;
     this.style = parseStyle({
       ...defaultStyle,
       ...style,
@@ -57,13 +55,6 @@ export default class Element{
     if (style.opacity !== undefined && style.backgroundColor && style.backgroundColor.indexOf('#') > -1) {
       style.backgroundColor = getRgba(style.backgroundColor, style.opacity);
     }
-
-    // for (let key in this.style) {
-    //   if (scalableStyles.indexOf(key) > -1) {
-    //     this.style[key] *= dpr;
-    //   }
-    // }
-
     // this.initRepaint();
   }
 
@@ -88,39 +79,16 @@ export default class Element{
     this.children.push(element)
   }
 
-  // 方便子类实现borderRadius
-  roundRectPath() {
-    const ctx = this.ctx
-    const style = this.style
-    const box = this.layoutBox
-
-    const w = box.width
-    const h = box.height
-    const r = style.borderRadius
-    const x = box.x
-    const y = box.y
-
-    ctx.moveTo(x + r, y)
-
-    ctx.arcTo(x + w, y, x + w, y + h, r)
-    ctx.arcTo(x + w, y + h, x, y + h, r)
-    ctx.arcTo(x, y + h, x, y, r)
-    ctx.arcTo(x, y, x + w, y, r)
-
-    ctx.clip()
-  }
-
   renderBox() {
     const ctx = this.ctx
     if (this.style.backgroundColor) {
       ctx.save()
-      __renderBoxPath.call(this)
+      __drawRoundBoxPath.call(this)
     
       ctx.setFillStyle(this.style.backgroundColor)
       ctx.fill()
       ctx.restore()
     }
-    // 填充会影响描边，这里再 render 一次
     __renderBorder.call(this)
 
     this.renderLine()
@@ -144,35 +112,6 @@ export default class Element{
     })
 
   }
-
-  drawRightBorder() {
-    const ctx = this.ctx
-    const style = this.style
-    const box = this.layoutBox
-    const borderLeftWidth = style.borderLeftWidth
-    const borderRightWidth = style.borderRightWidth
-    const borderTopWidth = style.borderTopWidth
-    const borderBottomWidth = style.borderBottomWidth
-    const drawX = box.x;
-    const drawY = box.y;
-    const ONE_CIRCLE = Math.PI * 2;
-  
-    let _x = drawX + box.width - style.borderTopRightRadius - borderRightWidth / 2
-    let _y = drawY + borderTopWidth / 2
-    
-    ctx.arc(
-      _x, 
-      _y + style.borderTopRightRadius, 
-      style.borderTopRightRadius, 7/8 * ONE_CIRCLE, 0, false);
-  
-    const borderBottomRightRadius = style.borderBottomRightRadius || style.borderRadius
-    _x = drawX + box.width - borderRightWidth / 2
-    _y = drawY + box.height - borderBottomRightRadius - borderBottomWidth / 2
-  
-    ctx.lineTo(_x, _y);
-  
-    ctx.arc(_x - borderBottomRightRadius, _y, borderBottomRightRadius, 0, 1/8 * ONE_CIRCLE, false);
-  }
 }
 
 function __renderHelper(fn) {
@@ -182,7 +121,7 @@ function __renderHelper(fn) {
   ctx.restore();
 }
 
-function __renderBoxPath() {
+function __drawRoundBoxPath() {
   // 从左上角开始，顺时针画一个盒子
   const ctx = this.ctx
   const style = this.style

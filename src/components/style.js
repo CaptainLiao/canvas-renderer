@@ -47,10 +47,10 @@ export function parseStyle(s) {
   s.borderBottomLeftRadius = s.borderBottomLeftRadius || s.borderRadius
   s.borderBottomRightRadius = s.borderBottomRightRadius || s.borderRadius
 
-  // s.borderTopColor = s.borderTopColor || s.borderColor
-  // s.borderRightColor = s.borderRightColor || s.borderColor
-  // s.borderBottomColor = s.borderBottomColor || s.borderColor
-  // s.borderLeftColor = s.borderLeftColor || s.borderColor
+  s.borderTopColor = s.borderTopColor || s.borderColor
+  s.borderRightColor = s.borderRightColor || s.borderColor
+  s.borderBottomColor = s.borderBottomColor || s.borderColor
+  s.borderLeftColor = s.borderLeftColor || s.borderColor
 
   return s
 }
