@@ -1,6 +1,7 @@
 import {
   Text,
   View,
+  Image,
   canvasRenderer,
   Element
 } from './components'
@@ -21,7 +22,7 @@ const computeLayout = require('css-layout')
 const nodeMap = {
   view: View,
   text: Text,
-  image: View,
+  image: Image,
   scrollview: View,
 }
 
@@ -174,23 +175,27 @@ class Layout extends Element {
     if (this.renderContext) {
       this.renderContext.clearRect(0, 0, this.renderport.width, this.renderport.height);
     }
-    const renderChildren = children => {
-      children.forEach(child => {
-        child.render(ctx)
-        return renderChildren(child.children)
-      })
+    const renderChildren = async children => {
+      for (const child of children) {
+        await child.render(ctx)
+        renderChildren(child.children)
+      }
     }
     renderChildren(this.children)
   }
 }
 
+// helper
 function reCalculate(list, layoutList) {
   list.forEach((child, index) => {
     // 处理文字换行
     if (child.type === "Text") {
       const currentLayoutNode = layoutList[index]
       const parent = currentLayoutNode.parent
-      child.style.width = parent.layout.width - 2 * currentLayoutNode.layout.left
+      child.style.width = Math.min(
+        parent.layout.width - 2 * currentLayoutNode.layout.left,
+        currentLayoutNode.layout.width
+      )
 
       const contentWidth = child.style.width
         - child.style.borderLeftWidth
@@ -221,13 +226,6 @@ function reCalculate(list, layoutList) {
   })
 }
 
-function getContentWidth(node) {
-  return node.layout.width
-    - node.style.paddingLeft 
-    - node.style.paddingRight
-    - node.style.borderLeftWidth
-    - node.style.borderRightWidth;
-}
 
 let layout = new Layout({
   style: {
@@ -243,6 +241,7 @@ export default layout;
 
 let xmlData = `
 <view id="container">
+  <image src="https://mdn.mozillademos.org/files/5395/backdrop.png" class="img"></image>
   <text class="t3" value="这是t2 value">这真的是一条非常长非常长非常 长非常长非常长非常长 非常长非常长非常长非常长的字符串.</text>
   <view class="redText"></view>
 </view>
@@ -250,6 +249,7 @@ let xmlData = `
 
 const style = {
   container: {
+    position: 'relative',
     diplay: 'flex',
     flexDirection: 'column',
     width: 200,
@@ -258,15 +258,22 @@ const style = {
     padding: 2,
     backgroundColor: '#999',
 
-    borderRadius: 12,
-    borderWidth: 10
+    // borderRadius: 12,
+    // borderWidth: 10
+  },
+
+  img: {
+    position: 'absolute',
+    top:0,
+    width: 200,
+    height: 200
   },
 
   t3: {
     margin: 8,
-    padding: 20,
+    padding: 10,
     paddingRight: 10,
-    
+
     backgroundColor: 'rgb(0, 120, 255)',
 
     borderWidth: 10,
@@ -280,7 +287,6 @@ const style = {
   redText: {
     marginTop: 10,
     flex: 1,
-
     backgroundColor: 'rgba(237,241,247,1)',
     borderRadius: 6,
     textAlign: 'center',
