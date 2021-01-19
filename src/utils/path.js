@@ -1,56 +1,64 @@
+  // 从左上角开始，顺时针画一个圆角路径
+export function drawRoundBoxPath() {
+  const ctx = this.ctx
+  const style = this.style
+  
+  ctx.save();
+  ctx.beginPath();
 
-/**
- * 该方法用来绘制一个有填充色、底边带斜箭头的圆角矩形
- * http://1017401036.iteye.com/blog/2311141
- * 
- * @param cxt:canvas的上下文环境
- * @param width:矩形的宽度
- * @param height:矩形的高度
- * @param radius:圆的半径
-**/
-export function drawRoundRectPath(cxt,width,height,radius){
-	cxt.beginPath(0);
-	//从右下角顺时针绘制，弧度从0到1/2PI
-	cxt.arc(width-radius,height-radius,radius,0,Math.PI/2);
+  const box = this.layoutBox
+  const borderLeftWidth = style.borderLeftWidth
+  const borderRightWidth = style.borderRightWidth
+  const borderTopWidth = style.borderTopWidth
+  const borderBottomWidth = style.borderBottomWidth
+  const drawX = box.x;
+  const drawY = box.y;
+  const ONE_CIRCLE = Math.PI * 2;
 
-  //矩形下边线
-	cxt.lineTo(radius,height)
+  let _x = drawX + box.width - style.borderTopRightRadius - borderRightWidth / 2
+  let _y = drawY + borderTopWidth / 2
 
-	//左下角圆弧，弧度从1/2PI到PI
-	cxt.arc(radius,height-radius,radius,Math.PI/2,Math.PI);
+  // borderTop
+  ctx.arc(
+    drawX + style.borderTopLeftRadius + borderLeftWidth/2, 
+    _y + style.borderTopLeftRadius, 
+    style.borderTopLeftRadius, 
+    5/8 * ONE_CIRCLE, 
+    3/4 * ONE_CIRCLE, 
+    false
+  )
+  ctx.moveTo(drawX + style.borderTopLeftRadius + borderLeftWidth/2 , _y);
+  ctx.arc(_x, _y + style.borderTopRightRadius, style.borderTopRightRadius, 3/4 * ONE_CIRCLE, 7/8 * ONE_CIRCLE, false);
 
-	//矩形左边线
-	cxt.lineTo(0,radius);
 
-	//左上角圆弧，弧度从PI到3/2PI
-	cxt.arc(radius,radius,radius,Math.PI,Math.PI*3/2);
+  // borderRight
+  ctx.arc(
+    drawX + box.width - style.borderTopRightRadius - borderRightWidth / 2, 
+    drawY + borderTopWidth / 2 + style.borderTopRightRadius, 
+    style.borderTopRightRadius, 7/8 * ONE_CIRCLE, 0, false);
+  const borderBottomRightRadius = style.borderBottomRightRadius || style.borderRadius
+  _x = drawX + box.width - borderRightWidth / 2
+  _y = drawY + box.height - borderBottomRightRadius - borderBottomWidth / 2
+  ctx.lineTo(_x, _y);
+  ctx.arc(_x - borderBottomRightRadius, _y, borderBottomRightRadius, 0, 1/8 * ONE_CIRCLE, false);
 
-	//上边线
-	cxt.lineTo(width-radius,0);
 
-	//右上角圆弧
-	cxt.arc(width-radius,radius,radius,Math.PI*3/2,Math.PI*2);
+  // borderBottom
+  ctx.arc(_x - style.borderBottomRightRadius, _y, style.borderBottomRightRadius, 1/8 * ONE_CIRCLE, 1/4* ONE_CIRCLE,false);
+  const borderBottomLeftRadius = style.borderBottomLeftRadius || style.borderRadius
+  _x = drawX + borderBottomLeftRadius + borderLeftWidth / 2
+  _y = drawY + box.height - borderBottomWidth / 2
+  ctx.lineTo(_x, _y);
+  ctx.arc(_x, _y - borderBottomLeftRadius, borderBottomLeftRadius, 1/4 *ONE_CIRCLE, 3/8* ONE_CIRCLE, false);
 
-	//右边线
-	cxt.lineTo(width,height-radius);
-	cxt.closePath();
-}
+  // borderLeft
+  ctx.arc(_x, _y - borderBottomLeftRadius, borderBottomLeftRadius, 3/8 *ONE_CIRCLE, 1/2* ONE_CIRCLE, false);
+  const borderTopLeftRadius = style.borderTopLeftRadius || style.borderRadius
+  _x =  drawX + borderLeftWidth / 2
+  _y = drawY + borderTopLeftRadius + borderTopWidth / 2
+  ctx.lineTo(_x, drawY + box.height - style.borderBottomLeftRadius - style.borderBottom)
+  // 上左圆角
+  ctx.arc(_x + borderTopLeftRadius, _y, borderTopLeftRadius, 1/2* ONE_CIRCLE, 5/8 * ONE_CIRCLE, false)
 
-function roundRect(ctx, layoutBox) {
-	const style = this.style || {};
-	const box   = layoutBox  || this.layoutBox;
-
-	const w = box.width;
-	const h = box.height;
-	const r = style.borderRadius;
-	const x = box.absoluteX;
-	const y = box.absoluteY;
-
-	ctx.moveTo(x + r, y)
-	ctx.arcTo(x + w, y, x + w, y + h, r);
-	ctx.arcTo(x + w, y + h, x, y + h, r);
-	ctx.arcTo(x, y + h, x, y, r);
-	ctx.arcTo(x, y, x + w, y, r);
-
-	ctx.clip();
+  ctx.restore();
 }

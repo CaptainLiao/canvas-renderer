@@ -19,5 +19,8 @@ export default function (ctx){
     }
   }
 
-  Object.assign(ctx, tmpt)
+  Object.keys(tmpt)
+    .map(k => {
+      if (!ctx[k]) ctx[k] = tmpt[k]
+    })
 }

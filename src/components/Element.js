@@ -121,8 +121,8 @@ function __renderHelper(fn) {
   ctx.restore();
 }
 
-function __drawRoundBoxPath() {
-  // 从左上角开始，顺时针画一个盒子
+export function __drawRoundBoxPath() {
+  // 从左上角开始，顺时针画一个路径
   const ctx = this.ctx
   const style = this.style
   
