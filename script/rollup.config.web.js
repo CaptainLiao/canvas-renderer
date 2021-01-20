@@ -1,11 +1,16 @@
+const replace = require('@rollup/plugin-replace')
 const commonConifg = require('./rollup.config.base')
 
-export default [
-  {
-    ...commonConifg,
-    output: {
-      file: 'example/web/CanvasStage.js',
-      format: 'esm'
-    },
-  }
-];
+export default {
+  ...commonConifg,
+  output: {
+    file: 'dist/cangine.web.js',
+    format: 'esm'
+  },
+
+  plugins: commonConifg.plugins.concat([
+    replace({
+      __buildTarget__: JSON.stringify('web'),
+    })
+  ])
+}

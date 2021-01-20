@@ -1,4 +1,4 @@
-const buble = require('@rollup/plugin-buble'); 
+
 const typescript = require('@rollup/plugin-typescript');
 const { babel } = require('@rollup/plugin-babel');
 
@@ -10,7 +10,4 @@ module.exports = {
       presets: ['@babel/preset-env']
     }),
   ],
-  watch: {
-    include: 'src/**'
-  }
 }

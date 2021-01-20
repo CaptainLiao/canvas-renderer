@@ -1,6 +1,4 @@
-import {
-  drawRoundRectPath
-} from '../utils/path'
+
 import Element from './Element';
 
 export default class View extends Element {

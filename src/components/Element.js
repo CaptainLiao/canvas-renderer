@@ -90,8 +90,6 @@ export default class Element{
       ctx.restore()
     }
     __renderBorder.call(this)
-
-    this.renderLine()
   }
 
 

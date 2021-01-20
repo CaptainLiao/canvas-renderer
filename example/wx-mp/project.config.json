@@ -21,12 +21,13 @@
 			"ignore": [],
 			"disablePlugins": [],
 			"outputPath": ""
-		}
+		},
+		"enhance": true
 	},
 	"compileType": "miniprogram",
 	"libVersion": "2.9.0",
 	"appid": "wx5a5ac39d0cc13dac",
-	"projectname": "canvas",
+	"projectname": "canvas-engine-demo",
 	"debugOptions": {
 		"hidedInDevtools": []
 	},
