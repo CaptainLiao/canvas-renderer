@@ -1,23 +1,14 @@
 export function createCanvas() {
-  if (__buildTarget__ === 'web') {
-    return document.createElement('canvas');
+  if (__buildTarget__ === 'mp') {
+    return wx.createOffscreenCanvas()
   }
-  return wx.createCanvas();
+  return document.createElement('canvas');
 }
 
 export function createImage() {
-  if (__buildTarget__ === 'web') {
-    return new Image()
+  if (__buildTarget__ === 'mp') {    
+    const canvas = createCanvas()
+    return canvas.createImage();
   }
-
-  const canvas = wx.createOffscreenCanvas()
-  return canvas.createImage();
-}
-
-export function measureText() {
-  const c = wx.createOffscreenCanvas()
-  const ctx = c.getContext('2d')
-  ctx.font = 'italic bold 20px cursive'
-  const metrics = ctx.measureText('Hello World')
-  console.log(metrics.width)
+  return new Image()
 }

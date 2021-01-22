@@ -13,7 +13,7 @@ export default [
     },
     plugins: commonConifg.plugins.concat([
       replace({
-        __buildTarget__: JSON.stringify('wx-mp'),
+        __buildTarget__: JSON.stringify('mp'),
       })
     ])
   

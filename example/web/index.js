@@ -41,7 +41,6 @@ const style = {
   t3: {
     margin: 8,
     padding: 10,
-    paddingRight: 10,
 
     backgroundColor: 'rgb(0, 120, 255)',
 

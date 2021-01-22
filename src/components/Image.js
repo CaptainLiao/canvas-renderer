@@ -1,5 +1,5 @@
 import Element, {__drawRoundBoxPath} from './Element';
-import {CanvasImage} from '../utils'
+import {createImage} from '../utils/createEle'
 
 export default class Image extends Element {
   constructor({
@@ -15,24 +15,26 @@ export default class Image extends Element {
       idName,
       className
     })
-    this.type = 'Image';
-    this.src = src;
+    this.type = 'Image'
+    this.src = src
+    const img = createImage()
+    img.src = this.src
+    this.__img = img
   }
 
 
   render(ctx) {
-    this.ctx = ctx;
+    this.ctx = ctx
+    const img = this.__img
 
     return new Promise((resolve, reject) => {
-      const img = new CanvasImage();
-      img.src = this.src;
       img.onload = () => {
-        ctx.save();
+        ctx.save()
 
         __drawRoundBoxPath.call(this);
-        ctx.clip();
-        const {x, y, width, height} = this.layoutBox;
-        ctx.drawImage(img, x, y, width, height);
+        ctx.clip()
+        const {x, y, width, height} = this.layoutBox
+        ctx.drawImage(img, x, y, width, height)
         ctx.restore()
 
         resolve()
@@ -40,7 +42,6 @@ export default class Image extends Element {
       img.onerror = reject
     })
     
-
   }
 }
 

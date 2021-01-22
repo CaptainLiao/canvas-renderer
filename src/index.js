@@ -29,24 +29,19 @@ const renderInH5 = ({ canvasId, xml, style}) => {
 const renderInMP = ({ canvasId, xml, style}) => {
   const {
     pixelRatio,
-    screenWidth,
-    screenHeight,
   } = wx.getSystemInfoSync();
   const dpr = pixelRatio
-  const w = screenWidth
-  const h = screenHeight
 
-  wx.createSelectorQuery()
-    .select('#canvas')
-    .boundingClientRect()
-    .node(res => {
+  const canvasRef = wx.createSelectorQuery().select('#canvas')
+
+  canvasRef.node(res => {
+    console.log(res);
+    
       const canvasEle = res.node;
       const ctx = canvasEle.getContext('2d')
-      canvasEle.width = w*dpr
-      canvasEle.height = h*dpr
-      canvasEle.style.width = `${w}px`
-      canvasEle.style.height = `${h}px`
-
+      canvasEle.width = canvasEle._width*dpr
+      canvasEle.height = canvasEle._height*dpr
+      
       ctx.scale(dpr, dpr)
       
       const layout = new Layout({
@@ -59,12 +54,10 @@ const renderInMP = ({ canvasId, xml, style}) => {
       layout.init(xml, style).render(ctx)
     
       console.log(layout);
-      drawGrid(ctx, w, h)
+      drawGrid(ctx, canvasEle.width, canvasEle.height)
 
     })
-    .exec(res => {
-      console.log(res);
-    })
+    .exec()
 };
 
 

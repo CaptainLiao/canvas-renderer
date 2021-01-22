@@ -25,4 +25,3 @@ const getTraversalObj = xmlToNodeobj.getTraversalObj
 
 exports.parse = parse
 exports.getTraversalObj = getTraversalObj
-

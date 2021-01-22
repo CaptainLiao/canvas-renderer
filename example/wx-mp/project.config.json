@@ -25,7 +25,7 @@
 		"enhance": true
 	},
 	"compileType": "miniprogram",
-	"libVersion": "2.9.0",
+	"libVersion": "2.9.5",
 	"appid": "wx5a5ac39d0cc13dac",
 	"projectname": "canvas-engine-demo",
 	"debugOptions": {

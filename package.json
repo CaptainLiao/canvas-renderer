@@ -7,6 +7,7 @@
     "start": "webpack --watch --config webpack.config.js",
     "build:web": "rollup -c script/rollup.config.web.js",
     "build:mp": "rollup -c script/rollup.config.mp.js",
+    "dev:mp": "rollup -c script/rollup.config.mp.js -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -16,6 +17,7 @@
     "@babel/preset-env": "^7.12.1",
     "@rollup/plugin-babel": "^5.2.1",
     "@rollup/plugin-buble": "^0.21.3",
+    "@rollup/plugin-commonjs": "^17.0.0",
     "@rollup/plugin-replace": "^2.3.4",
     "@rollup/plugin-typescript": "^4.1.2",
     "@types/source-map": "0.5.2",

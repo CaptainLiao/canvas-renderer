@@ -6,7 +6,10 @@ import {
   Element
 } from './components'
 
-import measureText from './utils/measureText'
+import {getTextWidth} from './utils/measureText'
+
+import parser from './libs/fast-xml-parser/parser'
+import computeLayout from 'css-layout'
 
 export const STATE = {
   "UNINIT": "UNINIT",
@@ -15,9 +18,6 @@ export const STATE = {
   "CLEAR": "CLEAR",
 }
 
-
-const parser = require('./libs/fast-xml-parser/parser')
-const computeLayout = require('css-layout')
 
 const nodeMap = {
   view: View,
@@ -168,16 +168,20 @@ export default class Layout extends Element {
 
   render(ctx) {
     canvasRenderer(ctx);
+    
     this.renderContext = ctx;
 
     if (this.renderContext) {
       this.renderContext.clearRect(0, 0, this.renderport.width, this.renderport.height);
     }
-    const renderChildren = async children => {
-      for (const child of children) {
-        await child.render(ctx)
-        renderChildren(child.children)
-      }
+    // TODO: 待优化
+    const renderChildren = children => {
+      return children.reduce((promise, child) => {
+        return promise.then(() => {
+          renderChildren(child.children); 
+          return child.render(ctx)
+        })
+      }, Promise.resolve())
     }
     renderChildren(this.children)
   }
@@ -204,8 +208,8 @@ function reCalculate(list, layoutList) {
       let lineIndex = 1
       let lineText = ''
       for (let i = 0; i < child.text.length; i++) {
-        let _layout = measureText({text: lineText + child.text[i], style: child.style})
-        if (_layout.width > contentWidth) {
+        const textWidth = getTextWidth({text: lineText + child.text[i], style: child.style})
+        if (textWidth > contentWidth) {
           child.__lines.push({text: lineText})
           lineText = ''
           lineIndex += 1
