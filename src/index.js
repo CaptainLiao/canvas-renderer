@@ -32,32 +32,32 @@ const renderInMP = ({ canvasId, xml, style}) => {
   } = wx.getSystemInfoSync();
   const dpr = pixelRatio
 
-  const canvasRef = wx.createSelectorQuery().select('#canvas')
+  const canvasRef = wx.createSelectorQuery().select(canvasId)
 
   canvasRef.node(res => {
     console.log(res);
-    
-      const canvasEle = res.node;
-      const ctx = canvasEle.getContext('2d')
-      canvasEle.width = canvasEle._width*dpr
-      canvasEle.height = canvasEle._height*dpr
-      
-      ctx.scale(dpr, dpr)
-      
-      const layout = new Layout({
-        style: {
-          width: 0,
-          height: 0,
-        },
-        name: 'layout'
-      });
-      layout.init(xml, style).render(ctx)
-    
-      console.log(layout);
-      drawGrid(ctx, canvasEle.width, canvasEle.height)
 
-    })
-    .exec()
+    const canvasEle = res.node;
+    const ctx = canvasEle.getContext('2d')
+    canvasEle.width = canvasEle._width*dpr
+    canvasEle.height = canvasEle._height*dpr
+    
+    ctx.scale(dpr, dpr)
+    
+    const layout = new Layout({
+      style: {
+        width: 0,
+        height: 0,
+      },
+      name: 'layout'
+    });
+    layout.init(xml, style).render(ctx)
+  
+    console.log(layout);
+    drawGrid(ctx, canvasEle.width, canvasEle.height)
+
+  })
+  .exec()
 };
 
 

@@ -20,13 +20,53 @@ function _createClass(Constructor, protoProps, staticProps) {
   return Constructor;
 }
 
-function _setPrototypeOf(o, p) {
-  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
-    o.__proto__ = p;
-    return o;
-  };
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
 
-  return _setPrototypeOf(o, p);
+  return obj;
+}
+
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+
+  return target;
 }
 
 function _inherits(subClass, superClass) {
@@ -44,20 +84,33 @@ function _inherits(subClass, superClass) {
   if (superClass) _setPrototypeOf(subClass, superClass);
 }
 
-function _typeof(obj) {
-  "@babel/helpers - typeof";
+function _getPrototypeOf(o) {
+  _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  };
+  return _getPrototypeOf(o);
+}
 
-  if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-    _typeof = function _typeof(obj) {
-      return typeof obj;
-    };
-  } else {
-    _typeof = function _typeof(obj) {
-      return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-    };
+function _setPrototypeOf(o, p) {
+  _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  };
+
+  return _setPrototypeOf(o, p);
+}
+
+function _isNativeReflectConstruct() {
+  if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+  if (Reflect.construct.sham) return false;
+  if (typeof Proxy === "function") return true;
+
+  try {
+    Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+    return true;
+  } catch (e) {
+    return false;
   }
-
-  return _typeof(obj);
 }
 
 function _assertThisInitialized(self) {
@@ -69,33 +122,30 @@ function _assertThisInitialized(self) {
 }
 
 function _possibleConstructorReturn(self, call) {
-  if (call && (_typeof(call) === "object" || typeof call === "function")) {
+  if (call && (typeof call === "object" || typeof call === "function")) {
     return call;
   }
 
   return _assertThisInitialized(self);
 }
 
-function _getPrototypeOf(o) {
-  _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
-    return o.__proto__ || Object.getPrototypeOf(o);
+function _createSuper(Derived) {
+  var hasNativeReflectConstruct = _isNativeReflectConstruct();
+
+  return function _createSuperInternal() {
+    var Super = _getPrototypeOf(Derived),
+        result;
+
+    if (hasNativeReflectConstruct) {
+      var NewTarget = _getPrototypeOf(this).constructor;
+
+      result = Reflect.construct(Super, arguments, NewTarget);
+    } else {
+      result = Super.apply(this, arguments);
+    }
+
+    return _possibleConstructorReturn(this, result);
   };
-  return _getPrototypeOf(o);
-}
-
-function _defineProperty(obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
 }
 
 var defaultStyle = {
@@ -132,9 +182,6 @@ function parseStyle(s) {
   return s;
 }
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 var uuid = 0;
 
 function hexToRgb(hex) {
@@ -170,7 +217,7 @@ var Element = /*#__PURE__*/function () {
     _classCallCheck(this, Element);
 
     this.id = ++uuid;
-    this.style = parseStyle(_objectSpread(_objectSpread({}, defaultStyle), style));
+    this.style = parseStyle(_objectSpread2(_objectSpread2({}, defaultStyle), style));
     this.props = props;
     this.idName = idName;
     this.className = className;
@@ -399,10 +446,6 @@ function __renderBorder() {
   ctx.restore();
 }
 
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
 var View = /*#__PURE__*/function (_Element) {
   _inherits(View, _Element);
 
@@ -453,6 +496,7 @@ function canvasRenderer (ctx) {
       {
         // 从基础库 1.9.90 开始，本接口停止维护，请使用 CanvasContext.font 代替
         ctx.setFontSize && ctx.setFontSize(parseFloat(t.fontSize));
+        ctx.font = "".concat(t.fontWeight, " ").concat(t.fontSize, " ").concat(t.fontFamily);
       }
 
       ctx.font = "".concat(t.fontWeight, " ").concat(t.fontSize, " ").concat(t.fontFamily);
@@ -559,13 +603,6 @@ function getTextWithEllipsis(style, text) {
   return length && textOverflow === 'ellipsis' ? str + '...' : str;
 }
 
-function ownKeys$1(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread$1(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$1(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$1(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _createSuper$1(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$1(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _isNativeReflectConstruct$1() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 var defaultTextStyle = {
   fontSize: '12px',
   fontWeight: 'normal',
@@ -578,7 +615,7 @@ var defaultTextStyle = {
 var Text = /*#__PURE__*/function (_Element) {
   _inherits(Text, _Element);
 
-  var _super = _createSuper$1(Text);
+  var _super = _createSuper(Text);
 
   function Text(_ref) {
     var _this;
@@ -593,7 +630,7 @@ var Text = /*#__PURE__*/function (_Element) {
 
     _classCallCheck(this, Text);
 
-    style = _objectSpread$1(_objectSpread$1({}, defaultTextStyle), style);
+    style = _objectSpread2(_objectSpread2({}, defaultTextStyle), style);
     style.lineHeight = getLineHeight({
       style: style
     });
@@ -645,14 +682,10 @@ var Text = /*#__PURE__*/function (_Element) {
   return Text;
 }(Element);
 
-function _createSuper$2(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$2(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _isNativeReflectConstruct$2() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
 var Image = /*#__PURE__*/function (_Element) {
   _inherits(Image, _Element);
 
-  var _super = _createSuper$2(Image);
+  var _super = _createSuper(Image);
 
   function Image(_ref) {
     var _this;
@@ -2877,13 +2910,6 @@ var cssLayout = createCommonjsModule(function (module, exports) {
   });
 });
 
-function _createSuper$3(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct$3(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _isNativeReflectConstruct$3() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-function ownKeys$2(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread$2(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys$2(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys$2(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 var nodeMap = {
   view: View,
   text: Text,
@@ -2901,13 +2927,13 @@ var createRenderTree = function createRenderTree(node, style) {
     var attribute = key;
 
     if (key === 'id') {
-      obj.style = _objectSpread$2(_objectSpread$2({}, obj.style), style[id]);
+      obj.style = _objectSpread2(_objectSpread2({}, obj.style), style[id]);
       return obj;
     }
 
     if (key === 'class') {
       obj.style = value.split(/\s+/).reduce(function (res, oneClass) {
-        return _objectSpread$2(_objectSpread$2({}, res), style[oneClass]);
+        return _objectSpread2(_objectSpread2({}, res), style[oneClass]);
       }, obj.style || {});
       return obj;
     }
@@ -2953,7 +2979,7 @@ function setLayoutBox(children) {
 var Layout = /*#__PURE__*/function (_Element) {
   _inherits(Layout, _Element);
 
-  var _super = _createSuper$3(Layout);
+  var _super = _createSuper(Layout);
 
   function Layout() {
     var _this3;
@@ -3103,7 +3129,7 @@ var renderInMP = function renderInMP(_ref2) {
       pixelRatio = _wx$getSystemInfoSync.pixelRatio;
 
   var dpr = pixelRatio;
-  var canvasRef = wx.createSelectorQuery().select('#canvas');
+  var canvasRef = wx.createSelectorQuery().select(canvasId);
   canvasRef.node(function (res) {
     console.log(res);
     var canvasEle = res.node;

@@ -5,6 +5,7 @@ export default function (ctx){
       if (__buildTarget__ === 'mp') {
         // 从基础库 1.9.90 开始，本接口停止维护，请使用 CanvasContext.font 代替
         ctx.setFontSize && ctx.setFontSize(parseFloat(t.fontSize))
+        ctx.font = `${t.fontWeight} ${t.fontSize} ${t.fontFamily}`
       }
       ctx.font = `${t.fontWeight} ${t.fontSize} ${t.fontFamily}`
     },
