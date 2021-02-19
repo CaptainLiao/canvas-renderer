@@ -4,7 +4,7 @@ const xmlData = `
 <view id="container">
   <image src="https://media.prod.mdn.mozit.cloud/attachments/2013/06/22/5395/505e0ef785fba7e3a5f9c1ac70e78658/backdrop.png" class="img"></image>
   <text class="t3" value="这是t2 value">这真的是一条非常长非常长非常 长非常长非常长非常长 非常长非常长非常长非常长的字符串.</text>
-  <image src="https://media.prod.mdn.mozit.cloud/attachments/2013/06/22/5395/505e0ef785fba7e3a5f9c1ac70e78658/backdrop.png" class="img2"></image>
+  <image src="https://img01.yzcdn.cn/vant/cat.jpeg" class="img2"></image>
   <view class="redText"></view>
 </view>
 `;

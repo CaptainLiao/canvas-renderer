@@ -148,6 +148,62 @@ function _createSuper(Derived) {
   };
 }
 
+function _slicedToArray(arr, i) {
+  return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest();
+}
+
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+
+  try {
+    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+
+  return _arr;
+}
+
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+  return arr2;
+}
+
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+
 var defaultStyle = {
   diplay: 'flex',
   flexDirection: 'row',
@@ -3120,18 +3176,45 @@ function reCalculate(list, layoutList) {
   });
 }
 
-var renderInMP = function renderInMP(_ref2) {
-  var canvasId = _ref2.canvasId,
-      xml = _ref2.xml,
-      style = _ref2.style;
+var LAYOUT_BASE_WIDTH = 375;
+
+var _scaleStyles = function _scaleStyles(_ref) {
+  var clientWidth = _ref.clientWidth,
+      style = _ref.style;
+  var x = clientWidth / LAYOUT_BASE_WIDTH;
+  return Object.keys(style).reduce(function (res, key) {
+    var s = style[key];
+    res[key] = Object.keys(s).reduce(function (acc, k) {
+      var _String$replace$split = String(s[k]).replace(/(\d+)(\D+)/g, '$1-$2').split('-'),
+          _String$replace$split2 = _slicedToArray(_String$replace$split, 2),
+          n = _String$replace$split2[0],
+          t = _String$replace$split2[1];
+
+      if (isNaN(parseFloat(n))) {
+        acc[k] = s[k];
+        return acc;
+      }
+
+      acc[k] = n * x;
+      if (t) acc[k] += t;
+      return acc;
+    }, {});
+    return res;
+  }, {});
+};
+
+var renderInMP = function renderInMP(_ref3) {
+  var canvasId = _ref3.canvasId,
+      xml = _ref3.xml,
+      style = _ref3.style;
 
   var _wx$getSystemInfoSync = wx.getSystemInfoSync(),
+      screenWidth = _wx$getSystemInfoSync.screenWidth,
       pixelRatio = _wx$getSystemInfoSync.pixelRatio;
 
   var dpr = pixelRatio;
   var canvasRef = wx.createSelectorQuery().select(canvasId);
   canvasRef.node(function (res) {
-    console.log(res);
     var canvasEle = res.node;
     var ctx = canvasEle.getContext('2d');
     canvasEle.width = canvasEle._width * dpr;
@@ -3143,6 +3226,10 @@ var renderInMP = function renderInMP(_ref2) {
         height: 0
       },
       name: 'layout'
+    });
+    style = _scaleStyles({
+      style: style,
+      clientWidth: screenWidth
     });
     layout.init(xml, style).render(ctx);
     console.log(layout);

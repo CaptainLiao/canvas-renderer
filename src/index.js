@@ -20,6 +20,8 @@ const renderInH5 = ({ canvasId, xml, style}) => {
     },
     name: 'layout'
   });
+  
+  style = _scaleStyles({style, clientWidth: w})
   layout.init(xml, style).render(ctx)
 
   console.log(layout);
@@ -28,6 +30,7 @@ const renderInH5 = ({ canvasId, xml, style}) => {
 
 const renderInMP = ({ canvasId, xml, style}) => {
   const {
+    screenWidth,
     pixelRatio,
   } = wx.getSystemInfoSync();
   const dpr = pixelRatio
@@ -35,8 +38,6 @@ const renderInMP = ({ canvasId, xml, style}) => {
   const canvasRef = wx.createSelectorQuery().select(canvasId)
 
   canvasRef.node(res => {
-    console.log(res);
-
     const canvasEle = res.node;
     const ctx = canvasEle.getContext('2d')
     canvasEle.width = canvasEle._width*dpr
@@ -51,6 +52,8 @@ const renderInMP = ({ canvasId, xml, style}) => {
       },
       name: 'layout'
     });
+
+    style = _scaleStyles({style, clientWidth: screenWidth})
     layout.init(xml, style).render(ctx)
   
     console.log(layout);
@@ -63,8 +66,29 @@ const renderInMP = ({ canvasId, xml, style}) => {
 
 export default __buildTarget__ === 'web'
   ? renderInH5
-  : renderInMP
+  : renderInMP;
 
+
+const LAYOUT_BASE_WIDTH = 375
+function _scaleStyles({clientWidth, style}) {
+  const x = clientWidth/LAYOUT_BASE_WIDTH
+
+  return Object.keys(style).reduce((res, key) => {
+    const s = style[key]
+    res[key] = Object.keys(s).reduce((acc, k) => {
+      const [n, t] = String(s[k]).replace(/(\d+)(\D+)/g, '$1-$2').split('-')
+      if (isNaN(parseFloat(n))) {
+        acc[k] = s[k]
+        return acc
+      }
+      acc[k] = n*x
+      if (t) acc[k] += t
+      return acc
+    }, {})
+
+    return res
+  }, {})
+}
 
 function drawGrid(ctx, w, h) {
   ctx.save()

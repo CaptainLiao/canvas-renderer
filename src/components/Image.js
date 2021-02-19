@@ -26,7 +26,7 @@ export default class Image extends Element {
   render(ctx) {
     this.ctx = ctx
     const img = this.__img
-
+    
     return new Promise((resolve, reject) => {
       img.onload = () => {
         ctx.save()
