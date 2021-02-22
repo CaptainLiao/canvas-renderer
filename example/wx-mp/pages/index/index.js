@@ -75,11 +75,21 @@ const style = {
 
 
 
-Page({
+Component({
   data: {
-  },
-  onLoad: function () {
     
-    cangine({canvasId: '#canvas', xml: xmlData, style})
   },
+
+
+  methods: {
+    onTap(e) {
+      console.log(e);
+      
+    },
+
+    onLoad: function () {
+    
+      cangine({canvasId: '#canvas', xml: xmlData, style, tap: this.onTap})
+    },
+  }
 })

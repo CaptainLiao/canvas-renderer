@@ -93,23 +93,23 @@ export default class Element{
   }
 
 
-  renderLine() {
-    const ctx = this.ctx
-    __renderHelper.call(this, () => {
-      ctx.beginPath()
-      ctx.moveTo(10, 220)
+  // renderLine() {
+  //   const ctx = this.ctx
+  //   __renderHelper.call(this, () => {
+  //     ctx.beginPath()
+  //     ctx.moveTo(10, 220)
       
-      ctx.lineTo(10, 320)
-      ctx.lineTo(200, 320)
-      ctx.setLineWidth(10)
-      // ctx.closePath()
-      // ctx.setFillStyle('#ccc')
-      // ctx.fill()
-      ctx.stroke()
+  //     ctx.lineTo(10, 320)
+  //     ctx.lineTo(200, 320)
+  //     ctx.setLineWidth(10)
+  //     // ctx.closePath()
+  //     // ctx.setFillStyle('#ccc')
+  //     // ctx.fill()
+  //     ctx.stroke()
  
-    })
+  //   })
 
-  }
+  // }
 }
 
 function __renderHelper(fn) {

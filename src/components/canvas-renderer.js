@@ -1,6 +1,6 @@
 export default function (ctx){
   const tmpt = {
-    setFont(fontObj, text) {
+    setFont(fontObj) {
       const t = fontObj
       if (__buildTarget__ === 'mp') {
         // 从基础库 1.9.90 开始，本接口停止维护，请使用 CanvasContext.font 代替

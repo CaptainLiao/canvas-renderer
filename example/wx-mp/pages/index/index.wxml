@@ -1,4 +1,4 @@
 <!--index.wxml-->
 <view>
-  <canvas id="canvas" type="2d"></canvas>
+  <canvas id="canvas" type="2d" bindtap="onTap"></canvas>
 </view>

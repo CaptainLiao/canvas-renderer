@@ -3,7 +3,7 @@ import {
   View,
   Image,
   canvasRenderer,
-  Element
+  Element,
 } from './components'
 
 import {getTextWidth} from './utils/measureText'
@@ -18,12 +18,11 @@ export const STATE = {
   "CLEAR": "CLEAR",
 }
 
-
 const nodeMap = {
   view: View,
   text: Text,
   image: Image,
-  scrollview: View,
+  scrollview: View
 }
 
 const createRenderTree = function (node, style) {
@@ -70,7 +69,7 @@ const createRenderTree = function (node, style) {
   const element = new NODE(args)
   element.root = this;
 
-  node.children.forEach(childNode => {
+  (node.children || []).forEach(childNode => {
     const childElement = createRenderTree.call(this, childNode, style);
 
     element.add(childElement);

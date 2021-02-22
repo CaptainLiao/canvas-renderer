@@ -58,7 +58,7 @@ export default class Text extends Element {
     this.renderBox()
 
 
-    ctx.setFont(this.style, 'fuck')
+    ctx.setFont(this.style)
     ctx.setFillStyle(this.style.color)
     ctx.setTextBaseline(this.style.textBaseline)
 

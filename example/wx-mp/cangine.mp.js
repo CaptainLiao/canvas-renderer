@@ -333,24 +333,21 @@ var Element = /*#__PURE__*/function () {
       }
 
       __renderBorder.call(this);
-    }
-  }, {
-    key: "renderLine",
-    value: function renderLine() {
-      var ctx = this.ctx;
+    } // renderLine() {
+    //   const ctx = this.ctx
+    //   __renderHelper.call(this, () => {
+    //     ctx.beginPath()
+    //     ctx.moveTo(10, 220)
+    //     ctx.lineTo(10, 320)
+    //     ctx.lineTo(200, 320)
+    //     ctx.setLineWidth(10)
+    //     // ctx.closePath()
+    //     // ctx.setFillStyle('#ccc')
+    //     // ctx.fill()
+    //     ctx.stroke()
+    //   })
+    // }
 
-      __renderHelper.call(this, function () {
-        ctx.beginPath();
-        ctx.moveTo(10, 220);
-        ctx.lineTo(10, 320);
-        ctx.lineTo(200, 320);
-        ctx.setLineWidth(10); // ctx.closePath()
-        // ctx.setFillStyle('#ccc')
-        // ctx.fill()
-
-        ctx.stroke();
-      });
-    }
   }]);
 
   return Element;
@@ -546,7 +543,7 @@ var View = /*#__PURE__*/function (_Element) {
 
 function canvasRenderer (ctx) {
   var tmpt = {
-    setFont: function setFont(fontObj, text) {
+    setFont: function setFont(fontObj) {
       var t = fontObj;
 
       {
@@ -721,7 +718,7 @@ var Text = /*#__PURE__*/function (_Element) {
       this.ctx = ctx;
       ctx.save();
       this.renderBox();
-      ctx.setFont(this.style, 'fuck');
+      ctx.setFont(this.style);
       ctx.setFillStyle(this.style.color);
       ctx.setTextBaseline(this.style.textBaseline);
       var startX = this.layoutBox.x + this.style.borderLeftWidth + this.style.paddingLeft;
@@ -3010,7 +3007,7 @@ var createRenderTree = function createRenderTree(node, style) {
   var NODE = nodeMap[node.name];
   var element = new NODE(args);
   element.root = this;
-  node.children.forEach(function (childNode) {
+  (node.children || []).forEach(function (childNode) {
     var childElement = createRenderTree.call(_this, childNode, style);
     element.add(childElement);
   });
@@ -3176,37 +3173,10 @@ function reCalculate(list, layoutList) {
   });
 }
 
-var LAYOUT_BASE_WIDTH = 375;
-
-var _scaleStyles = function _scaleStyles(_ref) {
-  var clientWidth = _ref.clientWidth,
-      style = _ref.style;
-  var x = clientWidth / LAYOUT_BASE_WIDTH;
-  return Object.keys(style).reduce(function (res, key) {
-    var s = style[key];
-    res[key] = Object.keys(s).reduce(function (acc, k) {
-      var _String$replace$split = String(s[k]).replace(/(\d+)(\D+)/g, '$1-$2').split('-'),
-          _String$replace$split2 = _slicedToArray(_String$replace$split, 2),
-          n = _String$replace$split2[0],
-          t = _String$replace$split2[1];
-
-      if (isNaN(parseFloat(n))) {
-        acc[k] = s[k];
-        return acc;
-      }
-
-      acc[k] = n * x;
-      if (t) acc[k] += t;
-      return acc;
-    }, {});
-    return res;
-  }, {});
-};
-
-var renderInMP = function renderInMP(_ref3) {
-  var canvasId = _ref3.canvasId,
-      xml = _ref3.xml,
-      style = _ref3.style;
+var renderInMP = function renderInMP(_ref2) {
+  var canvasId = _ref2.canvasId,
+      xml = _ref2.xml,
+      style = _ref2.style;
 
   var _wx$getSystemInfoSync = wx.getSystemInfoSync(),
       screenWidth = _wx$getSystemInfoSync.screenWidth,
@@ -3238,6 +3208,32 @@ var renderInMP = function renderInMP(_ref3) {
 };
 
 var index =  renderInMP;
+var LAYOUT_BASE_WIDTH = 375;
+
+function _scaleStyles(_ref3) {
+  var clientWidth = _ref3.clientWidth,
+      style = _ref3.style;
+  var x = clientWidth / LAYOUT_BASE_WIDTH;
+  return Object.keys(style).reduce(function (res, key) {
+    var s = style[key];
+    res[key] = Object.keys(s).reduce(function (acc, k) {
+      var _String$replace$split = String(s[k]).replace(/(\d+)(\D+)/g, '$1-$2').split('-'),
+          _String$replace$split2 = _slicedToArray(_String$replace$split, 2),
+          n = _String$replace$split2[0],
+          t = _String$replace$split2[1];
+
+      if (isNaN(parseFloat(n))) {
+        acc[k] = s[k];
+        return acc;
+      }
+
+      acc[k] = n * x;
+      if (t) acc[k] += t;
+      return acc;
+    }, {});
+    return res;
+  }, {});
+}
 
 function drawGrid(ctx, w, h) {
   ctx.save();
