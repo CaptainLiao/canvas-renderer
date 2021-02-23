@@ -2,11 +2,10 @@ import cangine from '../../cangine.mp.js'
 
 const xmlData = `
 <view id="container">
-  <image src="https://media.prod.mdn.mozit.cloud/attachments/2013/06/22/5395/505e0ef785fba7e3a5f9c1ac70e78658/backdrop.png" class="img"></image>
+  <image src="https://img.yzcdn.cn/vant/cat.jpeg" class="img"></image>
+  <image src="https://cdn.133.cn/ticket/h5/images/tabbar/v2/ticket-a.png" class="img2"></image>
   <text class="t3" value="这是t2 value">这真的是一条非常长非常长非常 长非常长非常长非常长 非常长非常长非常长非常长的字符串.</text>
-  <view class="center">
-    <image src="https://img01.yzcdn.cn/vant/cat.jpeg" class="img2"></image>
-  </view>
+
   
   <view class="redText">123</view>
 </view>

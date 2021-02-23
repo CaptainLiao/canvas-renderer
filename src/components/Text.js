@@ -57,10 +57,9 @@ export default class Text extends Element {
 
     this.renderBox()
 
-
-    ctx.setFont(this.style)
-    ctx.setFillStyle(this.style.color)
-    ctx.setTextBaseline(this.style.textBaseline)
+    ctx.font = `${this.style.fontWeight} ${this.style.fontSize} ${this.style.fontFamily}`
+    ctx.fillStyle = this.style.color
+    ctx.textBaseline =this.style.textBaseline
 
     let startX = this.layoutBox.x + this.style.borderLeftWidth + this.style.paddingLeft
     let startY = this.layoutBox.y + this.style.borderTopWidth + this.style.paddingTop

@@ -44,6 +44,7 @@ const renderInMP = ({ canvasId, xml, style}) => {
     canvasEle.height = canvasEle._height*dpr
     
     ctx.scale(dpr, dpr)
+    ctx.canvasEle = canvasEle
     
     const layout = new Layout({
       style: {

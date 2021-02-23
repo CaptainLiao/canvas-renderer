@@ -18,14 +18,14 @@ export default class Image extends Element {
     this.type = 'Image'
     this.src = src
     const img = createImage()
-    img.src = this.src
-    this.__img = img
+    img.src = this.src // 提前请求
   }
 
 
   render(ctx) {
     this.ctx = ctx
-    const img = this.__img
+    const img = createImage(ctx.canvasEle)
+    img.src = this.src // 这里不会重复请求
     
     return new Promise((resolve, reject) => {
       img.onload = () => {

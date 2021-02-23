@@ -25,8 +25,8 @@
 		"enhance": true
 	},
 	"compileType": "miniprogram",
-	"libVersion": "2.9.5",
-	"appid": "wx5a5ac39d0cc13dac",
+	"libVersion": "2.10.2",
+	"appid": "wxc0ebb192b589112e",
 	"projectname": "canvas-engine-demo",
 	"debugOptions": {
 		"hidedInDevtools": []

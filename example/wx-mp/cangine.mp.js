@@ -327,27 +327,13 @@ var Element = /*#__PURE__*/function () {
 
         __drawRoundBoxPath.call(this);
 
-        ctx.setFillStyle(this.style.backgroundColor);
+        ctx.fillStyle = this.style.backgroundColor;
         ctx.fill();
         ctx.restore();
       }
 
       __renderBorder.call(this);
-    } // renderLine() {
-    //   const ctx = this.ctx
-    //   __renderHelper.call(this, () => {
-    //     ctx.beginPath()
-    //     ctx.moveTo(10, 220)
-    //     ctx.lineTo(10, 320)
-    //     ctx.lineTo(200, 320)
-    //     ctx.setLineWidth(10)
-    //     // ctx.closePath()
-    //     // ctx.setFillStyle('#ccc')
-    //     // ctx.fill()
-    //     ctx.stroke()
-    //   })
-    // }
-
+    }
   }]);
 
   return Element;
@@ -428,15 +414,15 @@ function __renderBorder() {
   var _y = drawY + borderTopWidth / 2; // borderTop
 
 
-  ctx.arc(drawX + style.borderTopLeftRadius + borderLeftWidth / 2, _y + style.borderTopLeftRadius, style.borderTopLeftRadius, 5 / 8 * ONE_CIRCLE, 3 / 4 * ONE_CIRCLE, false);
-  ctx.moveTo(drawX + style.borderTopLeftRadius + borderLeftWidth / 2, _y);
+  ctx.arc(drawX + style.borderTopLeftRadius + borderLeftWidth / 2, _y + style.borderTopLeftRadius, style.borderTopLeftRadius, 5 / 8 * ONE_CIRCLE, 3 / 4 * ONE_CIRCLE, false); //ctx.moveTo(drawX + style.borderTopLeftRadius + borderLeftWidth/2 , _y);
+
   ctx.arc(_x, _y + style.borderTopRightRadius, style.borderTopRightRadius, 3 / 4 * ONE_CIRCLE, 7 / 8 * ONE_CIRCLE, false);
   var borderTopColor = style.borderTopColor;
 
   if (borderTopWidth && borderTopColor) {
     __renderHelper.call(this, function (ctx) {
-      ctx.setLineWidth(borderTopWidth);
-      ctx.setStrokeStyle(borderTopColor);
+      ctx.lineWidth = borderTopWidth;
+      ctx.strokeStyle = borderTopColor;
       ctx.stroke();
     });
   } // borderRight
@@ -446,15 +432,15 @@ function __renderBorder() {
   ctx.arc(drawX + box.width - style.borderTopRightRadius - borderRightWidth / 2, drawY + borderTopWidth / 2 + style.borderTopRightRadius, style.borderTopRightRadius, 7 / 8 * ONE_CIRCLE, 0, false);
   var borderBottomRightRadius = style.borderBottomRightRadius || style.borderRadius;
   _x = drawX + box.width - borderRightWidth / 2;
-  _y = drawY + box.height - borderBottomRightRadius - borderBottomWidth / 2;
-  ctx.lineTo(_x, _y);
+  _y = drawY + box.height - borderBottomRightRadius - borderBottomWidth / 2; //ctx.lineTo(_x, _y);
+
   ctx.arc(_x - borderBottomRightRadius, _y, borderBottomRightRadius, 0, 1 / 8 * ONE_CIRCLE, false);
   var borderRightColor = style.borderRightColor;
 
   if (borderRightWidth && borderRightColor) {
     __renderHelper.call(this, function () {
-      ctx.setLineWidth(borderRightWidth);
-      ctx.setStrokeStyle(borderRightColor);
+      ctx.lineWidth = borderRightWidth;
+      ctx.strokeStyle = borderRightColor;
       ctx.stroke();
     });
   } // borderBottom
@@ -464,15 +450,15 @@ function __renderBorder() {
   ctx.arc(_x - style.borderBottomRightRadius, _y, style.borderBottomRightRadius, 1 / 8 * ONE_CIRCLE, 1 / 4 * ONE_CIRCLE, false);
   var borderBottomLeftRadius = style.borderBottomLeftRadius || style.borderRadius;
   _x = drawX + borderBottomLeftRadius + borderLeftWidth / 2;
-  _y = drawY + box.height - borderBottomWidth / 2;
-  ctx.lineTo(_x, _y);
+  _y = drawY + box.height - borderBottomWidth / 2; //ctx.lineTo(_x, _y);
+
   ctx.arc(_x, _y - borderBottomLeftRadius, borderBottomLeftRadius, 1 / 4 * ONE_CIRCLE, 3 / 8 * ONE_CIRCLE, false);
   var borderBottomColor = style.borderBottomColor;
 
   if (borderBottomWidth && borderBottomColor) {
     __renderHelper.call(this, function () {
-      ctx.setLineWidth(borderBottomWidth);
-      ctx.setStrokeStyle(borderBottomColor);
+      ctx.lineWidth = borderBottomWidth;
+      ctx.strokeStyle = borderBottomColor;
       ctx.stroke();
     });
   } // borderLeft
@@ -482,16 +468,16 @@ function __renderBorder() {
   ctx.arc(_x, _y - borderBottomLeftRadius, borderBottomLeftRadius, 3 / 8 * ONE_CIRCLE, 1 / 2 * ONE_CIRCLE, false);
   var borderTopLeftRadius = style.borderTopLeftRadius || style.borderRadius;
   _x = drawX + borderLeftWidth / 2;
-  _y = drawY + borderTopLeftRadius + borderTopWidth / 2;
-  ctx.lineTo(_x, drawY + box.height - style.borderBottomLeftRadius - style.borderBottom); // 上左圆角
+  _y = drawY + borderTopLeftRadius + borderTopWidth / 2; //ctx.lineTo(_x, drawY + box.height - style.borderBottomLeftRadius - style.borderBottom)
+  // 上左圆角
 
   ctx.arc(_x + borderTopLeftRadius, _y, borderTopLeftRadius, 1 / 2 * ONE_CIRCLE, 5 / 8 * ONE_CIRCLE, false);
   var borderLeftColor = style.borderLeftColor;
 
   if (borderLeftWidth && borderLeftColor) {
     __renderHelper.call(this, function () {
-      ctx.setLineWidth(borderLeftWidth);
-      ctx.setStrokeStyle(borderLeftColor);
+      ctx.lineWidth = borderLeftWidth;
+      ctx.strokeStyle = borderLeftColor;
       ctx.stroke();
     });
   }
@@ -541,46 +527,20 @@ var View = /*#__PURE__*/function (_Element) {
   return View;
 }(Element);
 
-function canvasRenderer (ctx) {
-  var tmpt = {
-    setFont: function setFont(fontObj) {
-      var t = fontObj;
-
-      {
-        // 从基础库 1.9.90 开始，本接口停止维护，请使用 CanvasContext.font 代替
-        ctx.setFontSize && ctx.setFontSize(parseFloat(t.fontSize));
-        ctx.font = "".concat(t.fontWeight, " ").concat(t.fontSize, " ").concat(t.fontFamily);
-      }
-
-      ctx.font = "".concat(t.fontWeight, " ").concat(t.fontSize, " ").concat(t.fontFamily);
-    },
-    setTextBaseline: function setTextBaseline(textBaseline) {
-      ctx.textBaseline = textBaseline;
-    },
-    setFillStyle: function setFillStyle(fillStyle) {
-      ctx.fillStyle = fillStyle;
-    },
-    setStrokeStyle: function setStrokeStyle(strokeStyle) {
-      ctx.strokeStyle = strokeStyle;
-    },
-    setLineWidth: function setLineWidth(lineWidth) {
-      ctx.lineWidth = lineWidth;
-    }
-  };
-  Object.keys(tmpt).map(function (k) {
-    if (!ctx[k]) ctx[k] = tmpt[k];
-  });
-}
-
+var wxOffscreenCanvas = null;
 function createCanvas() {
+  // 基础库 2.7.0 开始支持
   {
-    return wx.createOffscreenCanvas();
+    if (!wxOffscreenCanvas) {
+      wxOffscreenCanvas = wx.createOffscreenCanvas();
+    }
+
+    return wxOffscreenCanvas;
   }
 }
-function createImage() {
+function createImage(canvasEle) {
   {
-    var canvas = createCanvas();
-    return canvas.createImage();
+    return (canvasEle || createCanvas()).createImage();
   }
 }
 
@@ -607,7 +567,6 @@ function getContext() {
     context = wx.createCanvasContext('offCanvas');
   }
 
-  canvasRenderer(context);
   return context;
 }
 
@@ -615,7 +574,7 @@ function getTextWidth(_ref2) {
   var style = _ref2.style,
       text = _ref2.text;
   var context = getContext();
-  context.setFont(style, text);
+  context.font = "".concat(style.fontWeight, " ").concat(style.fontSize, " ").concat(style.fontFamily);
   var w = context.measureText(text).width + style.paddingLeft + style.paddingRight;
   return w || 0;
 }
@@ -718,9 +677,9 @@ var Text = /*#__PURE__*/function (_Element) {
       this.ctx = ctx;
       ctx.save();
       this.renderBox();
-      ctx.setFont(this.style);
-      ctx.setFillStyle(this.style.color);
-      ctx.setTextBaseline(this.style.textBaseline);
+      ctx.font = "".concat(this.style.fontWeight, " ").concat(this.style.fontSize, " ").concat(this.style.fontFamily);
+      ctx.fillStyle = this.style.color;
+      ctx.textBaseline = this.style.textBaseline;
       var startX = this.layoutBox.x + this.style.borderLeftWidth + this.style.paddingLeft;
       var startY = this.layoutBox.y + this.style.borderTopWidth + this.style.paddingTop;
 
@@ -764,8 +723,8 @@ var Image = /*#__PURE__*/function (_Element) {
     _this.type = 'Image';
     _this.src = src;
     var img = createImage();
-    img.src = _this.src;
-    _this.__img = img;
+    img.src = _this.src; // 提前请求
+
     return _this;
   }
 
@@ -775,7 +734,9 @@ var Image = /*#__PURE__*/function (_Element) {
       var _this2 = this;
 
       this.ctx = ctx;
-      var img = this.__img;
+      var img = createImage(ctx.canvasEle);
+      img.src = this.src; // 这里不会重复请求
+
       return new Promise(function (resolve, reject) {
         img.onload = function () {
           ctx.save();
@@ -800,6 +761,13 @@ var Image = /*#__PURE__*/function (_Element) {
 
   return Image;
 }(Element);
+
+var comp = {
+  View: View,
+  Text: Text,
+  Element: Element,
+  Image: Image
+};
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2964,10 +2932,10 @@ var cssLayout = createCommonjsModule(function (module, exports) {
 });
 
 var nodeMap = {
-  view: View,
-  text: Text,
-  image: Image,
-  scrollview: View
+  view: comp.View,
+  text: comp.Text,
+  image: comp.Image,
+  scrollview: comp.View
 };
 
 var createRenderTree = function createRenderTree(node, style) {
@@ -3029,8 +2997,8 @@ function setLayoutBox(children) {
   });
 }
 
-var Layout = /*#__PURE__*/function (_Element) {
-  _inherits(Layout, _Element);
+var Layout = /*#__PURE__*/function (_comp$Element) {
+  _inherits(Layout, _comp$Element);
 
   var _super = _createSuper(Layout);
 
@@ -3107,7 +3075,6 @@ var Layout = /*#__PURE__*/function (_Element) {
   }, {
     key: "render",
     value: function render(ctx) {
-      canvasRenderer(ctx);
       this.renderContext = ctx;
 
       if (this.renderContext) {
@@ -3118,8 +3085,11 @@ var Layout = /*#__PURE__*/function (_Element) {
       var renderChildren = function renderChildren(children) {
         return children.reduce(function (promise, child) {
           return promise.then(function () {
-            renderChildren(child.children);
-            return child.render(ctx);
+            return Promise.resolve().then(function () {
+              return child.render(ctx);
+            }).then(function () {
+              return renderChildren(child.children);
+            });
           });
         }, Promise.resolve());
       };
@@ -3129,7 +3099,7 @@ var Layout = /*#__PURE__*/function (_Element) {
   }]);
 
   return Layout;
-}(Element); // helper
+}(comp.Element); // helper
 
 function reCalculate(list, layoutList) {
   list.forEach(function (child, index) {
@@ -3190,6 +3160,7 @@ var renderInMP = function renderInMP(_ref2) {
     canvasEle.width = canvasEle._width * dpr;
     canvasEle.height = canvasEle._height * dpr;
     ctx.scale(dpr, dpr);
+    ctx.canvasEle = canvasEle;
     var layout = new Layout({
       style: {
         width: 0,

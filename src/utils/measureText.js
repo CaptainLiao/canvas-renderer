@@ -1,6 +1,4 @@
 import {createCanvas} from './createEle'
-import canvasRenderer from '../components/canvas-renderer'
-
 
 export {
   getTextWidth,
@@ -29,15 +27,13 @@ function getContext() {
     context = wx.createCanvasContext('offCanvas')
   }
 
-  canvasRenderer(context)
-  
   return context;
 }
 
 function getTextWidth({style, text}) {
   const context = getContext();
 
-  context.setFont(style, text)
+  context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`
   const w = context.measureText(text).width + style.paddingLeft + style.paddingRight
 
   return w || 0;

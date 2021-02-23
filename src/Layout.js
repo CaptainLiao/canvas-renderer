@@ -1,10 +1,4 @@
-import {
-  Text,
-  View,
-  Image,
-  canvasRenderer,
-  Element,
-} from './components'
+import comp from './components'
 
 import {getTextWidth} from './utils/measureText'
 
@@ -19,10 +13,10 @@ export const STATE = {
 }
 
 const nodeMap = {
-  view: View,
-  text: Text,
-  image: Image,
-  scrollview: View
+  view: comp.View,
+  text: comp.Text,
+  image: comp.Image,
+  scrollview: comp.View
 }
 
 const createRenderTree = function (node, style) {
@@ -92,7 +86,7 @@ function setLayoutBox(children) {
   })
 }
 
-export default class Layout extends Element {
+export default class Layout extends comp.Element {
   constructor({
     style,
     name
@@ -166,8 +160,6 @@ export default class Layout extends Element {
   }
 
   render(ctx) {
-    canvasRenderer(ctx);
-    
     this.renderContext = ctx;
 
     if (this.renderContext) {
@@ -177,8 +169,9 @@ export default class Layout extends Element {
     const renderChildren = children => {
       return children.reduce((promise, child) => {
         return promise.then(() => {
-          renderChildren(child.children); 
-          return child.render(ctx)
+          return Promise.resolve()
+            .then(() => child.render(ctx))
+            .then(() => renderChildren(child.children))
         })
       }, Promise.resolve())
     }
