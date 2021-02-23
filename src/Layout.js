@@ -187,7 +187,7 @@ export default class Layout extends comp.Element {
 
   saveImageToPhotosAlbum(name = 'test.png') {
     if (__buildTarget__ !== 'mp') {
-      const errMsg = 'saveImageToPhotosAlbum 仅支持小程序是使用'
+      const errMsg = 'saveImageToPhotosAlbum 仅支持小程序使用'
       console.error(errMsg);
       throw new Error(errMsg)
     }
