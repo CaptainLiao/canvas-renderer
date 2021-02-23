@@ -89,6 +89,12 @@ Component({
     onLoad: function () {
     
       cangine({canvasId: '#canvas', xml: xmlData, style, tap: this.onTap})
+        .then(layout => {
+          //return layout.saveImageToPhotosAlbum()
+        })
+        .then(res => {
+          console.log(res)
+        })
     },
   }
 })

@@ -1,6 +1,7 @@
 import Layout from './Layout'
+import global from './utils/global'
 
-const renderInH5 = ({ canvasId, xml, style}) => {
+const renderInH5 = ({ canvasId, xml, style }) => {
   const dpr = window.devicePixelRatio
   const w = document.documentElement.clientWidth
   const h = document.documentElement.clientHeight
@@ -12,6 +13,7 @@ const renderInH5 = ({ canvasId, xml, style}) => {
   canvasEle.style.height = `${h}px`
 
   ctx.scale(dpr, dpr)
+  global.setCanvas(canvasEle)
 
   const layout = new Layout({
     style: {
@@ -22,13 +24,20 @@ const renderInH5 = ({ canvasId, xml, style}) => {
   });
   
   style = _scaleStyles({style, clientWidth: w})
-  layout.init(xml, style).render(ctx)
 
-  console.log(layout);
   drawGrid(ctx, w, h)
+
+  return layout.init(xml, style)
+    .render(ctx)
+    .then(() => layout)
+
+
+
+  return Promise.resolve(layout);
 };
 
-const renderInMP = ({ canvasId, xml, style}) => {
+// canvasComponentThis: 在自定义组件下，当前组件实例的this
+const renderInMP = ({ canvasId, xml, style, canvasComponentThis}) => {
   const {
     screenWidth,
     pixelRatio,
@@ -37,31 +46,35 @@ const renderInMP = ({ canvasId, xml, style}) => {
 
   const canvasRef = wx.createSelectorQuery().select(canvasId)
 
-  canvasRef.node(res => {
-    const canvasEle = res.node;
-    const ctx = canvasEle.getContext('2d')
-    canvasEle.width = canvasEle._width*dpr
-    canvasEle.height = canvasEle._height*dpr
-    
-    ctx.scale(dpr, dpr)
-    ctx.canvasEle = canvasEle
-    
-    const layout = new Layout({
-      style: {
-        width: 0,
-        height: 0,
-      },
-      name: 'layout'
-    });
-
-    style = _scaleStyles({style, clientWidth: screenWidth})
-    layout.init(xml, style).render(ctx)
+  return new Promise((resolve, reject) => {
+    canvasRef.node(res => {
+      const canvasEle = res.node;
+      const ctx = canvasEle.getContext('2d')
+      canvasEle.width = canvasEle._width*dpr
+      canvasEle.height = canvasEle._height*dpr
+      
+      ctx.scale(dpr, dpr)
+      global.setCanvas(canvasEle)
+      global.setCanvasId(canvasId)
+      global.setCanvasComponentThis(canvasComponentThis)
+      
+      const layout = new Layout({
+        style: {
+          width: 0,
+          height: 0,
+        },
+        name: 'layout',
+      });
   
-    console.log(layout);
-    drawGrid(ctx, canvasEle.width, canvasEle.height)
+      style = _scaleStyles({style, clientWidth: screenWidth})
+      drawGrid(ctx, canvasEle.width, canvasEle.height)
 
+      return layout.init(xml, style)
+        .render(ctx)
+        .then(() => resolve(layout))
+    })
+    .exec()
   })
-  .exec()
 };
 
 

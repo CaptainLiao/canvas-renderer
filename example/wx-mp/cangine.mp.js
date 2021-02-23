@@ -414,8 +414,7 @@ function __renderBorder() {
   var _y = drawY + borderTopWidth / 2; // borderTop
 
 
-  ctx.arc(drawX + style.borderTopLeftRadius + borderLeftWidth / 2, _y + style.borderTopLeftRadius, style.borderTopLeftRadius, 5 / 8 * ONE_CIRCLE, 3 / 4 * ONE_CIRCLE, false); //ctx.moveTo(drawX + style.borderTopLeftRadius + borderLeftWidth/2 , _y);
-
+  ctx.arc(drawX + style.borderTopLeftRadius + borderLeftWidth / 2, _y + style.borderTopLeftRadius, style.borderTopLeftRadius, 5 / 8 * ONE_CIRCLE, 3 / 4 * ONE_CIRCLE, false);
   ctx.arc(_x, _y + style.borderTopRightRadius, style.borderTopRightRadius, 3 / 4 * ONE_CIRCLE, 7 / 8 * ONE_CIRCLE, false);
   var borderTopColor = style.borderTopColor;
 
@@ -432,8 +431,7 @@ function __renderBorder() {
   ctx.arc(drawX + box.width - style.borderTopRightRadius - borderRightWidth / 2, drawY + borderTopWidth / 2 + style.borderTopRightRadius, style.borderTopRightRadius, 7 / 8 * ONE_CIRCLE, 0, false);
   var borderBottomRightRadius = style.borderBottomRightRadius || style.borderRadius;
   _x = drawX + box.width - borderRightWidth / 2;
-  _y = drawY + box.height - borderBottomRightRadius - borderBottomWidth / 2; //ctx.lineTo(_x, _y);
-
+  _y = drawY + box.height - borderBottomRightRadius - borderBottomWidth / 2;
   ctx.arc(_x - borderBottomRightRadius, _y, borderBottomRightRadius, 0, 1 / 8 * ONE_CIRCLE, false);
   var borderRightColor = style.borderRightColor;
 
@@ -450,8 +448,7 @@ function __renderBorder() {
   ctx.arc(_x - style.borderBottomRightRadius, _y, style.borderBottomRightRadius, 1 / 8 * ONE_CIRCLE, 1 / 4 * ONE_CIRCLE, false);
   var borderBottomLeftRadius = style.borderBottomLeftRadius || style.borderRadius;
   _x = drawX + borderBottomLeftRadius + borderLeftWidth / 2;
-  _y = drawY + box.height - borderBottomWidth / 2; //ctx.lineTo(_x, _y);
-
+  _y = drawY + box.height - borderBottomWidth / 2;
   ctx.arc(_x, _y - borderBottomLeftRadius, borderBottomLeftRadius, 1 / 4 * ONE_CIRCLE, 3 / 8 * ONE_CIRCLE, false);
   var borderBottomColor = style.borderBottomColor;
 
@@ -468,8 +465,7 @@ function __renderBorder() {
   ctx.arc(_x, _y - borderBottomLeftRadius, borderBottomLeftRadius, 3 / 8 * ONE_CIRCLE, 1 / 2 * ONE_CIRCLE, false);
   var borderTopLeftRadius = style.borderTopLeftRadius || style.borderRadius;
   _x = drawX + borderLeftWidth / 2;
-  _y = drawY + borderTopLeftRadius + borderTopWidth / 2; //ctx.lineTo(_x, drawY + box.height - style.borderBottomLeftRadius - style.borderBottom)
-  // 上左圆角
+  _y = drawY + borderTopLeftRadius + borderTopWidth / 2; // 上左圆角
 
   ctx.arc(_x + borderTopLeftRadius, _y, borderTopLeftRadius, 1 / 2 * ONE_CIRCLE, 5 / 8 * ONE_CIRCLE, false);
   var borderLeftColor = style.borderLeftColor;
@@ -527,6 +523,39 @@ var View = /*#__PURE__*/function (_Element) {
   return View;
 }(Element);
 
+var data = {
+  canvasElement: null,
+  canvasId: null,
+  canvasComponentThis: null,
+  canvasContext: null
+};
+var global$1 = {
+  getCanvasId: function getCanvasId() {
+    return data.canvasId;
+  },
+  setCanvasId: function setCanvasId(canvasId) {
+    data.canvasId = canvasId.slice(1);
+  },
+  getCanvas: function getCanvas() {
+    return data.canvasElement;
+  },
+  setCanvas: function setCanvas(canvasElement) {
+    data.canvasElement = canvasElement;
+  },
+  getCanvasComponentThis: function getCanvasComponentThis() {
+    return data.canvasComponentThis;
+  },
+  setCanvasComponentThis: function setCanvasComponentThis(_this) {
+    return data.canvasComponentThis = _this;
+  },
+  getContext: function getContext() {
+    return data.canvasContext;
+  },
+  setContext: function setContext(context) {
+    return data.canvasContext = context;
+  }
+};
+
 var wxOffscreenCanvas = null;
 function createCanvas() {
   // 基础库 2.7.0 开始支持
@@ -538,9 +567,9 @@ function createCanvas() {
     return wxOffscreenCanvas;
   }
 }
-function createImage(canvasEle) {
+function createImage() {
   {
-    return (canvasEle || createCanvas()).createImage();
+    return global$1.getCanvas().createImage();
   }
 }
 
@@ -723,6 +752,7 @@ var Image = /*#__PURE__*/function (_Element) {
     _this.type = 'Image';
     _this.src = src;
     var img = createImage();
+
     img.src = _this.src; // 提前请求
 
     return _this;
@@ -734,7 +764,8 @@ var Image = /*#__PURE__*/function (_Element) {
       var _this2 = this;
 
       this.ctx = ctx;
-      var img = createImage(ctx.canvasEle);
+      var img = createImage();
+
       img.src = this.src; // 这里不会重复请求
 
       return new Promise(function (resolve, reject) {
@@ -3094,7 +3125,32 @@ var Layout = /*#__PURE__*/function (_comp$Element) {
         }, Promise.resolve());
       };
 
-      renderChildren(this.children);
+      return renderChildren(this.children);
+    }
+  }, {
+    key: "toDataURLSync",
+    value: function toDataURLSync() {
+      var type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'image/png';
+      var encoderOptions = arguments.length > 1 ? arguments[1] : undefined;
+      // 基础库 2.11.0 开始支持
+      var url = global$1.getCanvas().toDataURL(type, encoderOptions);
+      return url;
+    }
+  }, {
+    key: "saveImageToPhotosAlbum",
+    value: function saveImageToPhotosAlbum() {
+      var name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'test.png';
+
+      var filePath = "".concat(wx.env.USER_DATA_PATH, "/").concat(name);
+      var fileManager = wx.getFileSystemManager();
+      fileManager.writeFileSync(filePath, this.toDataURLSync().slice(22), 'base64');
+      return new Promise(function (resolve, reject) {
+        wx.saveImageToPhotosAlbum({
+          filePath: filePath,
+          success: resolve,
+          fail: reject
+        });
+      });
     }
   }]);
 
@@ -3146,7 +3202,8 @@ function reCalculate(list, layoutList) {
 var renderInMP = function renderInMP(_ref2) {
   var canvasId = _ref2.canvasId,
       xml = _ref2.xml,
-      style = _ref2.style;
+      style = _ref2.style,
+      canvasComponentThis = _ref2.canvasComponentThis;
 
   var _wx$getSystemInfoSync = wx.getSystemInfoSync(),
       screenWidth = _wx$getSystemInfoSync.screenWidth,
@@ -3154,28 +3211,33 @@ var renderInMP = function renderInMP(_ref2) {
 
   var dpr = pixelRatio;
   var canvasRef = wx.createSelectorQuery().select(canvasId);
-  canvasRef.node(function (res) {
-    var canvasEle = res.node;
-    var ctx = canvasEle.getContext('2d');
-    canvasEle.width = canvasEle._width * dpr;
-    canvasEle.height = canvasEle._height * dpr;
-    ctx.scale(dpr, dpr);
-    ctx.canvasEle = canvasEle;
-    var layout = new Layout({
-      style: {
-        width: 0,
-        height: 0
-      },
-      name: 'layout'
-    });
-    style = _scaleStyles({
-      style: style,
-      clientWidth: screenWidth
-    });
-    layout.init(xml, style).render(ctx);
-    console.log(layout);
-    drawGrid(ctx, canvasEle.width, canvasEle.height);
-  }).exec();
+  return new Promise(function (resolve, reject) {
+    canvasRef.node(function (res) {
+      var canvasEle = res.node;
+      var ctx = canvasEle.getContext('2d');
+      canvasEle.width = canvasEle._width * dpr;
+      canvasEle.height = canvasEle._height * dpr;
+      ctx.scale(dpr, dpr);
+      global$1.setCanvas(canvasEle);
+      global$1.setCanvasId(canvasId);
+      global$1.setCanvasComponentThis(canvasComponentThis);
+      var layout = new Layout({
+        style: {
+          width: 0,
+          height: 0
+        },
+        name: 'layout'
+      });
+      style = _scaleStyles({
+        style: style,
+        clientWidth: screenWidth
+      });
+      drawGrid(ctx, canvasEle.width, canvasEle.height);
+      return layout.init(xml, style).render(ctx).then(function () {
+        return resolve(layout);
+      });
+    }).exec();
+  });
 };
 
 var index =  renderInMP;

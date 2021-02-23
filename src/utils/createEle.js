@@ -1,3 +1,5 @@
+import global from './global'
+
 let wxOffscreenCanvas = null
 
 export function createCanvas() {
@@ -12,9 +14,9 @@ export function createCanvas() {
   return document.createElement('canvas');
 }
 
-export function createImage(canvasEle) {
+export function createImage() {
   if (__buildTarget__ === 'mp') {
-    return (canvasEle || createCanvas()).createImage();
+    return global.getCanvas().createImage();
   }
   return new Image()
 }

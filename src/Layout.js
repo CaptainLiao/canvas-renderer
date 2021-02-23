@@ -1,6 +1,7 @@
 import comp from './components'
 
 import {getTextWidth} from './utils/measureText'
+import global from './utils/global'
 
 import parser from './libs/fast-xml-parser/parser'
 import computeLayout from 'css-layout'
@@ -175,7 +176,34 @@ export default class Layout extends comp.Element {
         })
       }, Promise.resolve())
     }
-    renderChildren(this.children)
+    return renderChildren(this.children)
+  }
+
+  toDataURLSync(type = 'image/png', encoderOptions) {
+    // 基础库 2.11.0 开始支持
+    const url = global.getCanvas().toDataURL(type, encoderOptions)
+    return url
+  }
+
+  saveImageToPhotosAlbum(name = 'test.png') {
+    if (__buildTarget__ !== 'mp') {
+      const errMsg = 'saveImageToPhotosAlbum 仅支持小程序是使用'
+      console.error(errMsg);
+      throw new Error(errMsg)
+    }
+
+    const filePath = `${wx.env.USER_DATA_PATH}/${name}`
+    const fileManager = wx.getFileSystemManager()
+    
+    fileManager.writeFileSync(filePath, this.toDataURLSync().slice(22), 'base64')
+
+    return new Promise((resolve, reject) => {
+      wx.saveImageToPhotosAlbum({
+        filePath,
+        success: resolve,
+        fail: reject
+      })
+    })
   }
 }
 

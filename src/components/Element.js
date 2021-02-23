@@ -91,9 +91,6 @@ export default class Element{
     }
     __renderBorder.call(this)
   }
-
-
-
 }
 
 function __renderHelper(fn) {
@@ -197,7 +194,7 @@ function __renderBorder() {
     3/4 * ONE_CIRCLE, 
     false
   )
-  //ctx.moveTo(drawX + style.borderTopLeftRadius + borderLeftWidth/2 , _y);
+
   ctx.arc(_x, _y + style.borderTopRightRadius, style.borderTopRightRadius, 3/4 * ONE_CIRCLE, 7/8 * ONE_CIRCLE, false);
 
   const borderTopColor = style.borderTopColor
@@ -219,7 +216,6 @@ function __renderBorder() {
   const borderBottomRightRadius = style.borderBottomRightRadius || style.borderRadius
   _x = drawX + box.width - borderRightWidth / 2
   _y = drawY + box.height - borderBottomRightRadius - borderBottomWidth / 2
-  //ctx.lineTo(_x, _y);
   ctx.arc(_x - borderBottomRightRadius, _y, borderBottomRightRadius, 0, 1/8 * ONE_CIRCLE, false);
 
   const borderRightColor = style.borderRightColor
@@ -238,7 +234,6 @@ function __renderBorder() {
   const borderBottomLeftRadius = style.borderBottomLeftRadius || style.borderRadius
   _x = drawX + borderBottomLeftRadius + borderLeftWidth / 2
   _y = drawY + box.height - borderBottomWidth / 2
-  //ctx.lineTo(_x, _y);
   ctx.arc(_x, _y - borderBottomLeftRadius, borderBottomLeftRadius, 1/4 *ONE_CIRCLE, 3/8* ONE_CIRCLE, false);
   const borderBottomColor = style.borderBottomColor
   if (borderBottomWidth && borderBottomColor) {
@@ -255,7 +250,6 @@ function __renderBorder() {
   const borderTopLeftRadius = style.borderTopLeftRadius || style.borderRadius
   _x =  drawX + borderLeftWidth / 2
   _y = drawY + borderTopLeftRadius + borderTopWidth / 2
-  //ctx.lineTo(_x, drawY + box.height - style.borderBottomLeftRadius - style.borderBottom)
   // 上左圆角
   ctx.arc(_x + borderTopLeftRadius, _y, borderTopLeftRadius, 1/2* ONE_CIRCLE, 5/8 * ONE_CIRCLE, false)
   const borderLeftColor = style.borderLeftColor

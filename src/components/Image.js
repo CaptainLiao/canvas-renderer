@@ -18,13 +18,18 @@ export default class Image extends Element {
     this.type = 'Image'
     this.src = src
     const img = createImage()
+    if(__buildTarget__ === 'web') {
+      img.setAttribute("crossOrigin",'Anonymous')
+    }
     img.src = this.src // 提前请求
   }
 
-
   render(ctx) {
     this.ctx = ctx
-    const img = createImage(ctx.canvasEle)
+    const img = createImage()
+    if(__buildTarget__ === 'web') {
+      img.setAttribute("crossOrigin",'Anonymous')
+    }
     img.src = this.src // 这里不会重复请求
     
     return new Promise((resolve, reject) => {
