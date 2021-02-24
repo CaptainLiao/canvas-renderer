@@ -7,7 +7,7 @@ export default {
   ...commonConifg,
   input: 'example/web/index.js',
   output: {
-    file: 'example/web/CanvasRenderer.js',
+    file: 'example/web/canvas-renderer.js',
     format: 'esm'
   },
 

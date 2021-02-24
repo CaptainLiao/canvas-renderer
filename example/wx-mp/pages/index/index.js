@@ -1,4 +1,4 @@
-import Renderer from '../../CanvasRenderer'
+import Renderer from '../../canvas-renderer'
 
 const xmlData = `
 <View id="container">

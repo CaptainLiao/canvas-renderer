@@ -1,10 +1,12 @@
 const replace = require('@rollup/plugin-replace')
 const commonConifg = require('./rollup.config.base')
 
+import { terser } from 'rollup-plugin-terser'
+
 export default {
   ...commonConifg,
   output: {
-    file: 'dist/web/CanvasRenderer.js',
+    file: 'dist/web/canvas-renderer.min.js',
     format: 'esm'
   },
 
@@ -13,5 +15,6 @@ export default {
       __buildTarget__: JSON.stringify('web'),
       preventAssignment: true
     }),
+    terser()
   ])
 }

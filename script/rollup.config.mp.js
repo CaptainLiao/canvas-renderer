@@ -7,7 +7,7 @@ export default [
   {
     ...commonConifg,
     output: {
-      file: 'example/wx-mp/CanvasRenderer.js',
+      file: 'example/wx-mp/canvas-renderer.js',
       format: 'esm'
     },
     plugins: commonConifg.plugins.concat([
