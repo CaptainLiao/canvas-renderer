@@ -1,7 +1,7 @@
 import {
   defaultStyle,
   parseStyle
-} from './style.js';
+} from './utils/style';
 
 let uuid = 0;
 

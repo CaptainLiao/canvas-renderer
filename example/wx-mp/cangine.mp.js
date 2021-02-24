@@ -481,48 +481,6 @@ function __renderBorder() {
   ctx.restore();
 }
 
-var View = /*#__PURE__*/function (_Element) {
-  _inherits(View, _Element);
-
-  var _super = _createSuper(View);
-
-  function View(_ref) {
-    var _this;
-
-    var _ref$style = _ref.style,
-        style = _ref$style === void 0 ? {} : _ref$style,
-        _ref$props = _ref.props,
-        props = _ref$props === void 0 ? {} : _ref$props,
-        _ref$idName = _ref.idName,
-        idName = _ref$idName === void 0 ? '' : _ref$idName,
-        _ref$className = _ref.className,
-        className = _ref$className === void 0 ? '' : _ref$className;
-
-    _classCallCheck(this, View);
-
-    _this = _super.call(this, {
-      style: style,
-      props: props,
-      idName: idName,
-      className: className
-    });
-    _this.type = 'View';
-    return _this;
-  }
-
-  _createClass(View, [{
-    key: "render",
-    value: function render(ctx) {
-      this.ctx = ctx;
-      ctx.save();
-      this.renderBox();
-      ctx.restore();
-    }
-  }]);
-
-  return View;
-}(Element);
-
 var data = {
   canvasElement: null,
   canvasId: null,
@@ -643,155 +601,6 @@ function getTextWithEllipsis(style, text) {
 
   return length && textOverflow === 'ellipsis' ? str + '...' : str;
 }
-
-var defaultTextStyle = {
-  fontSize: '12px',
-  fontWeight: 'normal',
-  fontFamily: "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"PingFangSC\",    \"Microsoft YaHei\", \"Microsoft JhengHei\", \"Source Han Sans SC\", \"WenQuanYi Micro Hei\", SimSun,sans-serif",
-  text: '',
-  textBaseline: 'top',
-  color: '#000'
-};
-
-var Text = /*#__PURE__*/function (_Element) {
-  _inherits(Text, _Element);
-
-  var _super = _createSuper(Text);
-
-  function Text(_ref) {
-    var _this;
-
-    var _ref$style = _ref.style,
-        style = _ref$style === void 0 ? {} : _ref$style,
-        _text_ = _ref._text_,
-        _ref$idName = _ref.idName,
-        idName = _ref$idName === void 0 ? '' : _ref$idName,
-        _ref$className = _ref.className,
-        className = _ref$className === void 0 ? '' : _ref$className;
-
-    _classCallCheck(this, Text);
-
-    style = _objectSpread2(_objectSpread2({}, defaultTextStyle), style);
-    style.lineHeight = getLineHeight({
-      style: style
-    });
-    _this = _super.call(this, {
-      style: style,
-      idName: idName,
-      className: className
-    });
-    style = _this.style;
-    var text = _text_;
-
-    if (style.width === undefined) {
-      style.width = getTextWidth({
-        text: text,
-        style: style
-      });
-    } else if (style.textOverflow === 'ellipsis') {
-      text = getTextWithEllipsis(style, text);
-    }
-
-    _this.text = text;
-    _this.__lines = [];
-    _this.type = 'Text';
-    return _this;
-  }
-
-  _createClass(Text, [{
-    key: "render",
-    value: function render(ctx) {
-      var _this2 = this;
-
-      this.ctx = ctx;
-      ctx.save();
-      this.renderBox();
-      ctx.font = "".concat(this.style.fontWeight, " ").concat(this.style.fontSize, " ").concat(this.style.fontFamily);
-      ctx.fillStyle = this.style.color;
-      ctx.textBaseline = this.style.textBaseline;
-      var startX = this.layoutBox.x + this.style.borderLeftWidth + this.style.paddingLeft;
-      var startY = this.layoutBox.y + this.style.borderTopWidth + this.style.paddingTop;
-
-      this.__lines.forEach(function (line, index) {
-        ctx.fillText(line.text, startX, startY + index * parseFloat(_this2.style.lineHeight));
-      });
-
-      ctx.restore();
-    }
-  }]);
-
-  return Text;
-}(Element);
-
-var Image = /*#__PURE__*/function (_Element) {
-  _inherits(Image, _Element);
-
-  var _super = _createSuper(Image);
-
-  function Image(_ref) {
-    var _this;
-
-    var _ref$style = _ref.style,
-        style = _ref$style === void 0 ? {} : _ref$style,
-        _ref$props = _ref.props,
-        props = _ref$props === void 0 ? {} : _ref$props,
-        _ref$idName = _ref.idName,
-        idName = _ref$idName === void 0 ? '' : _ref$idName,
-        _ref$className = _ref.className,
-        className = _ref$className === void 0 ? '' : _ref$className,
-        src = _ref.src;
-
-    _classCallCheck(this, Image);
-
-    _this = _super.call(this, {
-      style: style,
-      props: props,
-      idName: idName,
-      className: className
-    });
-    _this.type = 'Image';
-    _this.src = src;
-    var img = createImage();
-
-    img.src = _this.src; // 提前请求
-
-    return _this;
-  }
-
-  _createClass(Image, [{
-    key: "render",
-    value: function render(ctx) {
-      var _this2 = this;
-
-      this.ctx = ctx;
-      var img = createImage();
-
-      img.src = this.src; // 这里不会重复请求
-
-      return new Promise(function (resolve, reject) {
-        img.onload = function () {
-          ctx.save();
-
-          __drawRoundBoxPath.call(_this2);
-
-          ctx.clip();
-          var _this2$layoutBox = _this2.layoutBox,
-              x = _this2$layoutBox.x,
-              y = _this2$layoutBox.y,
-              width = _this2$layoutBox.width,
-              height = _this2$layoutBox.height;
-          ctx.drawImage(img, x, y, width, height);
-          ctx.restore();
-          resolve();
-        };
-
-        img.onerror = reject;
-      });
-    }
-  }]);
-
-  return Image;
-}(Element);
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -3238,8 +3047,8 @@ var Renderer = /*#__PURE__*/function () {
       });
     }
   }], [{
-    key: "use",
-    value: function use(name, ELEMENT) {
+    key: "usePlugin",
+    value: function usePlugin(name, ELEMENT) {
       Layout.prototype['$' + name] = ELEMENT;
     }
   }]);
@@ -3321,9 +3130,200 @@ function drawGrid(ctx, w, h) {
   ctx.restore();
 }
 
-Renderer.use('Image', Image);
-Renderer.use('Text', Text);
-Renderer.use('View', View);
+var Image = /*#__PURE__*/function (_Element) {
+  _inherits(Image, _Element);
+
+  var _super = _createSuper(Image);
+
+  function Image(_ref) {
+    var _this;
+
+    var _ref$style = _ref.style,
+        style = _ref$style === void 0 ? {} : _ref$style,
+        _ref$props = _ref.props,
+        props = _ref$props === void 0 ? {} : _ref$props,
+        _ref$idName = _ref.idName,
+        idName = _ref$idName === void 0 ? '' : _ref$idName,
+        _ref$className = _ref.className,
+        className = _ref$className === void 0 ? '' : _ref$className,
+        src = _ref.src;
+
+    _classCallCheck(this, Image);
+
+    _this = _super.call(this, {
+      style: style,
+      props: props,
+      idName: idName,
+      className: className
+    });
+    _this.type = 'Image';
+    _this.src = src;
+    var img = createImage();
+
+    img.src = _this.src; // 提前请求
+
+    return _this;
+  }
+
+  _createClass(Image, [{
+    key: "render",
+    value: function render(ctx) {
+      var _this2 = this;
+
+      this.ctx = ctx;
+      var img = createImage();
+
+      img.src = this.src; // 这里不会重复请求
+
+      return new Promise(function (resolve, reject) {
+        img.onload = function () {
+          ctx.save();
+
+          __drawRoundBoxPath.call(_this2);
+
+          ctx.clip();
+          var _this2$layoutBox = _this2.layoutBox,
+              x = _this2$layoutBox.x,
+              y = _this2$layoutBox.y,
+              width = _this2$layoutBox.width,
+              height = _this2$layoutBox.height;
+          ctx.drawImage(img, x, y, width, height);
+          ctx.restore();
+          resolve();
+        };
+
+        img.onerror = reject;
+      });
+    }
+  }]);
+
+  return Image;
+}(Element);
+
+var defaultTextStyle = {
+  fontSize: '12px',
+  fontWeight: 'normal',
+  fontFamily: "-apple-system, BlinkMacSystemFont, \"PingFang SC\", \"PingFangSC\",    \"Microsoft YaHei\", \"Microsoft JhengHei\", \"Source Han Sans SC\", \"WenQuanYi Micro Hei\", SimSun,sans-serif",
+  text: '',
+  textBaseline: 'top',
+  color: '#000'
+};
+
+var Text = /*#__PURE__*/function (_Element) {
+  _inherits(Text, _Element);
+
+  var _super = _createSuper(Text);
+
+  function Text(_ref) {
+    var _this;
+
+    var _ref$style = _ref.style,
+        style = _ref$style === void 0 ? {} : _ref$style,
+        _text_ = _ref._text_,
+        _ref$idName = _ref.idName,
+        idName = _ref$idName === void 0 ? '' : _ref$idName,
+        _ref$className = _ref.className,
+        className = _ref$className === void 0 ? '' : _ref$className;
+
+    _classCallCheck(this, Text);
+
+    style = _objectSpread2(_objectSpread2({}, defaultTextStyle), style);
+    style.lineHeight = getLineHeight({
+      style: style
+    });
+    _this = _super.call(this, {
+      style: style,
+      idName: idName,
+      className: className
+    });
+    style = _this.style;
+    var text = _text_;
+
+    if (style.width === undefined) {
+      style.width = getTextWidth({
+        text: text,
+        style: style
+      });
+    } else if (style.textOverflow === 'ellipsis') {
+      text = getTextWithEllipsis(style, text);
+    }
+
+    _this.text = text;
+    _this.__lines = [];
+    _this.type = 'Text';
+    return _this;
+  }
+
+  _createClass(Text, [{
+    key: "render",
+    value: function render(ctx) {
+      var _this2 = this;
+
+      this.ctx = ctx;
+      ctx.save();
+      this.renderBox();
+      ctx.font = "".concat(this.style.fontWeight, " ").concat(this.style.fontSize, " ").concat(this.style.fontFamily);
+      ctx.fillStyle = this.style.color;
+      ctx.textBaseline = this.style.textBaseline;
+      var startX = this.layoutBox.x + this.style.borderLeftWidth + this.style.paddingLeft;
+      var startY = this.layoutBox.y + this.style.borderTopWidth + this.style.paddingTop;
+
+      this.__lines.forEach(function (line, index) {
+        ctx.fillText(line.text, startX, startY + index * parseFloat(_this2.style.lineHeight));
+      });
+
+      ctx.restore();
+    }
+  }]);
+
+  return Text;
+}(Element);
+
+var View = /*#__PURE__*/function (_Element) {
+  _inherits(View, _Element);
+
+  var _super = _createSuper(View);
+
+  function View(_ref) {
+    var _this;
+
+    var _ref$style = _ref.style,
+        style = _ref$style === void 0 ? {} : _ref$style,
+        _ref$props = _ref.props,
+        props = _ref$props === void 0 ? {} : _ref$props,
+        _ref$idName = _ref.idName,
+        idName = _ref$idName === void 0 ? '' : _ref$idName,
+        _ref$className = _ref.className,
+        className = _ref$className === void 0 ? '' : _ref$className;
+
+    _classCallCheck(this, View);
+
+    _this = _super.call(this, {
+      style: style,
+      props: props,
+      idName: idName,
+      className: className
+    });
+    _this.type = 'View';
+    return _this;
+  }
+
+  _createClass(View, [{
+    key: "render",
+    value: function render(ctx) {
+      this.ctx = ctx;
+      ctx.save();
+      this.renderBox();
+      ctx.restore();
+    }
+  }]);
+
+  return View;
+}(Element);
+
+Renderer.usePlugin('Image', Image);
+Renderer.usePlugin('Text', Text);
+Renderer.usePlugin('View', View);
 
 export default Renderer;
 export { Element };

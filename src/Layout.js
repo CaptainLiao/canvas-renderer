@@ -1,10 +1,5 @@
-import {
-  Element,
-} from './components'
-
+import Element from './Element'
 import {getTextWidth} from './utils/measureText'
-import global from './utils/global'
-
 import parser from './libs/fast-xml-parser/parser'
 import computeLayout from 'css-layout'
 

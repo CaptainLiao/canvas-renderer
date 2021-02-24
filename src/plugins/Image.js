@@ -1,4 +1,4 @@
-import Element, {__drawRoundBoxPath} from './Element';
+import Element, {__drawRoundBoxPath} from '../Element';
 import {createImage} from '../utils/createEle'
 
 export default class Image extends Element {

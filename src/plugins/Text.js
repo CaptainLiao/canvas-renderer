@@ -3,7 +3,7 @@ import {
   getLineHeight,
   getTextWithEllipsis
 } from '../utils/measureText'
-import Element from './Element';
+import Element from '../Element';
 
 const defaultTextStyle = {
   fontSize: '12px',

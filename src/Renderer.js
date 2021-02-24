@@ -15,7 +15,7 @@ export default class Renderer {
     this.renderred = null
   }
 
-  static use(name, ELEMENT) {
+  static usePlugin(name, ELEMENT) {
     Layout.prototype['$' + name] = ELEMENT
   }
 

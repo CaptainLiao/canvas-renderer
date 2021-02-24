@@ -1,14 +1,12 @@
 import Renderer from './Renderer'
-import {
-  Element,
-  Image,
-  Text,
-  View,
-} from './components'
+import Element from './Element'
+import Image from './plugins/Image'
+import Text from './plugins/Text'
+import View from './plugins/View'
 
-Renderer.use('Image', Image)
-Renderer.use('Text', Text)
-Renderer.use('View', View)
+Renderer.usePlugin('Image', Image)
+Renderer.usePlugin('Text', Text)
+Renderer.usePlugin('View', View)
 
 export {
   Element
