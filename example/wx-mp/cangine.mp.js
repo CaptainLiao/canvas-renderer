@@ -793,13 +793,6 @@ var Image = /*#__PURE__*/function (_Element) {
   return Image;
 }(Element);
 
-var comp = {
-  View: View,
-  Text: Text,
-  Element: Element,
-  Image: Image
-};
-
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function createCommonjsModule(fn) {
@@ -2962,12 +2955,11 @@ var cssLayout = createCommonjsModule(function (module, exports) {
   });
 });
 
-var nodeMap = {
-  view: comp.View,
-  text: comp.Text,
-  image: comp.Image,
-  scrollview: comp.View
-};
+//   "UNINIT": "UNINIT",
+//   "INITED": "INITED",
+//   "RENDERED": "RENDERED",
+//   "CLEAR": "CLEAR",
+// }
 
 var createRenderTree = function createRenderTree(node, style) {
   var _this = this;
@@ -3003,7 +2995,7 @@ var createRenderTree = function createRenderTree(node, style) {
   args.idName = id;
   args.className = attr["class"] || '';
   args._text_ = node._text_;
-  var NODE = nodeMap[node.name];
+  var NODE = this['$' + node.name];
   var element = new NODE(args);
   element.root = this;
   (node.children || []).forEach(function (childNode) {
@@ -3028,8 +3020,8 @@ function setLayoutBox(children) {
   });
 }
 
-var Layout = /*#__PURE__*/function (_comp$Element) {
-  _inherits(Layout, _comp$Element);
+var Layout = /*#__PURE__*/function (_Element) {
+  _inherits(Layout, _Element);
 
   var _super = _createSuper(Layout);
 
@@ -3127,35 +3119,10 @@ var Layout = /*#__PURE__*/function (_comp$Element) {
 
       return renderChildren(this.children);
     }
-  }, {
-    key: "toDataURLSync",
-    value: function toDataURLSync() {
-      var type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'image/png';
-      var encoderOptions = arguments.length > 1 ? arguments[1] : undefined;
-      // 基础库 2.11.0 开始支持
-      var url = global$1.getCanvas().toDataURL(type, encoderOptions);
-      return url;
-    }
-  }, {
-    key: "saveImageToPhotosAlbum",
-    value: function saveImageToPhotosAlbum() {
-      var name = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'test.png';
-
-      var filePath = "".concat(wx.env.USER_DATA_PATH, "/").concat(name);
-      var fileManager = wx.getFileSystemManager();
-      fileManager.writeFileSync(filePath, this.toDataURLSync().slice(22), 'base64');
-      return new Promise(function (resolve, reject) {
-        wx.saveImageToPhotosAlbum({
-          filePath: filePath,
-          success: resolve,
-          fail: reject
-        });
-      });
-    }
   }]);
 
   return Layout;
-}(comp.Element); // helper
+}(Element); // helper
 
 function reCalculate(list, layoutList) {
   list.forEach(function (child, index) {
@@ -3199,48 +3166,111 @@ function reCalculate(list, layoutList) {
   });
 }
 
-var renderInMP = function renderInMP(_ref2) {
-  var canvasId = _ref2.canvasId,
-      xml = _ref2.xml,
-      style = _ref2.style,
-      canvasComponentThis = _ref2.canvasComponentThis;
+var Renderer = /*#__PURE__*/function () {
+  function Renderer(_ref) {
+    var xml = _ref.xml,
+        style = _ref.style;
 
+    _classCallCheck(this, Renderer);
+
+    this.xml = xml;
+    this.style = style;
+    this.layout = new Layout({
+      style: {
+        width: 0,
+        height: 0
+      },
+      name: 'layout'
+    });
+    this.renderred = null;
+  }
+
+  _createClass(Renderer, [{
+    key: "render",
+    value: function render(canvasId, canvasComponentThis) {
+      var _this = this;
+
+      var processCanvas =  canvasInMP;
+      return this.renderred = processCanvas(canvasId).then(function (_ref2) {
+        var ctx = _ref2.ctx,
+            canvasEle = _ref2.canvasEle,
+            clientWidth = _ref2.clientWidth,
+            clientHeight = _ref2.clientHeight;
+        global$1.setCanvas(canvasEle);
+        global$1.setCanvasId(canvasId);
+        global$1.setCanvasComponentThis(canvasComponentThis);
+        drawGrid(ctx, clientWidth, clientHeight);
+
+        var style = _scaleStyles({
+          style: _this.style,
+          clientWidth: clientWidth
+        });
+
+        return _this.layout.init(_this.xml, style).render(ctx);
+      });
+    }
+  }, {
+    key: "toDataURL",
+    value: function toDataURL() {
+      var type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'image/png';
+      var encoderOptions = arguments.length > 1 ? arguments[1] : undefined;
+      if (!this.renderred) throw new Error('render 未调用');
+      return this.renderred.then(function () {
+        // toDataURL 在小程序基础库 2.11.0 开始支持
+        var url = global$1.getCanvas().toDataURL(type, encoderOptions);
+        return url;
+      });
+    }
+  }, {
+    key: "saveImageToPhotosAlbum",
+    value: function saveImageToPhotosAlbum(base64img) {
+      var name = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'test.png';
+
+      var filePath = "".concat(wx.env.USER_DATA_PATH, "/").concat(name);
+      var fileManager = wx.getFileSystemManager();
+      fileManager.writeFileSync(filePath, base64img.slice(22), 'base64');
+      return new Promise(function (resolve, reject) {
+        wx.saveImageToPhotosAlbum({
+          filePath: filePath,
+          success: resolve,
+          fail: reject
+        });
+      });
+    }
+  }], [{
+    key: "use",
+    value: function use(name, ELEMENT) {
+      Layout.prototype['$' + name] = ELEMENT;
+    }
+  }]);
+
+  return Renderer;
+}();
+
+function canvasInMP(canvasId) {
   var _wx$getSystemInfoSync = wx.getSystemInfoSync(),
       screenWidth = _wx$getSystemInfoSync.screenWidth,
+      screenHeight = _wx$getSystemInfoSync.screenHeight,
       pixelRatio = _wx$getSystemInfoSync.pixelRatio;
 
   var dpr = pixelRatio;
   var canvasRef = wx.createSelectorQuery().select(canvasId);
-  return new Promise(function (resolve, reject) {
+  return new Promise(function (resolve) {
     canvasRef.node(function (res) {
       var canvasEle = res.node;
       var ctx = canvasEle.getContext('2d');
       canvasEle.width = canvasEle._width * dpr;
       canvasEle.height = canvasEle._height * dpr;
       ctx.scale(dpr, dpr);
-      global$1.setCanvas(canvasEle);
-      global$1.setCanvasId(canvasId);
-      global$1.setCanvasComponentThis(canvasComponentThis);
-      var layout = new Layout({
-        style: {
-          width: 0,
-          height: 0
-        },
-        name: 'layout'
-      });
-      style = _scaleStyles({
-        style: style,
-        clientWidth: screenWidth
-      });
-      drawGrid(ctx, canvasEle.width, canvasEle.height);
-      return layout.init(xml, style).render(ctx).then(function () {
-        return resolve(layout);
+      resolve({
+        ctx: ctx,
+        canvasEle: canvasEle,
+        clientWidth: screenWidth,
+        clientHeight: screenHeight
       });
     }).exec();
   });
-};
-
-var index =  renderInMP;
+}
 var LAYOUT_BASE_WIDTH = 375;
 
 function _scaleStyles(_ref3) {
@@ -3291,4 +3321,9 @@ function drawGrid(ctx, w, h) {
   ctx.restore();
 }
 
-export default index;
+Renderer.use('Image', Image);
+Renderer.use('Text', Text);
+Renderer.use('View', View);
+
+export default Renderer;
+export { Element };

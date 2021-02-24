@@ -1,4 +1,6 @@
-import comp from './components'
+import {
+  Element,
+} from './components'
 
 import {getTextWidth} from './utils/measureText'
 import global from './utils/global'
@@ -6,19 +8,12 @@ import global from './utils/global'
 import parser from './libs/fast-xml-parser/parser'
 import computeLayout from 'css-layout'
 
-export const STATE = {
-  "UNINIT": "UNINIT",
-  "INITED": "INITED",
-  "RENDERED": "RENDERED",
-  "CLEAR": "CLEAR",
-}
-
-const nodeMap = {
-  view: comp.View,
-  text: comp.Text,
-  image: comp.Image,
-  scrollview: comp.View
-}
+// export const STATE = {
+//   "UNINIT": "UNINIT",
+//   "INITED": "INITED",
+//   "RENDERED": "RENDERED",
+//   "CLEAR": "CLEAR",
+// }
 
 const createRenderTree = function (node, style) {
   const attr = node.attr || {};
@@ -60,7 +55,7 @@ const createRenderTree = function (node, style) {
   args.className = attr.class || ''
   args._text_ = node._text_
 
-  const NODE = nodeMap[node.name];
+  const NODE = this['$' + node.name];
   const element = new NODE(args)
   element.root = this;
 
@@ -87,7 +82,7 @@ function setLayoutBox(children) {
   })
 }
 
-export default class Layout extends comp.Element {
+export default class Layout extends Element {
   constructor({
     style,
     name
@@ -177,33 +172,6 @@ export default class Layout extends comp.Element {
       }, Promise.resolve())
     }
     return renderChildren(this.children)
-  }
-
-  toDataURLSync(type = 'image/png', encoderOptions) {
-    // 基础库 2.11.0 开始支持
-    const url = global.getCanvas().toDataURL(type, encoderOptions)
-    return url
-  }
-
-  saveImageToPhotosAlbum(name = 'test.png') {
-    if (__buildTarget__ !== 'mp') {
-      const errMsg = 'saveImageToPhotosAlbum 仅支持小程序使用'
-      console.error(errMsg);
-      throw new Error(errMsg)
-    }
-
-    const filePath = `${wx.env.USER_DATA_PATH}/${name}`
-    const fileManager = wx.getFileSystemManager()
-    
-    fileManager.writeFileSync(filePath, this.toDataURLSync().slice(22), 'base64')
-
-    return new Promise((resolve, reject) => {
-      wx.saveImageToPhotosAlbum({
-        filePath,
-        success: resolve,
-        fail: reject
-      })
-    })
   }
 }
 

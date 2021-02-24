@@ -4,7 +4,7 @@ import Text from './Text';
 import Element from './Element';
 import Image from './Image';
 
-export default {
+export {
   View,
   Text,
   Element,

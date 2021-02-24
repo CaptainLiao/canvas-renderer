@@ -1,14 +1,14 @@
-import cangine from '../../cangine.mp.js'
+import Renderer from '../../cangine.mp.js'
 
 const xmlData = `
-<view id="container">
-  <image src="https://img.yzcdn.cn/vant/cat.jpeg" class="img"></image>
-  <image src="https://cdn.133.cn/ticket/h5/images/tabbar/v2/ticket-a.png" class="img2"></image>
-  <text class="t3" value="这是t2 value">这真的是一条非常长非常长非常 长非常长非常长非常长 非常长非常长非常长非常长的字符串.</text>
+<View id="container">
+  <Image src="https://img.yzcdn.cn/vant/cat.jpeg" class="img"></Image>
+  <Image src="https://cdn.133.cn/ticket/h5/images/tabbar/v2/ticket-a.png" class="img2"></Image>
+  <Text class="t3" value="这是t2 value">这真的是一条非常长非常长非常 长非常长非常长非常长 非常长非常长非常长非常长的字符串.</Text>
 
   
-  <view class="redText">123</view>
-</view>
+  <View class="redText">123</View>
+</View>
 `;
 
 const style = {
@@ -83,18 +83,15 @@ Component({
   methods: {
     onTap(e) {
       console.log(e);
-      
     },
 
     onLoad: function () {
-    
-      cangine({canvasId: '#canvas', xml: xmlData, style, tap: this.onTap})
-        .then(layout => {
-          //return layout.saveImageToPhotosAlbum()
-        })
-        .then(res => {
-          console.log(res)
-        })
+
+      const renderer = new Renderer({xml: xmlData, style})
+
+      renderer.render('#canvas')
+      renderer.toDataURL()
+        .then(url => console.log(1))
     },
   }
 })
