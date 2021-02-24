@@ -106,7 +106,7 @@ function _isNativeReflectConstruct() {
   if (typeof Proxy === "function") return true;
 
   try {
-    Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+    Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
     return true;
   } catch (e) {
     return false;
@@ -3008,14 +3008,15 @@ var Renderer = /*#__PURE__*/function () {
         global$1.setCanvas(canvasEle);
         global$1.setCanvasId(canvasId);
         global$1.setCanvasComponentThis(canvasComponentThis);
-        drawGrid(ctx, clientWidth, clientHeight);
 
         var style = _scaleStyles({
           style: _this.style,
           clientWidth: clientWidth
         });
 
-        return _this.layout.init(_this.xml, style).render(ctx);
+        return _this.layout.init(_this.xml, style).render(ctx).then(function () {
+          drawGrid(ctx, clientWidth, clientHeight);
+        });
       });
     }
   }, {
@@ -3116,13 +3117,17 @@ function drawGrid(ctx, w, h) {
     ctx.lineTo(i * gap, h);
   }
 
-  for (var _i = 1; _i < w / gap; ++_i) {
+  for (var _i = 1; _i < h / gap; ++_i) {
     ctx.moveTo(0, _i * gap);
     ctx.lineTo(w, _i * gap);
   }
 
   for (var _i2 = 0; _i2 < w; _i2 += 2) {
     ctx.fillText(_i2 * gap * 2, _i2 * gap * 2 - 6, 10);
+  }
+
+  for (var _i3 = 0; _i3 < h; _i3 += 2) {
+    ctx.fillText(_i3 * gap * 2, 0, _i3 * gap * 2 + 4);
   }
 
   ctx.strokeStyle = 'rgba(0, 0, 0,.15)';

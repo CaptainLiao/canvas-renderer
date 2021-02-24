@@ -30,12 +30,13 @@ export default class Renderer {
         global.setCanvasId(canvasId)
         global.setCanvasComponentThis(canvasComponentThis)
 
-        drawGrid(ctx, clientWidth, clientHeight)
-
         const style = _scaleStyles({style: this.style, clientWidth})
         return this.layout
           .init(this.xml, style)
           .render(ctx)
+          .then(() => {
+            drawGrid(ctx, clientWidth, clientHeight)
+          })
       })
   }
 
@@ -142,12 +143,15 @@ function drawGrid(ctx, w, h) {
     ctx.moveTo(i * gap, 0)
     ctx.lineTo(i*gap, h)
   }
-  for (let i = 1; i < w/gap; ++i) {
+  for (let i = 1; i < h/gap; ++i) {
     ctx.moveTo(0, i*gap)
     ctx.lineTo(w, i*gap)
   }
   for (let i = 0; i < w; i += 2) {
     ctx.fillText(i*gap*2, i*gap*2 - 6, 10)
+  }
+  for (let i = 0; i < h; i += 2) {
+    ctx.fillText(i*gap*2, 0, i*gap*2 + 4)
   }
 
   ctx.strokeStyle = 'rgba(0, 0, 0,.15)'

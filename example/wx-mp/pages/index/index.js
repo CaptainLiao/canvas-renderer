@@ -1,4 +1,4 @@
-import Renderer from '../../cangine.mp.js'
+import Renderer from '../../CanvasRenderer'
 
 const xmlData = `
 <View id="container">
@@ -18,7 +18,7 @@ const style = {
     flexDirection: 'column',
     width: 200,
     height: 200,
-    margin: 10,
+    margin: 40,
     padding: 2,
     backgroundColor: '#999',
 
@@ -37,6 +37,7 @@ const style = {
   img: {
     position: 'absolute',
     top:0,
+    left: 0,
     width: 200,
     height: 200,
     zIndex: 1,
@@ -91,7 +92,7 @@ Component({
 
       renderer.render('#canvas')
       renderer.toDataURL()
-        .then(url => console.log(1))
+        .then(url => console.log(renderer))
     },
   }
 })
