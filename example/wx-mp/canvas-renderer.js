@@ -2815,6 +2815,32 @@ function setLayoutBox(children) {
   });
 }
 
+var GatherTime = /*#__PURE__*/function () {
+  function GatherTime() {
+    _classCallCheck(this, GatherTime);
+
+    this.start = new Date();
+    this.time = "start";
+    this.total = 0;
+    this._time = [0];
+  }
+
+  _createClass(GatherTime, [{
+    key: "gather",
+    value: function gather(phase) {
+      var last = this._time[this._time.length - 1];
+      var costTime = new Date() - this.start - last;
+
+      this._time.push(costTime);
+
+      this.time += " -> ".concat(phase, ": ").concat(costTime, "ms");
+      this.total = new Date() - this.start + 'ms';
+    }
+  }]);
+
+  return GatherTime;
+}();
+
 var Layout = /*#__PURE__*/function (_Element) {
   _inherits(Layout, _Element);
 
@@ -2837,7 +2863,7 @@ var Layout = /*#__PURE__*/function (_Element) {
     _this3.renderContext = null;
     _this3.renderport = {};
     _this3.viewport = {};
-    _this3.__cost_time = {};
+    _this3.__cost_time = null;
     _this3.hasViewPortSet = false;
     _this3.layoutBox = {
       x: 0,
@@ -2849,7 +2875,7 @@ var Layout = /*#__PURE__*/function (_Element) {
   _createClass(Layout, [{
     key: "init",
     value: function init(template, style) {
-      var start = new Date();
+      this.__cost_time = new GatherTime();
       var parseConfig = {
         attributeNamePrefix: "",
         attrNodeName: "attr",
@@ -2865,17 +2891,23 @@ var Layout = /*#__PURE__*/function (_Element) {
       };
       var jsonObj = parser.parse(template, parseConfig, true);
       var xmlTree = jsonObj.children[0];
-      this.__cost_time.xmlTree = new Date() - start; // XML树生成渲染树
+
+      this.__cost_time.gather('parseXml'); // XML树生成渲染树
+
 
       var renderTree = createRenderTree.call(this, xmlTree, style);
-      this.__cost_time.renderTree = new Date() - start; // 计算布局树
-
-      cssLayout(renderTree);
-      this.__cost_time.layoutTree = new Date() - start; // 要处理文字换行，需要两棵renderTree
-
       var renderTree2 = createRenderTree.call(this, xmlTree, style);
+
+      this.__cost_time.gather('renderTree'); // 计算布局树
+
+
+      cssLayout(renderTree); // 要处理文字换行，需要两棵renderTree
+
       reCalculate([renderTree2], [renderTree]);
       cssLayout(renderTree2);
+
+      this.__cost_time.gather('layoutTree');
+
       this.add(renderTree2);
       var rootEle = this.children[0];
 
@@ -2892,6 +2924,8 @@ var Layout = /*#__PURE__*/function (_Element) {
   }, {
     key: "render",
     value: function render(ctx) {
+      var _this4 = this;
+
       this.renderContext = ctx;
 
       if (this.renderContext) {
@@ -2911,7 +2945,9 @@ var Layout = /*#__PURE__*/function (_Element) {
         }, Promise.resolve());
       };
 
-      return renderChildren(this.children);
+      return renderChildren(this.children).then(function () {
+        return _this4.__cost_time.gather('paintTree');
+      });
     }
   }]);
 

@@ -77,6 +77,22 @@ function setLayoutBox(children) {
   })
 }
 
+class GatherTime {
+  constructor() {
+    this.start = new Date()
+    this.time = `start`
+    this.total = 0
+    this._time = [0]
+  }
+  gather(phase) {
+    const last = this._time[this._time.length - 1]
+    const costTime = new Date() - this.start - last
+    this._time.push(costTime)
+    this.time += ` -> ${phase}: ${costTime}ms`
+    this.total = new Date() - this.start + 'ms'
+  }
+}
+
 export default class Layout extends Element {
   constructor({
     style,
@@ -92,7 +108,7 @@ export default class Layout extends Element {
 
     this.renderport = {}
     this.viewport = {}
-    this.__cost_time = {}
+    this.__cost_time = null
 
     this.hasViewPortSet = false
     this.layoutBox = {
@@ -102,7 +118,7 @@ export default class Layout extends Element {
   }
 
   init(template, style) {
-    const start = new Date();
+    this.__cost_time = new GatherTime()
 
     const parseConfig = {
       attributeNamePrefix: "",
@@ -119,19 +135,19 @@ export default class Layout extends Element {
 
     const jsonObj = parser.parse(template, parseConfig, true);
     const xmlTree = jsonObj.children[0];
-  
-    this.__cost_time.xmlTree = new Date() - start;
+
+    this.__cost_time.gather('parseXml')
 
     // XML树生成渲染树
     const renderTree = createRenderTree.call(this, xmlTree, style);
-    this.__cost_time.renderTree = new Date() - start;
+    const renderTree2 = createRenderTree.call(this, xmlTree, style)
+    this.__cost_time.gather('renderTree')
     // 计算布局树
     computeLayout(renderTree);
-    this.__cost_time.layoutTree = new Date() - start;
     // 要处理文字换行，需要两棵renderTree
-    const renderTree2 = createRenderTree.call(this, xmlTree, style)
     reCalculate([renderTree2], [renderTree])
     computeLayout(renderTree2);
+    this.__cost_time.gather('layoutTree')
 
     this.add(renderTree2);
 
@@ -166,6 +182,7 @@ export default class Layout extends Element {
       }, Promise.resolve())
     }
     return renderChildren(this.children)
+      .then(() => this.__cost_time.gather('paintTree'))
   }
 }
 
