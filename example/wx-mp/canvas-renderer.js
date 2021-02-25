@@ -290,26 +290,12 @@ var Element = /*#__PURE__*/function () {
 
     if (style.opacity !== undefined && style.backgroundColor && style.backgroundColor.indexOf('#') > -1) {
       style.backgroundColor = getRgba(style.backgroundColor, style.opacity);
-    } // this.initRepaint();
-
-  } // 子类填充实现
-
+    }
+  }
 
   _createClass(Element, [{
-    key: "repaint",
-    value: function repaint() {}
-  }, {
     key: "render",
     value: function render() {}
-  }, {
-    key: "checkNeedRender",
-    value: function checkNeedRender() {
-      return true;
-    } // 子类填充实现
-
-  }, {
-    key: "destroy",
-    value: function destroy() {}
   }, {
     key: "add",
     value: function add(element) {
@@ -2878,17 +2864,16 @@ var Layout = /*#__PURE__*/function (_Element) {
         parseTrueNumberOnly: false
       };
       var jsonObj = parser.parse(template, parseConfig, true);
-      this.__xmlTree = jsonObj.children[0];
-      this.__style = style;
+      var xmlTree = jsonObj.children[0];
       this.__cost_time.xmlTree = new Date() - start; // XML树生成渲染树
 
-      var renderTree = createRenderTree.call(this, this.__xmlTree, this.__style);
+      var renderTree = createRenderTree.call(this, xmlTree, style);
       this.__cost_time.renderTree = new Date() - start; // 计算布局树
 
       cssLayout(renderTree);
       this.__cost_time.layoutTree = new Date() - start; // 要处理文字换行，需要两棵renderTree
 
-      var renderTree2 = createRenderTree.call(this, this.__xmlTree, this.__style);
+      var renderTree2 = createRenderTree.call(this, xmlTree, style);
       reCalculate([renderTree2], [renderTree]);
       cssLayout(renderTree2);
       this.add(renderTree2);
@@ -3014,9 +2999,13 @@ var Renderer = /*#__PURE__*/function () {
           clientWidth: clientWidth
         });
 
-        return _this.layout.init(_this.xml, style).render(ctx).then(function () {
-          drawGrid(ctx, clientWidth, clientHeight);
-        });
+        var r = _this.layout.init(_this.xml, style).render(ctx);
+
+        {
+          return r.then(function () {
+            return drawGrid(ctx, clientWidth, clientHeight);
+          });
+        }
       });
     }
   }, {

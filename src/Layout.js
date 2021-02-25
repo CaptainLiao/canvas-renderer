@@ -118,19 +118,18 @@ export default class Layout extends Element {
     }
 
     const jsonObj = parser.parse(template, parseConfig, true);
-    this.__xmlTree = jsonObj.children[0];
-    
-    this.__style = style
+    const xmlTree = jsonObj.children[0];
+  
     this.__cost_time.xmlTree = new Date() - start;
 
     // XML树生成渲染树
-    const renderTree = createRenderTree.call(this, this.__xmlTree, this.__style);
+    const renderTree = createRenderTree.call(this, xmlTree, style);
     this.__cost_time.renderTree = new Date() - start;
     // 计算布局树
     computeLayout(renderTree);
     this.__cost_time.layoutTree = new Date() - start;
     // 要处理文字换行，需要两棵renderTree
-    const renderTree2 = createRenderTree.call(this, this.__xmlTree, this.__style)
+    const renderTree2 = createRenderTree.call(this, xmlTree, style)
     reCalculate([renderTree2], [renderTree])
     computeLayout(renderTree2);
 

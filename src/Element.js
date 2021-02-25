@@ -55,22 +55,9 @@ export default class Element{
     if (style.opacity !== undefined && style.backgroundColor && style.backgroundColor.indexOf('#') > -1) {
       style.backgroundColor = getRgba(style.backgroundColor, style.opacity);
     }
-    // this.initRepaint();
   }
-
-  // 子类填充实现
-  repaint() {}
 
   render() {}
-
-  checkNeedRender() {
-    return true;
-  }
-
-  // 子类填充实现
-  destroy() {
-
-  }
 
   add(element) {
     element.parent = this;

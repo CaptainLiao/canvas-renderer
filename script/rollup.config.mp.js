@@ -13,6 +13,7 @@ export default [
     plugins: commonConifg.plugins.concat([
       replace({
         __buildTarget__: JSON.stringify('mp'),
+        __buildMode__: JSON.stringify('development'),
         preventAssignment: true
       })
     ])

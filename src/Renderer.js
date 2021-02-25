@@ -31,12 +31,14 @@ export default class Renderer {
         global.setCanvasComponentThis(canvasComponentThis)
 
         const style = _scaleStyles({style: this.style, clientWidth})
-        return this.layout
+        const r = this.layout
           .init(this.xml, style)
           .render(ctx)
-          .then(() => {
-            drawGrid(ctx, clientWidth, clientHeight)
-          })
+        
+        if (__buildMode__ === 'development') {
+          return r.then(() => drawGrid(ctx, clientWidth, clientHeight))
+        }
+        return r
       })
   }
 
