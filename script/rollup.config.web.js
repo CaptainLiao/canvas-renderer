@@ -8,7 +8,7 @@ export default {
   input: 'example/web/index.js',
   output: {
     file: 'example/web/canvas-renderer.js',
-    format: 'esm'
+    format: 'esm',
   },
 
   plugins: commonConifg.plugins.concat([

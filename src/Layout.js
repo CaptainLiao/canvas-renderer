@@ -135,6 +135,8 @@ export default class Layout extends Element {
 
     const jsonObj = parser.parse(template, parseConfig, true);
     const xmlTree = jsonObj.children[0];
+    console.log('xmlTree', xmlTree);
+    
 
     this.__cost_time.gather('parseXml')
 
