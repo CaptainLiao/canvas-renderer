@@ -16,13 +16,15 @@ Attributes with quoted values: id="main"
 Text nodes: <Text>world</Text>
 */
 
+const fs = require('fs');
+
 export {
   parse
 }
 
 function parse(source: string) {
   const nodes = new Parser(0, source).parseNodes()
-
+  fs.writeFileSync('write.json', JSON.stringify(nodes, null, 2))
   console.log(nodes);
   
 }
@@ -31,47 +33,38 @@ type hashMap = {
   [key: string]: string
 }
 
+
+enum XNodeName {
+  Text = 'txt',
+}
+
 class XNode {
-  children: XNode[] | string;
-  node_type: NodeType;
-  constructor(children: XNode[] | string, node_type: NodeType) {
-    this.children = children;
-    this.node_type = node_type;
+  children: XNode[];
+  nodeName: string;
+  attrs: hashMap;
+  text?: string;
+  constructor(node: XNode) {
+    this.children = node.children;
+    this.nodeName = node.nodeName;
+    this.attrs = node.attrs;
+    if (node.text !== undefined && node.text !== null) this.text = node.text;
   }
 
-  static text(data: string): XNode {
-    return new XNode(data, NodeType.Text)
+  static createText(data: string): XNode {
+    return new XNode({children: [], nodeName: XNodeName.Text, attrs: {}, text: data})
   }
 
-  static elem(name: string, attrs: hashMap, children: XNode[]): XNode {
-    return new XNode(children, NodeType.Element(new ElementData(name, attrs)))
-  }
-}
-
-
-class NodeType {
-  static Text = 'Text'
-  static Element(data: ElementData): ElementData  {
-    return new ElementData(data.tag_name, data.attributes)
+  static createElem(name: string, attrs: hashMap, children: XNode[], text?: string): XNode {
+    return new XNode({children, nodeName: name, attrs, text})
   }
 }
-
-class ElementData {
-  tag_name: string;
-  attributes: Object;
-  constructor(tag_name: string, attributes: Object) {
-    this.tag_name = tag_name
-    this.attributes = attributes
-  }
-}
-
 
 class Parser {
-  pos: number
+  curIndex: number
   input: string
 
-  constructor(pos: number, input: string) {
-    this.pos = pos
+  constructor(curIndex: number, input: string) {
+    this.curIndex = curIndex
     this.input = input
   }
 
@@ -88,7 +81,7 @@ class Parser {
   }
 
   parseNode(): XNode {
-    if (this.nextChar() == '<') {
+    if (this.currentChar() == '<') {
       return this.parseElement()
     }
     return this.parseText()
@@ -96,7 +89,7 @@ class Parser {
 
   parseText(): XNode {
     const t = this.consumeWhile(c => c != '<')
-    return XNode.text(t)
+    return XNode.createText(t)
   }
   parseElement(): XNode {
     if (this.consumeChar() !== '<') throw new Error('Invalid')
@@ -105,7 +98,12 @@ class Parser {
 
     if (this.consumeChar() !== '>') throw new Error('Invalid tag name')
 
-    const children = this.parseNodes()
+    let children = this.parseNodes()
+    let text = void 0
+    if (children[0] && children[0].nodeName === XNodeName.Text) {
+      text = children[0].text
+      children = []
+    }
 
     if (
       this.consumeChar() !== '<' ||
@@ -114,34 +112,35 @@ class Parser {
       this.consumeChar() !== '>'
     ) throw new Error('Invalid tag name')
     
-    return XNode.elem(tagName, attrs, children)
+    return XNode.createElem(tagName, attrs, children, text)
   }
 
-  nextChar(): string {
-    return this.input[this.pos]
+  currentChar(): string {
+    const c = this.input[this.curIndex]
+    return c
   }
 
   startsWith(str: string): boolean {
-    return this.input.startsWith(str, this.pos)
+    return this.input.startsWith(str, this.curIndex)
   }
   eof(): boolean {
-    return this.pos >= this.input.length
+    return this.curIndex >= this.input.length
   }
 
   consumeChar(): string {
-    const s = this.input[this.pos]
-    this.pos += 1
+    const s = this.currentChar()
+    this.curIndex += 1
     return s
   }
   consumeWhile(test: (n: string) => boolean): string {
     let result = ''
-    while (!this.eof() && test(this.nextChar())) {
+    while (!this.eof() && test(this.currentChar())) {
       result += this.consumeChar()
     }
     return result
   }
   consumeWhiteSpace(): void {
-    const isWhiteSpace = (str: string) => str === ' '
+    const isWhiteSpace = (str: string) => /\s+/.test(str) || str === ''
     this.consumeWhile(isWhiteSpace)
   }
 
@@ -154,7 +153,7 @@ class Parser {
     const obj: hashMap = {}
     while(true) {
       this.consumeWhiteSpace()
-      if (this.nextChar() === '>') break;
+      if (this.currentChar() === '>') break;
 
       const [name, value] = this.parseAttr()
       obj[name] = value
@@ -165,17 +164,17 @@ class Parser {
 
   parseAttr(): [string, string] {
     const name = this.parseTagName()
-    if (this.consumeChar() !== '=') throw new Error('Invalid tag name')
+    if (this.consumeChar() !== '=') throw new Error('Invalid attributes')
 
     const value = this.parseAttrValue()
     return [name, value]
   }
   parseAttrValue(): string {
     const openQuote = this.consumeChar()
-    if (openQuote !== '"' && openQuote !== '\'') throw new Error('Invalid')
+    if (openQuote !== '"' && openQuote !== '\'') throw new Error('Invalid attributes')
 
     const value = this.consumeWhile(c => c !== openQuote)
-    if (this.consumeChar() !== openQuote) throw new Error('Invalid')
+    if (this.consumeChar() !== openQuote) throw new Error('Invalid attributes')
 
     return value
   }
