@@ -1,6 +1,6 @@
 import Element from './Element'
 import {getTextWidth} from './utils/measureText'
-import parser from './libs/fast-xml-parser/parser'
+import * as parser from './libs/my-parser'
 import computeLayout from 'css-layout'
 
 // export const STATE = {
@@ -48,9 +48,9 @@ const createRenderTree = function (node, style) {
 
   args.idName = id
   args.className = attr.class || ''
-  args._text_ = node._text_
+  args._text_ = node.text
 
-  const NODE = this['$' + node.name];
+  const NODE = this['$' + node.nodeName];
   const element = new NODE(args)
   element.root = this;
 
@@ -134,9 +134,7 @@ export default class Layout extends Element {
     }
 
     const jsonObj = parser.parse(template, parseConfig, true);
-    const xmlTree = jsonObj.children[0];
-    console.log('xmlTree', xmlTree);
-    
+    const xmlTree = jsonObj[0];
 
     this.__cost_time.gather('parseXml')
 
@@ -208,7 +206,7 @@ function reCalculate(list, layoutList) {
 
       let lineIndex = 1
       let lineText = ''
-      for (let i = 0; i < child.text.length; i++) {
+      for (let i = 0; i < (child.text || '').length; i++) {
         const textWidth = getTextWidth({text: lineText + child.text[i], style: child.style})
         if (textWidth > contentWidth) {
           child.__lines.push({text: lineText})

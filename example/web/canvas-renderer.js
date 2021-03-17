@@ -580,849 +580,168 @@ function getTextWithEllipsis(style, text) {
   return length && textOverflow === 'ellipsis' ? str + '...' : str;
 }
 
+/**
+<View id="container">
+  <Image src="https://img.yzcdn.cn/vant/cat.jpeg" class="img"></Image>
+  <Image src="https://img.yzcdn.cn/vant/cat.jpeg" class="img2"></Image>
+  <Text class="t3" value="这是t2 value">22这真的是一条非常长非常长非常 长非常长非常长非常长 非常长非常长非常长非常长的字符串.</Text>
+
+  
+  <View class="redText"><Text>123</Text></View>
+</View>
+
+The following syntax is allowed:
+
+Balanced tags: <View>...</View>
+Attributes with quoted values: id="main"
+Text nodes: <Text>world</Text>
+*/
+function parse(source) {
+    var nodes = new Parser(0, source).parseNodes();
+    console.log(nodes);
+    return nodes;
+}
+var XNodeName;
+(function (XNodeName) {
+    XNodeName["Text"] = "txt";
+})(XNodeName || (XNodeName = {}));
+var XNode = /** @class */ (function () {
+    function XNode(node) {
+        this.children = node.children;
+        this.nodeName = node.nodeName;
+        this.attr = node.attr;
+        if (node.text !== undefined && node.text !== null)
+            this.text = node.text;
+    }
+    XNode.createTextNode = function (data) {
+        return new XNode({ children: [], nodeName: XNodeName.Text, attr: {}, text: data });
+    };
+    XNode.createElemNode = function (name, attr, children, text) {
+        return new XNode({ children: children, nodeName: name, attr: attr, text: text });
+    };
+    return XNode;
+}());
+var Parser = /** @class */ (function () {
+    function Parser(curIndex, input) {
+        this.curIndex = curIndex;
+        this.input = input;
+    }
+    Parser.prototype.parseNodes = function () {
+        var nodes = [];
+        while (true) {
+            this.consumeWhiteSpace();
+            if (this.eof() || this.startsWith('</'))
+                break;
+            if (this.startsWith('<!')) {
+                this.consumeComment();
+                continue;
+            }
+            nodes.push(this.parseNode());
+        }
+        return nodes;
+    };
+    Parser.prototype.parseNode = function () {
+        if (this.currentChar() == '<') {
+            return this.parseElement();
+        }
+        return this.parseText();
+    };
+    Parser.prototype.parseText = function () {
+        var t = this.consumeWhile(function (c) { return c != '<'; });
+        return XNode.createTextNode(t);
+    };
+    Parser.prototype.parseElement = function () {
+        if (this.consumeChar() !== '<')
+            throw new Error('Invalid');
+        var tagName = this.parseTagName();
+        var attr = this.parseAttributes();
+        if (this.consumeChar() !== '>')
+            throw new Error('Invalid tag name');
+        var children = this.parseNodes();
+        var text = void 0;
+        if (children[0] && children[0].nodeName === XNodeName.Text) {
+            text = children[0].text;
+            children = [];
+        }
+        if (this.consumeChar() !== '<' ||
+            this.consumeChar() !== '/' ||
+            this.parseTagName() !== tagName ||
+            this.consumeChar() !== '>')
+            throw new Error('Invalid tag name');
+        return XNode.createElemNode(tagName, attr, children, text);
+    };
+    Parser.prototype.currentChar = function () {
+        var c = this.input[this.curIndex];
+        return c;
+    };
+    Parser.prototype.eof = function () {
+        return this.curIndex >= this.input.length;
+    };
+    Parser.prototype.consumeChar = function () {
+        var s = this.currentChar();
+        this.curIndex += 1;
+        return s;
+    };
+    Parser.prototype.startsWith = function (str) {
+        return this.input.startsWith(str, this.curIndex);
+    };
+    Parser.prototype.consumeWhile = function (test) {
+        var result = '';
+        while (!this.eof() && test(this.currentChar())) {
+            result += this.consumeChar();
+        }
+        return result;
+    };
+    Parser.prototype.consumeWhiteSpace = function () {
+        var isWhiteSpace = function (str) { return /\s+/.test(str) || str === ''; };
+        this.consumeWhile(isWhiteSpace);
+    };
+    Parser.prototype.consumeComment = function () {
+        var regex = /<!(.+)-->/;
+        var str = '';
+        while (!this.eof() && !regex.test(str)) {
+            str += this.consumeChar();
+        }
+    };
+    Parser.prototype.parseTagName = function () {
+        return this.consumeWhile(function (c) { return /[a-z]|[A-Z]|[0-9]/.test(c); });
+    };
+    Parser.prototype.parseAttributes = function () {
+        var obj = {};
+        while (true) {
+            this.consumeWhiteSpace();
+            if (this.currentChar() === '>')
+                break;
+            var _a = this.parseAttr(), name_1 = _a[0], value = _a[1];
+            obj[name_1] = value;
+        }
+        return obj;
+    };
+    Parser.prototype.parseAttr = function () {
+        var name = this.parseTagName();
+        if (this.consumeChar() !== '=')
+            throw new Error('Invalid attributes');
+        var value = this.parseAttrValue();
+        return [name, value];
+    };
+    Parser.prototype.parseAttrValue = function () {
+        var openQuote = this.consumeChar();
+        if (openQuote !== '"' && openQuote !== '\'')
+            throw new Error('Invalid attributes');
+        var value = this.consumeWhile(function (c) { return c !== openQuote; });
+        if (this.consumeChar() !== openQuote)
+            throw new Error('Invalid attributes');
+        return value;
+    };
+    return Parser;
+}());
+
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function createCommonjsModule(fn) {
   var module = { exports: {} };
 	return fn(module, module.exports), module.exports;
 }
-
-var util = createCommonjsModule(function (module, exports) {
-
-  var getAllMatches = function getAllMatches(string, regex) {
-    var matches = [];
-    var match = regex.exec(string);
-
-    while (match) {
-      var allmatches = [];
-      var len = match.length;
-
-      for (var index = 0; index < len; index++) {
-        allmatches.push(match[index]);
-      }
-
-      matches.push(allmatches);
-      match = regex.exec(string);
-    }
-
-    return matches;
-  };
-
-  var doesMatch = function doesMatch(string, regex) {
-    var match = regex.exec(string);
-    return !(match === null || typeof match === 'undefined');
-  };
-
-  var doesNotMatch = function doesNotMatch(string, regex) {
-    return !doesMatch(string, regex);
-  };
-
-  exports.isExist = function (v) {
-    return typeof v !== 'undefined';
-  };
-
-  exports.isEmptyObject = function (obj) {
-    return Object.keys(obj).length === 0;
-  };
-  /**
-   * Copy all the properties of a into b.
-   * @param {*} target
-   * @param {*} a
-   */
-
-
-  exports.merge = function (target, a, arrayMode) {
-    if (a) {
-      var keys = Object.keys(a); // will return an array of own properties
-
-      var len = keys.length; //don't make it inline
-
-      for (var i = 0; i < len; i++) {
-        if (arrayMode === 'strict') {
-          target[keys[i]] = [a[keys[i]]];
-        } else {
-          target[keys[i]] = a[keys[i]];
-        }
-      }
-    }
-  };
-  /* exports.merge =function (b,a){
-    return Object.assign(b,a);
-  } */
-
-
-  exports.getValue = function (v) {
-    if (exports.isExist(v)) {
-      return v;
-    } else {
-      return '';
-    }
-  }; // const fakeCall = function(a) {return a;};
-  // const fakeCallNoReturn = function() {};
-
-
-  exports.buildOptions = function (options, defaultOptions, props) {
-    var newOptions = {};
-
-    if (!options) {
-      return defaultOptions; //if there are not options
-    }
-
-    for (var i = 0; i < props.length; i++) {
-      if (options[props[i]] !== undefined) {
-        newOptions[props[i]] = options[props[i]];
-      } else {
-        newOptions[props[i]] = defaultOptions[props[i]];
-      }
-    }
-
-    return newOptions;
-  };
-
-  exports.doesMatch = doesMatch;
-  exports.doesNotMatch = doesNotMatch;
-  exports.getAllMatches = getAllMatches;
-});
-
-var convertToJson = function convertToJson(node, options) {
-  var jObj = {
-    name: node.tagname
-  }; //when no child node or attr is present
-
-  if ((!node.child || util.isEmptyObject(node.child)) && (!node.attrsMap || util.isEmptyObject(node.attrsMap))) {
-    return util.isExist(node.val) && !!node.val ? node.val : jObj;
-  } else {
-    //otherwise create a textnode if node has some text
-    if (util.isExist(node.val)) {
-      if (!(typeof node.val === 'string' && (node.val === '' || node.val === options.cdataPositionChar))) {
-        if (options.arrayMode === "strict") {
-          jObj[options.textNodeName] = [node.val];
-        } else {
-          jObj[options.textNodeName] = node.val;
-        }
-      }
-    }
-  }
-
-  util.merge(jObj, node.attrsMap, options.arrayMode);
-  jObj.children = [];
-  node.children.forEach(function (child) {
-    jObj.children.push(convertToJson(child, options));
-  }); // const keys = Object.keys(node.child);
-  // for (let index = 0; index < keys.length; index++) {
-  //   var tagname = keys[index];
-  //   if (node.child[tagname] && node.child[tagname].length > 1) {
-  //     jObj[tagname] = [];
-  //     for (var tag in node.child[tagname]) {
-  //       jObj[tagname].push(convertToJson(node.child[tagname][tag], options));
-  //     }
-  //   } else {
-  //     if(options.arrayMode === true){
-  //       const result = convertToJson(node.child[tagname][0], options)
-  //       if(typeof result === 'object')
-  //         jObj[tagname] = [ result ];
-  //       else
-  //         jObj[tagname] = result;
-  //     }else if(options.arrayMode === "strict"){
-  //       jObj[tagname] = [convertToJson(node.child[tagname][0], options) ];
-  //     }else{
-  //       jObj[tagname] = convertToJson(node.child[tagname][0], options);
-  //     }
-  //   }
-  // }
-  //add value
-
-  return jObj;
-};
-
-var convertToJson_1 = convertToJson;
-var node2json = {
-  convertToJson: convertToJson_1
-};
-
-var xmlNode = function xmlNode(tagname, parent, val) {
-  this.tagname = tagname;
-  this.parent = parent;
-  this.child = {}; //child tags
-
-  this.attrsMap = {}; //attributes map
-
-  this.children = [];
-  this.val = val; //text only
-
-  this.addChild = function (child) {
-    this.children.push(child);
-
-    if (Array.isArray(this.child[child.tagname])) {
-      //already presents
-      this.child[child.tagname].push(child);
-    } else {
-      this.child[child.tagname] = [child];
-    }
-  };
-};
-
-var buildOptions = util.buildOptions;
-var TagType = {
-  OPENING: 1,
-  CLOSING: 2,
-  SELF: 3,
-  CDATA: 4
-};
-var regx = '<((!\\[CDATA\\[([\\s\\S]*?)(]]>))|(([\\w:\\-._]*:)?([\\w:\\-._]+))([^>]*)>|((\\/)(([\\w:\\-._]*:)?([\\w:\\-._]+))\\s*>))([^<]*)'; //const tagsRegx = new RegExp("<(\\/?[\\w:\\-\._]+)([^>]*)>(\\s*"+cdataRegx+")*([^<]+)?","g");
-//const tagsRegx = new RegExp("<(\\/?)((\\w*:)?([\\w:\\-\._]+))([^>]*)>([^<]*)("+cdataRegx+"([^<]*))*([^<]+)?","g");
-//polyfill
-
-if (!Number.parseInt && window.parseInt) {
-  Number.parseInt = window.parseInt;
-}
-
-if (!Number.parseFloat && window.parseFloat) {
-  Number.parseFloat = window.parseFloat;
-}
-
-var defaultOptions = {
-  attributeNamePrefix: '@_',
-  attrNodeName: false,
-  textNodeName: '#text',
-  ignoreAttributes: true,
-  ignoreNameSpace: false,
-  allowBooleanAttributes: false,
-  //a tag can have attributes without any value
-  //ignoreRootElement : false,
-  parseNodeValue: true,
-  parseAttributeValue: false,
-  arrayMode: false,
-  trimValues: true,
-  //Trim string values of tag and attributes
-  cdataTagName: false,
-  cdataPositionChar: '\\c',
-  localeRange: '',
-  tagValueProcessor: function tagValueProcessor(a) {
-    return a;
-  },
-  attrValueProcessor: function attrValueProcessor(a) {
-    return a;
-  },
-  stopNodes: [] //decodeStrict: false,
-
-};
-var defaultOptions_1 = defaultOptions;
-var props = ['attributeNamePrefix', 'attrNodeName', 'textNodeName', 'ignoreAttributes', 'ignoreNameSpace', 'allowBooleanAttributes', 'parseNodeValue', 'parseAttributeValue', 'arrayMode', 'trimValues', 'cdataTagName', 'cdataPositionChar', 'localeRange', 'tagValueProcessor', 'attrValueProcessor', 'parseTrueNumberOnly', 'stopNodes'];
-var props_1 = props;
-
-var getTraversalObj = function getTraversalObj(xmlData, options) {
-  options = buildOptions(options, defaultOptions, props); //xmlData = xmlData.replace(/\r?\n/g, " ");//make it single line
-
-  xmlData = xmlData.replace(/<!--[\s\S]*?-->/g, ''); //Remove  comments
-
-  var xmlObj = new xmlNode('!xml');
-  var currentNode = xmlObj;
-  regx = regx.replace(/\[\\w/g, '[' + options.localeRange + '\\w');
-  var tagsRegx = new RegExp(regx, 'g');
-  var tag = tagsRegx.exec(xmlData);
-  var nextTag = tagsRegx.exec(xmlData);
-
-  while (tag) {
-    var tagType = checkForTagType(tag);
-
-    if (tagType === TagType.CLOSING) {
-      //add parsed data to parent node
-      if (currentNode.parent && tag[14]) {
-        currentNode.parent.val = util.getValue(currentNode.parent.val) + '' + processTagValue(tag, options, currentNode.parent.tagname);
-      }
-
-      if (options.stopNodes.length && options.stopNodes.includes(currentNode.tagname)) {
-        currentNode.child = [];
-
-        if (currentNode.attrsMap == undefined) {
-          currentNode.attrsMap = {};
-        }
-
-        currentNode.val = xmlData.substr(currentNode.startIndex + 1, tag.index - currentNode.startIndex - 1);
-      }
-
-      currentNode = currentNode.parent;
-    } else if (tagType === TagType.CDATA) {
-      if (options.cdataTagName) {
-        //add cdata node
-        var childNode = new xmlNode(options.cdataTagName, currentNode, tag[3]);
-        childNode.attrsMap = buildAttributesMap(tag[8], options);
-        currentNode.addChild(childNode); //for backtracking
-
-        currentNode.val = util.getValue(currentNode.val) + options.cdataPositionChar; //add rest value to parent node
-
-        if (tag[14]) {
-          currentNode.val += processTagValue(tag, options);
-        }
-      } else {
-        currentNode.val = (currentNode.val || '') + (tag[3] || '') + processTagValue(tag, options);
-      }
-    } else if (tagType === TagType.SELF) {
-      if (currentNode && tag[14]) {
-        currentNode.val = util.getValue(currentNode.val) + '' + processTagValue(tag, options);
-      }
-
-      var _childNode = new xmlNode(options.ignoreNameSpace ? tag[7] : tag[5], currentNode, '');
-
-      if (tag[8] && tag[8].length > 0) {
-        tag[8] = tag[8].substr(0, tag[8].length - 1);
-      }
-
-      _childNode.attrsMap = buildAttributesMap(tag[8], options);
-      currentNode.addChild(_childNode);
-    } else {
-      //TagType.OPENING
-      var _childNode2 = new xmlNode(options.ignoreNameSpace ? tag[7] : tag[5], currentNode, processTagValue(tag, options));
-
-      if (options.stopNodes.length && options.stopNodes.includes(_childNode2.tagname)) {
-        _childNode2.startIndex = tag.index + tag[1].length;
-      }
-
-      _childNode2.attrsMap = buildAttributesMap(tag[8], options);
-      currentNode.addChild(_childNode2);
-      currentNode = _childNode2;
-    }
-
-    tag = nextTag;
-    nextTag = tagsRegx.exec(xmlData);
-  }
-
-  return xmlObj;
-};
-
-function processTagValue(parsedTags, options, parentTagName) {
-  var tagName = parsedTags[7] || parentTagName;
-  var val = parsedTags[14];
-
-  if (val) {
-    if (options.trimValues) {
-      val = val.trim();
-    }
-
-    val = options.tagValueProcessor(val, tagName);
-    val = parseValue(val, options.parseNodeValue, options.parseTrueNumberOnly);
-  }
-
-  return val;
-}
-
-function checkForTagType(match) {
-  if (match[4] === ']]>') {
-    return TagType.CDATA;
-  } else if (match[10] === '/') {
-    return TagType.CLOSING;
-  } else if (typeof match[8] !== 'undefined' && match[8].substr(match[8].length - 1) === '/') {
-    return TagType.SELF;
-  } else {
-    return TagType.OPENING;
-  }
-}
-
-function resolveNameSpace(tagname, options) {
-  if (options.ignoreNameSpace) {
-    var tags = tagname.split(':');
-    var prefix = tagname.charAt(0) === '/' ? '/' : '';
-
-    if (tags[0] === 'xmlns') {
-      return '';
-    }
-
-    if (tags.length === 2) {
-      tagname = prefix + tags[1];
-    }
-  }
-
-  return tagname;
-}
-
-function parseValue(val, shouldParse, parseTrueNumberOnly) {
-  if (shouldParse && typeof val === 'string') {
-    var parsed;
-
-    if (val.trim() === '' || isNaN(val)) {
-      parsed = val === 'true' ? true : val === 'false' ? false : val;
-    } else {
-      if (val.indexOf('0x') !== -1) {
-        //support hexa decimal
-        parsed = Number.parseInt(val, 16);
-      } else if (val.indexOf('.') !== -1) {
-        parsed = Number.parseFloat(val);
-      } else {
-        parsed = Number.parseInt(val, 10);
-      }
-
-      if (parseTrueNumberOnly) {
-        parsed = String(parsed) === val ? parsed : val;
-      }
-    }
-
-    return parsed;
-  } else {
-    if (util.isExist(val)) {
-      return val;
-    } else {
-      return '';
-    }
-  }
-} //TODO: change regex to capture NS
-//const attrsRegx = new RegExp("([\\w\\-\\.\\:]+)\\s*=\\s*(['\"])((.|\n)*?)\\2","gm");
-
-
-var attrsRegx = new RegExp('([^\\s=]+)\\s*(=\\s*([\'"])(.*?)\\3)?', 'g');
-
-function buildAttributesMap(attrStr, options) {
-  if (!options.ignoreAttributes && typeof attrStr === 'string') {
-    attrStr = attrStr.replace(/\r?\n/g, ' '); //attrStr = attrStr || attrStr.trim();
-
-    var matches = util.getAllMatches(attrStr, attrsRegx);
-    var len = matches.length; //don't make it inline
-
-    var attrs = {};
-
-    for (var i = 0; i < len; i++) {
-      var attrName = resolveNameSpace(matches[i][1], options);
-
-      if (attrName.length) {
-        if (matches[i][4] !== undefined) {
-          if (options.trimValues) {
-            matches[i][4] = matches[i][4].trim();
-          }
-
-          matches[i][4] = options.attrValueProcessor(matches[i][4], attrName);
-          attrs[options.attributeNamePrefix + attrName] = parseValue(matches[i][4], options.parseAttributeValue, options.parseTrueNumberOnly);
-        } else if (options.allowBooleanAttributes) {
-          attrs[options.attributeNamePrefix + attrName] = true;
-        }
-      }
-    }
-
-    if (!Object.keys(attrs).length) {
-      return;
-    }
-
-    if (options.attrNodeName) {
-      var attrCollection = {};
-      attrCollection[options.attrNodeName] = attrs;
-      return attrCollection;
-    }
-
-    return attrs;
-  }
-}
-
-var getTraversalObj_1 = getTraversalObj;
-var xmlstr2xmlnode = {
-  defaultOptions: defaultOptions_1,
-  props: props_1,
-  getTraversalObj: getTraversalObj_1
-};
-
-var defaultOptions$1 = {
-  allowBooleanAttributes: false,
-  //A tag can have attributes without any value
-  localeRange: 'a-zA-Z'
-};
-var props$1 = ['allowBooleanAttributes', 'localeRange']; //const tagsPattern = new RegExp("<\\/?([\\w:\\-_\.]+)\\s*\/?>","g");
-
-var validate = function validate(xmlData, options) {
-  options = util.buildOptions(options, defaultOptions$1, props$1); //xmlData = xmlData.replace(/(\r\n|\n|\r)/gm,"");//make it single line
-  //xmlData = xmlData.replace(/(^\s*<\?xml.*?\?>)/g,"");//Remove XML starting tag
-  //xmlData = xmlData.replace(/(<!DOCTYPE[\s\w\"\.\/\-\:]+(\[.*\])*\s*>)/g,"");//Remove DOCTYPE
-
-  var tags = [];
-  var tagFound = false;
-
-  if (xmlData[0] === "\uFEFF") {
-    // check for byte order mark (BOM)
-    xmlData = xmlData.substr(1);
-  }
-
-  var regxAttrName = new RegExp('^[_w][\\w\\-.:]*$'.replace('_w', '_' + options.localeRange));
-  var regxTagName = new RegExp('^([w]|_)[\\w.\\-_:]*'.replace('([w', '([' + options.localeRange));
-
-  for (var i = 0; i < xmlData.length; i++) {
-    if (xmlData[i] === '<') {
-      //starting of tag
-      //read until you reach to '>' avoiding any '>' in attribute value
-      i++;
-
-      if (xmlData[i] === '?') {
-        i = readPI(xmlData, ++i);
-
-        if (i.err) {
-          return i;
-        }
-      } else if (xmlData[i] === '!') {
-        i = readCommentAndCDATA(xmlData, i);
-        continue;
-      } else {
-        var closingTag = false;
-
-        if (xmlData[i] === '/') {
-          //closing tag
-          closingTag = true;
-          i++;
-        } //read tagname
-
-
-        var tagName = '';
-
-        for (; i < xmlData.length && xmlData[i] !== '>' && xmlData[i] !== ' ' && xmlData[i] !== '\t' && xmlData[i] !== '\n' && xmlData[i] !== '\r'; i++) {
-          tagName += xmlData[i];
-        }
-
-        tagName = tagName.trim(); //console.log(tagName);
-
-        if (tagName[tagName.length - 1] === '/') {
-          //self closing tag without attributes
-          tagName = tagName.substring(0, tagName.length - 1);
-          continue;
-        }
-
-        if (!validateTagName(tagName, regxTagName)) {
-          return {
-            err: {
-              code: 'InvalidTag',
-              msg: 'Tag ' + tagName + ' is an invalid name.'
-            }
-          };
-        }
-
-        var result = readAttributeStr(xmlData, i);
-
-        if (result === false) {
-          return {
-            err: {
-              code: 'InvalidAttr',
-              msg: 'Attributes for "' + tagName + '" have open quote.'
-            }
-          };
-        }
-
-        var attrStr = result.value;
-        i = result.index;
-
-        if (attrStr[attrStr.length - 1] === '/') {
-          //self closing tag
-          attrStr = attrStr.substring(0, attrStr.length - 1);
-          var isValid = validateAttributeString(attrStr, options, regxAttrName);
-
-          if (isValid === true) {
-            tagFound = true; //continue; //text may presents after self closing tag
-          } else {
-            return isValid;
-          }
-        } else if (closingTag) {
-          if (!result.tagClosed) {
-            return {
-              err: {
-                code: 'InvalidTag',
-                msg: 'closing tag "' + tagName + "\" don't have proper closing."
-              }
-            };
-          } else if (attrStr.trim().length > 0) {
-            return {
-              err: {
-                code: 'InvalidTag',
-                msg: 'closing tag "' + tagName + "\" can't have attributes or invalid starting."
-              }
-            };
-          } else {
-            var otg = tags.pop();
-
-            if (tagName !== otg) {
-              return {
-                err: {
-                  code: 'InvalidTag',
-                  msg: 'closing tag ' + otg + ' is expected inplace of ' + tagName + '.'
-                }
-              };
-            }
-          }
-        } else {
-          var _isValid = validateAttributeString(attrStr, options, regxAttrName);
-
-          if (_isValid !== true) {
-            return _isValid;
-          }
-
-          tags.push(tagName);
-          tagFound = true;
-        } //skip tag text value
-        //It may include comments and CDATA value
-
-
-        for (i++; i < xmlData.length; i++) {
-          if (xmlData[i] === '<') {
-            if (xmlData[i + 1] === '!') {
-              //comment or CADATA
-              i++;
-              i = readCommentAndCDATA(xmlData, i);
-              continue;
-            } else {
-              break;
-            }
-          }
-        } //end of reading tag text value
-
-
-        if (xmlData[i] === '<') {
-          i--;
-        }
-      }
-    } else {
-      if (xmlData[i] === ' ' || xmlData[i] === '\t' || xmlData[i] === '\n' || xmlData[i] === '\r') {
-        continue;
-      }
-
-      return {
-        err: {
-          code: 'InvalidChar',
-          msg: 'char ' + xmlData[i] + ' is not expected .'
-        }
-      };
-    }
-  }
-
-  if (!tagFound) {
-    return {
-      err: {
-        code: 'InvalidXml',
-        msg: 'Start tag expected.'
-      }
-    };
-  } else if (tags.length > 0) {
-    return {
-      err: {
-        code: 'InvalidXml',
-        msg: 'Invalid ' + JSON.stringify(tags, null, 4).replace(/\r?\n/g, '') + ' found.'
-      }
-    };
-  }
-
-  return true;
-};
-/**
- * Read Processing insstructions and skip
- * @param {*} xmlData
- * @param {*} i
- */
-
-
-function readPI(xmlData, i) {
-  var start = i;
-
-  for (; i < xmlData.length; i++) {
-    if (xmlData[i] == '?' || xmlData[i] == ' ') {
-      //tagname
-      var tagname = xmlData.substr(start, i - start);
-
-      if (i > 5 && tagname === 'xml') {
-        return {
-          err: {
-            code: 'InvalidXml',
-            msg: 'XML declaration allowed only at the start of the document.'
-          }
-        };
-      } else if (xmlData[i] == '?' && xmlData[i + 1] == '>') {
-        //check if valid attribut string
-        i++;
-        break;
-      } else {
-        continue;
-      }
-    }
-  }
-
-  return i;
-}
-
-function readCommentAndCDATA(xmlData, i) {
-  if (xmlData.length > i + 5 && xmlData[i + 1] === '-' && xmlData[i + 2] === '-') {
-    //comment
-    for (i += 3; i < xmlData.length; i++) {
-      if (xmlData[i] === '-' && xmlData[i + 1] === '-' && xmlData[i + 2] === '>') {
-        i += 2;
-        break;
-      }
-    }
-  } else if (xmlData.length > i + 8 && xmlData[i + 1] === 'D' && xmlData[i + 2] === 'O' && xmlData[i + 3] === 'C' && xmlData[i + 4] === 'T' && xmlData[i + 5] === 'Y' && xmlData[i + 6] === 'P' && xmlData[i + 7] === 'E') {
-    var angleBracketsCount = 1;
-
-    for (i += 8; i < xmlData.length; i++) {
-      if (xmlData[i] === '<') {
-        angleBracketsCount++;
-      } else if (xmlData[i] === '>') {
-        angleBracketsCount--;
-
-        if (angleBracketsCount === 0) {
-          break;
-        }
-      }
-    }
-  } else if (xmlData.length > i + 9 && xmlData[i + 1] === '[' && xmlData[i + 2] === 'C' && xmlData[i + 3] === 'D' && xmlData[i + 4] === 'A' && xmlData[i + 5] === 'T' && xmlData[i + 6] === 'A' && xmlData[i + 7] === '[') {
-    for (i += 8; i < xmlData.length; i++) {
-      if (xmlData[i] === ']' && xmlData[i + 1] === ']' && xmlData[i + 2] === '>') {
-        i += 2;
-        break;
-      }
-    }
-  }
-
-  return i;
-}
-
-var doubleQuote = '"';
-var singleQuote = "'";
-/**
- * Keep reading xmlData until '<' is found outside the attribute value.
- * @param {string} xmlData
- * @param {number} i
- */
-
-function readAttributeStr(xmlData, i) {
-  var attrStr = '';
-  var startChar = '';
-  var tagClosed = false;
-
-  for (; i < xmlData.length; i++) {
-    if (xmlData[i] === doubleQuote || xmlData[i] === singleQuote) {
-      if (startChar === '') {
-        startChar = xmlData[i];
-      } else if (startChar !== xmlData[i]) {
-        //if vaue is enclosed with double quote then single quotes are allowed inside the value and vice versa
-        continue;
-      } else {
-        startChar = '';
-      }
-    } else if (xmlData[i] === '>') {
-      if (startChar === '') {
-        tagClosed = true;
-        break;
-      }
-    }
-
-    attrStr += xmlData[i];
-  }
-
-  if (startChar !== '') {
-    return false;
-  }
-
-  return {
-    value: attrStr,
-    index: i,
-    tagClosed: tagClosed
-  };
-}
-/**
- * Select all the attributes whether valid or invalid.
- */
-
-
-var validAttrStrRegxp = new RegExp('(\\s*)([^\\s=]+)(\\s*=)?(\\s*([\'"])(([\\s\\S])*?)\\5)?', 'g'); //attr, ="sd", a="amit's", a="sd"b="saf", ab  cd=""
-
-function validateAttributeString(attrStr, options, regxAttrName) {
-  //console.log("start:"+attrStr+":end");
-  //if(attrStr.trim().length === 0) return true; //empty string
-  var matches = util.getAllMatches(attrStr, validAttrStrRegxp);
-  var attrNames = {};
-
-  for (var i = 0; i < matches.length; i++) {
-    //console.log(matches[i]);
-    if (matches[i][1].length === 0) {
-      //nospace before attribute name: a="sd"b="saf"
-      return {
-        err: {
-          code: 'InvalidAttr',
-          msg: 'attribute ' + matches[i][2] + ' has no space in starting.'
-        }
-      };
-    } else if (matches[i][3] === undefined && !options.allowBooleanAttributes) {
-      //independent attribute: ab
-      return {
-        err: {
-          code: 'InvalidAttr',
-          msg: 'boolean attribute ' + matches[i][2] + ' is not allowed.'
-        }
-      };
-    }
-    /* else if(matches[i][6] === undefined){//attribute without value: ab=
-                    return { err: { code:"InvalidAttr",msg:"attribute " + matches[i][2] + " has no value assigned."}};
-                } */
-
-
-    var attrName = matches[i][2];
-
-    if (!validateAttrName(attrName, regxAttrName)) {
-      return {
-        err: {
-          code: 'InvalidAttr',
-          msg: 'attribute ' + attrName + ' is an invalid name.'
-        }
-      };
-    }
-    /*if (!attrNames.hasOwnProperty(attrName)) {*/
-
-
-    if (!Object.prototype.hasOwnProperty.call(attrNames, attrName)) {
-      //check for duplicate attribute.
-      attrNames[attrName] = 1;
-    } else {
-      return {
-        err: {
-          code: 'InvalidAttr',
-          msg: 'attribute ' + attrName + ' is repeated.'
-        }
-      };
-    }
-  }
-
-  return true;
-} // const validAttrRegxp = /^[_a-zA-Z][\w\-.:]*$/;
-
-
-function validateAttrName(attrName, regxAttrName) {
-  // const validAttrRegxp = new RegExp(regxAttrName);
-  return util.doesMatch(attrName, regxAttrName);
-} //const startsWithXML = new RegExp("^[Xx][Mm][Ll]");
-//  startsWith = /^([a-zA-Z]|_)[\w.\-_:]*/;
-
-
-function validateTagName(tagname, regxTagName) {
-  /*if(util.doesMatch(tagname,startsWithXML)) return false;
-    else*/
-  return !util.doesNotMatch(tagname, regxTagName);
-}
-
-var validator = {
-  validate: validate
-};
-
-var x2xmlnode = xmlstr2xmlnode;
-var buildOptions$1 = util.buildOptions;
-
-function parse(xmlData, options, validationOption) {
-  if (validationOption) {
-    if (validationOption === true) validationOption = {};
-    var result = validator.validate(xmlData, validationOption);
-
-    if (result !== true) {
-      throw Error(result.err.msg);
-    }
-  }
-
-  options = buildOptions$1(options, x2xmlnode.defaultOptions, x2xmlnode.props);
-  return node2json.convertToJson(xmlstr2xmlnode.getTraversalObj(xmlData, options), options);
-}
-var getTraversalObj$1 = xmlstr2xmlnode.getTraversalObj;
-var parse_1 = parse;
-var getTraversalObj_1$1 = getTraversalObj$1;
-var parser = {
-  parse: parse_1,
-  getTraversalObj: getTraversalObj_1$1
-};
 
 var cssLayout = createCommonjsModule(function (module, exports) {
   // UMD (Universal Module Definition)
@@ -2781,8 +2100,8 @@ var createRenderTree = function createRenderTree(node, style) {
   }, {});
   args.idName = id;
   args.className = attr["class"] || '';
-  args._text_ = node._text_;
-  var NODE = this['$' + node.name];
+  args._text_ = node.text;
+  var NODE = this['$' + node.nodeName];
   var element = new NODE(args);
   element.root = this;
   (node.children || []).forEach(function (childNode) {
@@ -2868,22 +2187,8 @@ var Layout = /*#__PURE__*/function (_Element) {
     key: "init",
     value: function init(template, style) {
       this.__cost_time = new GatherTime();
-      var parseConfig = {
-        attributeNamePrefix: "",
-        attrNodeName: "attr",
-        //default is 'false'
-        textNodeName: "_text_",
-        ignoreAttributes: false,
-        ignoreNameSpace: true,
-        allowBooleanAttributes: true,
-        parseNodeValue: false,
-        parseAttributeValue: false,
-        trimValues: true,
-        parseTrueNumberOnly: false
-      };
-      var jsonObj = parser.parse(template, parseConfig, true);
-      var xmlTree = jsonObj.children[0];
-      console.log('xmlTree', xmlTree);
+      var jsonObj = parse(template);
+      var xmlTree = jsonObj[0];
 
       this.__cost_time.gather('parseXml'); // XML树生成渲染树
 
@@ -2960,7 +2265,7 @@ function reCalculate(list, layoutList) {
       var lineIndex = 1;
       var lineText = '';
 
-      for (var i = 0; i < child.text.length; i++) {
+      for (var i = 0; i < (child.text || '').length; i++) {
         var textWidth = getTextWidth({
           text: lineText + child.text[i],
           style: child.style
