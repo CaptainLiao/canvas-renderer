@@ -73,9 +73,8 @@ class Parser {
 
     while (true) {
       this.consumeWhiteSpace()
-      if (this.eof() || this.consumeByStr('</')) break
-      if (this.consumeByStr('<!')) {
-        this.curIndex -= 2;
+      if (this.eof() || this.startsWith('</')) break
+      if (this.startsWith('<!')) {
         this.consumeComment()
         continue
       }
@@ -134,12 +133,8 @@ class Parser {
     this.curIndex += 1
     return s
   }
-  consumeByStr(str): boolean {
-    let c = ''
-    while (c !== str && c.length <= str.length) {
-      c += this.consumeChar()
-    }
-    return c.length === str.length
+  startsWith(str): boolean {
+    return this.input.startsWith(str, this.curIndex)
   }
   consumeWhile(test: (n: string) => boolean): string {
     let result = ''
