@@ -24,7 +24,7 @@ export {
 
 function parse(source: string) {
   const nodes = new Parser(0, source).parseNodes()
-  fs.writeFileSync('write.json', JSON.stringify(nodes, null, 2))
+  fs.writeFileSync('dist/my-parser/out.json', JSON.stringify(nodes, null, 2))
   console.log(nodes);
   
 }
@@ -50,11 +50,11 @@ class XNode {
     if (node.text !== undefined && node.text !== null) this.text = node.text;
   }
 
-  static createText(data: string): XNode {
+  static createTextNode(data: string): XNode {
     return new XNode({children: [], nodeName: XNodeName.Text, attrs: {}, text: data})
   }
 
-  static createElem(name: string, attrs: hashMap, children: XNode[], text?: string): XNode {
+  static createElemNode(name: string, attrs: hashMap, children: XNode[], text?: string): XNode {
     return new XNode({children, nodeName: name, attrs, text})
   }
 }
@@ -73,7 +73,12 @@ class Parser {
 
     while (true) {
       this.consumeWhiteSpace()
-      if (this.eof() || this.startsWith('</')) break
+      if (this.eof() || this.consumeByStr('</')) break
+      if (this.consumeByStr('<!')) {
+        this.curIndex -= 2;
+        this.consumeComment()
+        continue
+      }
 
       nodes.push(this.parseNode())
     }
@@ -89,7 +94,7 @@ class Parser {
 
   parseText(): XNode {
     const t = this.consumeWhile(c => c != '<')
-    return XNode.createText(t)
+    return XNode.createTextNode(t)
   }
   parseElement(): XNode {
     if (this.consumeChar() !== '<') throw new Error('Invalid')
@@ -112,7 +117,7 @@ class Parser {
       this.consumeChar() !== '>'
     ) throw new Error('Invalid tag name')
     
-    return XNode.createElem(tagName, attrs, children, text)
+    return XNode.createElemNode(tagName, attrs, children, text)
   }
 
   currentChar(): string {
@@ -120,9 +125,6 @@ class Parser {
     return c
   }
 
-  startsWith(str: string): boolean {
-    return this.input.startsWith(str, this.curIndex)
-  }
   eof(): boolean {
     return this.curIndex >= this.input.length
   }
@@ -131,6 +133,13 @@ class Parser {
     const s = this.currentChar()
     this.curIndex += 1
     return s
+  }
+  consumeByStr(str): boolean {
+    let c = ''
+    while (c !== str && c.length <= str.length) {
+      c += this.consumeChar()
+    }
+    return c.length === str.length
   }
   consumeWhile(test: (n: string) => boolean): string {
     let result = ''
@@ -142,6 +151,13 @@ class Parser {
   consumeWhiteSpace(): void {
     const isWhiteSpace = (str: string) => /\s+/.test(str) || str === ''
     this.consumeWhile(isWhiteSpace)
+  }
+  consumeComment(): void {
+    const regex = /<!(.+)-->/
+    let str = ''
+    while (!this.eof() && !regex.test(str)) {
+      str += this.consumeChar()
+    }
   }
 
   parseTagName(): string {

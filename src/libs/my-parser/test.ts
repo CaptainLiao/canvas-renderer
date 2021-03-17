@@ -1,8 +1,11 @@
 
 import {parse} from './index'
 
-const str = `<View id="container">
+const str = `
+<!-- sfsdf -->
+<View id="container">
   <Image src="https://img.yzcdn.cn/vant/cat.jpeg" class="img"></Image>
+
   <Image src="https://img.yzcdn.cn/vant/cat.jpeg" class="img2"></Image>
   <View class="redText">
     <Text>123</Text>

@@ -12,7 +12,8 @@
       "name": "Launch Program",
       "program": "${workspaceFolder}/src/libs/my-parser/test.ts",
       "preLaunchTask": "tsc: build - the-tsconfig.json",
-      "outFiles": ["${workspaceFolder}/dist/ts-out/**/*.js"]
+      "outFiles": ["${workspaceFolder}/dist/my-parser/**/*.js"],
+      
     }
   ]
 }
