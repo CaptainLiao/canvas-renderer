@@ -16,17 +16,14 @@ Attributes with quoted values: id="main"
 Text nodes: <Text>world</Text>
 */
 
-const fs = require('fs');
-
 export {
   parse
 }
 
 function parse(source: string) {
   const nodes = new Parser(0, source).parseNodes()
-  fs.writeFileSync('dist/my-parser/out.json', JSON.stringify(nodes, null, 2))
   console.log(nodes);
-  
+  return nodes
 }
 
 type hashMap = {
@@ -41,21 +38,21 @@ enum XNodeName {
 class XNode {
   children: XNode[];
   nodeName: string;
-  attrs: hashMap;
+  attr: hashMap;
   text?: string;
   constructor(node: XNode) {
     this.children = node.children;
     this.nodeName = node.nodeName;
-    this.attrs = node.attrs;
+    this.attr = node.attr;
     if (node.text !== undefined && node.text !== null) this.text = node.text;
   }
 
   static createTextNode(data: string): XNode {
-    return new XNode({children: [], nodeName: XNodeName.Text, attrs: {}, text: data})
+    return new XNode({children: [], nodeName: XNodeName.Text, attr: {}, text: data})
   }
 
-  static createElemNode(name: string, attrs: hashMap, children: XNode[], text?: string): XNode {
-    return new XNode({children, nodeName: name, attrs, text})
+  static createElemNode(name: string, attr: hashMap, children: XNode[], text?: string): XNode {
+    return new XNode({children, nodeName: name, attr, text})
   }
 }
 
@@ -98,7 +95,7 @@ class Parser {
   parseElement(): XNode {
     if (this.consumeChar() !== '<') throw new Error('Invalid')
     const tagName = this.parseTagName()
-    const attrs = this.parseAttributes()
+    const attr = this.parseAttributes()
 
     if (this.consumeChar() !== '>') throw new Error('Invalid tag name')
 
@@ -116,7 +113,7 @@ class Parser {
       this.consumeChar() !== '>'
     ) throw new Error('Invalid tag name')
     
-    return XNode.createElemNode(tagName, attrs, children, text)
+    return XNode.createElemNode(tagName, attr, children, text)
   }
 
   currentChar(): string {
