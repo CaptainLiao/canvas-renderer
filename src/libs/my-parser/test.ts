@@ -3,7 +3,7 @@ import {parse} from './index'
 
 const str = `
 <!-- sfsdf -->
-<View id="container">
+<View id="container" value
   <Image src="https://img.yzcdn.cn/vant/cat.jpeg" class="img"></Image>
 
   <Image src="https://img.yzcdn.cn/vant/cat.jpeg" class="img2"></Image>
@@ -14,4 +14,9 @@ const str = `
 </View>
 `
 
-parse(str);
+try {
+  parse(str);
+} catch (err) {
+  console.log(err);
+  
+}

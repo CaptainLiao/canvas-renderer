@@ -16,12 +16,14 @@ Attributes with quoted values: id="main"
 Text nodes: <Text>world</Text>
 */
 
+const fs = require('fs');
 export {
   parse
 }
 
 function parse(source: string) {
   const nodes = new Parser(0, source).parseNodes()
+  fs.writeFileSync('dist/my-parser/out.json', JSON.stringify(nodes,null, 2))
   console.log(nodes);
   return nodes
 }
@@ -93,11 +95,11 @@ class Parser {
     return XNode.createTextNode(t)
   }
   parseElement(): XNode {
-    if (this.consumeChar() !== '<') throw new Error('Invalid')
+    if (this.consumeChar() !== '<') throw this.formatError('Invalid: not found start char <')
     const tagName = this.parseTagName()
     const attr = this.parseAttributes()
 
-    if (this.consumeChar() !== '>') throw new Error('Invalid tag name')
+    if (this.consumeChar() !== '>') throw this.formatError('Invalid: not found end char >')
 
     let children = this.parseNodes()
     let text = void 0
@@ -111,7 +113,7 @@ class Parser {
       this.consumeChar() !== '/' ||
       this.parseTagName() !== tagName ||
       this.consumeChar() !== '>'
-    ) throw new Error('Invalid tag name')
+    ) throw this.formatError('Invalid: not found valid close tag.')
     
     return XNode.createElemNode(tagName, attr, children, text)
   }
@@ -161,7 +163,7 @@ class Parser {
     const obj: hashMap = {}
     while(true) {
       this.consumeWhiteSpace()
-      if (this.currentChar() === '>') break;
+      if (this.currentChar() === '>' || this.currentChar() === '<') break;
 
       const [name, value] = this.parseAttr()
       obj[name] = value
@@ -172,18 +174,29 @@ class Parser {
 
   parseAttr(): [string, string] {
     const name = this.parseTagName()
-    if (this.consumeChar() !== '=') throw new Error('Invalid attributes')
-
-    const value = this.parseAttrValue()
+    let value: string = ''
+    if (this.currentChar() === '=') {
+      this.consumeChar()
+      value = this.parseAttrValue()
+    } else {
+      value = 'true'
+    }
     return [name, value]
   }
   parseAttrValue(): string {
     const openQuote = this.consumeChar()
-    if (openQuote !== '"' && openQuote !== '\'') throw new Error('Invalid attributes')
+    if (openQuote !== '"' && openQuote !== '\'') throw this.formatError('Invalid attributes')
 
     const value = this.consumeWhile(c => c !== openQuote)
-    if (this.consumeChar() !== openQuote) throw new Error('Invalid attributes')
+    if (this.consumeChar() !== openQuote) throw this.formatError('Invalid attributes')
 
     return value
+  }
+
+  formatError(message: string) {
+    return {
+      message,
+      context: this.input.substring(this.curIndex - 10, this.curIndex + 10)
+    }
   }
 }
