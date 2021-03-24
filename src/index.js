@@ -12,4 +12,13 @@ export {
   Element
 }
 
+/**
+  useage:
+    const renderer = new Renderer({xml: xmlData, style})
+
+    renderer.render('#canvas')
+    renderer.toDataURL()
+      .then(res => console.log(res))
+ */
+
 export default Renderer

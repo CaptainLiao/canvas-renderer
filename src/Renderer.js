@@ -1,10 +1,12 @@
 import Layout from './Layout'
 import global from './utils/global'
+import eventBus from './libs/eventBus'
 
 export default class Renderer {
-  constructor({xml, style}) {
+  constructor({xml, style, scripts}) {
     this.xml = xml
     this.style = style
+    this.scripts = scripts
     this.layout = new Layout({
       style: {
         width: 0,
@@ -32,7 +34,7 @@ export default class Renderer {
 
         const style = _scaleStyles({style: this.style, clientWidth})
         const r = this.layout
-          .init(this.xml, style)
+          .init(this.xml, style, this.scripts)
           .render(ctx)
         
         if (__buildMode__ === 'development') {
@@ -83,6 +85,12 @@ function canvasInH5(canvasId) {
   canvasEle.style.width = `${w}px`
   canvasEle.style.height = `${h}px`
   ctx.scale(dpr, dpr)
+
+  canvasEle.addEventListener('click', e => {
+    console.log('canvasEle click');
+    const shape = 'test'
+    eventBus.emit('click', e, shape)
+  })
 
   return Promise.resolve({ctx, canvasEle, clientWidth: w, clientHeight: h})
 };

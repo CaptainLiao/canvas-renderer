@@ -238,6 +238,86 @@ function parseStyle(s) {
   return s;
 }
 
+var EventBus = {};
+var _ = {
+  cached: {},
+  handlers: {}
+};
+Object.defineProperties(EventBus, {
+  on: {
+    get: function get() {
+      var _this = this;
+
+      return function (event) {
+        var args = arguments.length <= 1 ? undefined : arguments[1]; // 默认不使用cache。（缺省 undefined）
+
+        var isCallCache = arguments.length <= 2 ? undefined : arguments[2];
+
+        try {
+          if (typeof args === 'function') {
+            _this._listen(event, args, isCallCache);
+          } else {
+            _this._listen(event, args[event].bind(args), isCallCache);
+          }
+        } catch (e) {
+          throw new Error("".concat(event, " is not a function"));
+        }
+      };
+    }
+  },
+  '_listen': {
+    get: function get() {
+      return function (event, fn, isCallCache) {
+        var handlers = _.handlers;
+        handlers[event] = fn;
+
+        if (_.cached[event] && isCallCache) {
+          fn.apply(null, _.cached[event]);
+        }
+      };
+    }
+  },
+  off: {
+    get: function get() {
+      return function (event, fn) {
+        var handlers = _.handlers[event];
+        var cachedEvent = _.cached[event];
+
+        if (!fn) {
+          delete _.handlers[event];
+          delete _.cached[event];
+          return;
+        }
+
+        for (var i = 0, len = handlers.length; i < len; i++) {
+          if (handlers[i] === fn) {
+            handlers.splice(i, 1);
+            cachedEvent.splice(i, 1);
+            break;
+          }
+        }
+      };
+    }
+  },
+  emit: {
+    get: function get() {
+      return function (event) {
+        var handlers = _.handlers[event];
+
+        for (var _len = arguments.length, options = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+          options[_key - 1] = arguments[_key];
+        }
+
+        if (handlers) {
+          handlers.apply(null, options);
+        }
+
+        _.cached[event] = options;
+      };
+    }
+  }
+});
+
 var uuid = 0;
 
 function hexToRgb(hex) {
@@ -302,6 +382,11 @@ var Element = /*#__PURE__*/function () {
       element.parent = this;
       element.parentId = this.id;
       this.children.push(element);
+    }
+  }, {
+    key: "addEventListener",
+    value: function addEventListener(event, listener) {
+      EventBus.on(event, listener);
     }
   }, {
     key: "renderBox",
@@ -706,6 +791,9 @@ var Parser = /** @class */ (function () {
     Parser.prototype.parseTagName = function () {
         return this.consumeWhile(function (c) { return /[a-z]|[A-Z]|[0-9]/.test(c); });
     };
+    Parser.prototype.parseAttrName = function () {
+        return this.consumeWhile(function (c) { return /[a-z]|[A-Z]|[0-9]|@|_/.test(c); });
+    };
     Parser.prototype.parseAttributes = function () {
         var obj = {};
         while (true) {
@@ -718,7 +806,7 @@ var Parser = /** @class */ (function () {
         return obj;
     };
     Parser.prototype.parseAttr = function () {
-        var name = this.parseTagName();
+        var name = this.parseAttrName();
         var value = '';
         if (this.currentChar() === '=') {
             this.consumeChar();
@@ -2078,11 +2166,12 @@ var cssLayout = createCommonjsModule(function (module, exports) {
 //   "CLEAR": "CLEAR",
 // }
 
-var createRenderTree = function createRenderTree(node, style) {
+var createRenderTree = function createRenderTree(node, style, scripts) {
   var _this = this;
 
   var attr = node.attr || {};
   var id = attr.id || '';
+  var events = [];
   var args = Object.keys(attr).reduce(function (obj, key) {
     var value = attr[key];
     var attribute = key;
@@ -2107,6 +2196,14 @@ var createRenderTree = function createRenderTree(node, style) {
       obj[attribute] = value;
     }
 
+    if (scripts && attribute.indexOf('@') == 0) {
+      var eventName = attribute.substring(1);
+      events.push({
+        name: eventName,
+        handler: scripts[value]
+      });
+    }
+
     return obj;
   }, {});
   args.idName = id;
@@ -2114,9 +2211,13 @@ var createRenderTree = function createRenderTree(node, style) {
   args._text_ = node.text;
   var NODE = this['$' + node.nodeName];
   var element = new NODE(args);
-  element.root = this;
+  element.root = this; // register event
+
+  events.forEach(function (event) {
+    element.addEventListener(event.name, event.handler);
+  });
   (node.children || []).forEach(function (childNode) {
-    var childElement = createRenderTree.call(_this, childNode, style);
+    var childElement = createRenderTree.call(_this, childNode, style, scripts);
     element.add(childElement);
   });
   return element;
@@ -2196,7 +2297,7 @@ var Layout = /*#__PURE__*/function (_Element) {
 
   _createClass(Layout, [{
     key: "init",
-    value: function init(template, style) {
+    value: function init(template, style, scripts) {
       this.__cost_time = new GatherTime();
       var jsonObj = parse(template);
       var xmlTree = jsonObj[0];
@@ -2204,8 +2305,8 @@ var Layout = /*#__PURE__*/function (_Element) {
       this.__cost_time.gather('parseXml'); // XML树生成渲染树
 
 
-      var renderTree = createRenderTree.call(this, xmlTree, style);
-      var renderTree2 = createRenderTree.call(this, xmlTree, style);
+      var renderTree = createRenderTree.call(this, xmlTree, style, scripts);
+      var renderTree2 = createRenderTree.call(this, xmlTree, style, scripts);
 
       this.__cost_time.gather('renderTree'); // 计算布局树
 
@@ -2228,6 +2329,7 @@ var Layout = /*#__PURE__*/function (_Element) {
       }
 
       setLayoutBox.call(this, this.children);
+      console.log(this.children);
       return this;
     }
   }, {
@@ -2308,12 +2410,14 @@ function reCalculate(list, layoutList) {
 var Renderer = /*#__PURE__*/function () {
   function Renderer(_ref) {
     var xml = _ref.xml,
-        style = _ref.style;
+        style = _ref.style,
+        scripts = _ref.scripts;
 
     _classCallCheck(this, Renderer);
 
     this.xml = xml;
     this.style = style;
+    this.scripts = scripts;
     this.layout = new Layout({
       style: {
         width: 0,
@@ -2344,7 +2448,7 @@ var Renderer = /*#__PURE__*/function () {
           clientWidth: clientWidth
         });
 
-        var r = _this.layout.init(_this.xml, style).render(ctx);
+        var r = _this.layout.init(_this.xml, style, _this.scripts).render(ctx);
 
         {
           return r.then(function () {
@@ -2394,6 +2498,11 @@ function canvasInH5(canvasId) {
   canvasEle.style.width = "".concat(w, "px");
   canvasEle.style.height = "".concat(h, "px");
   ctx.scale(dpr, dpr);
+  canvasEle.addEventListener('click', function (e) {
+    console.log('canvasEle click');
+    var shape = 'test';
+    EventBus.emit('click', e, shape);
+  });
   return Promise.resolve({
     ctx: ctx,
     canvasEle: canvasEle,
@@ -2525,7 +2634,11 @@ var Image$1 = /*#__PURE__*/function (_Element) {
           resolve();
         };
 
-        img.onerror = reject;
+        img.onerror = function (e) {
+          // TODO: 处理图片加载失败的的情况
+          console.error(e);
+          resolve();
+        };
       });
     }
   }]);
@@ -2658,7 +2771,12 @@ Renderer.usePlugin('Image', Image$1);
 Renderer.usePlugin('Text', Text);
 Renderer.usePlugin('View', View);
 
-var xmlData = "\n<View id=\"container\">\n  <Image src=\"https://img.yzcdn.cn/vant/cat.jpeg\" class=\"img\"></Image>\n  <Image src=\"https://img.yzcdn.cn/vant/cat.jpeg\" class=\"img2\"></Image>\n  <Text class=\"t3\" value=\"\u8FD9\u662Ft2 value\">22\u8FD9\u771F\u7684\u662F\u4E00\u6761\u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38 \u957F\u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38\u957F \u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38\u957F\u7684\u5B57\u7B26\u4E32.</Text>\n\n  \n  <View class=\"redText\">123</View>\n</View>\n";
+var xmlData = "\n<View id=\"container\">\n  <Image src=\"https://img.yzcdn.cn/vant/cat.jpeg\" class=\"img\" @click=\"tapImage\"></Image>\n  <Image src=\"https://img.yzcdn.cn/vant/cat.jpeg\" class=\"img2\"></Image>\n  <Text class=\"t3\" value=\"\u8FD9\u662Ft2 value\">22\u8FD9\u771F\u7684\u662F\u4E00\u6761\u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38 \u957F\u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38\u957F \u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38\u957F\u7684\u5B57\u7B26\u4E32.</Text>\n\n  \n  <View class=\"redText\">123</View>\n</View>\n";
+var scripts = {
+  tapImage: function tapImage(e) {
+    console.log('tapImage', e);
+  }
+};
 var style = {
   container: {
     position: 'relative',
@@ -2704,9 +2822,8 @@ var style = {
 };
 var renderer = new Renderer({
   xml: xmlData,
-  style: style
+  style: style,
+  scripts: scripts
 });
 renderer.render('#canvas');
-renderer.toDataURL().then(function (res) {
-  return console.log(res);
-});
+renderer.toDataURL(); // .then(res => console.log(res))

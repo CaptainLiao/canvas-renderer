@@ -44,7 +44,11 @@ export default class Image extends Element {
 
         resolve()
       }
-      img.onerror = reject
+      img.onerror = (e) => {
+        // TODO: 处理图片加载失败的的情况
+        console.error(e)
+        resolve()
+      }
     })
     
   }

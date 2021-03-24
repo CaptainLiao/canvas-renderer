@@ -2,6 +2,7 @@ import {
   defaultStyle,
   parseStyle
 } from './utils/style';
+import eventBus from './libs/eventBus'
 
 let uuid = 0;
 
@@ -64,6 +65,10 @@ export default class Element{
     element.parentId = this.id;
 
     this.children.push(element)
+  }
+
+  addEventListener(event, listener) {
+    eventBus.on(event, listener)
   }
 
   renderBox() {

@@ -156,6 +156,9 @@ class Parser {
   parseTagName(): string {
     return this.consumeWhile(c => /[a-z]|[A-Z]|[0-9]/.test(c))
   }
+  parseAttrName(): string {
+    return this.consumeWhile(c => /[a-z]|[A-Z]|[0-9]|@|_/.test(c))
+  }
 
 
   parseAttributes(): hashMap {
@@ -172,7 +175,7 @@ class Parser {
   }
 
   parseAttr(): [string, string] {
-    const name = this.parseTagName()
+    const name = this.parseAttrName()
     let value: string = ''
     if (this.currentChar() === '=') {
       this.consumeChar()

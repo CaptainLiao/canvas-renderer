@@ -10,9 +10,10 @@ import computeLayout from 'css-layout'
 //   "CLEAR": "CLEAR",
 // }
 
-const createRenderTree = function (node, style) {
+const createRenderTree = function (node, style, scripts) {
   const attr = node.attr || {};
   const id = attr.id || ''
+  const events = []
   const args = Object.keys(attr)
     .reduce((obj, key) => {
       const value = attr[key]
@@ -42,6 +43,11 @@ const createRenderTree = function (node, style) {
         obj[attribute] = value
       }
 
+      if (scripts && attribute.indexOf('@') == 0) {
+        const eventName = attribute.substring(1)
+        events.push({name: eventName, handler: scripts[value]})
+      }
+
       return obj;
     }, {})
 
@@ -54,8 +60,13 @@ const createRenderTree = function (node, style) {
   const element = new NODE(args)
   element.root = this;
 
+  // register event
+  events.forEach(event => {
+    element.addEventListener(event.name, event.handler)
+  });
+
   (node.children || []).forEach(childNode => {
-    const childElement = createRenderTree.call(this, childNode, style);
+    const childElement = createRenderTree.call(this, childNode, style, scripts);
 
     element.add(childElement);
   });
@@ -117,7 +128,7 @@ export default class Layout extends Element {
     }
   }
 
-  init(template, style) {
+  init(template, style, scripts) {
     this.__cost_time = new GatherTime()
 
     const parseConfig = {
@@ -139,8 +150,8 @@ export default class Layout extends Element {
     this.__cost_time.gather('parseXml')
 
     // XML树生成渲染树
-    const renderTree = createRenderTree.call(this, xmlTree, style);
-    const renderTree2 = createRenderTree.call(this, xmlTree, style)
+    const renderTree = createRenderTree.call(this, xmlTree, style, scripts);
+    const renderTree2 = createRenderTree.call(this, xmlTree, style, scripts)
     this.__cost_time.gather('renderTree')
     // 计算布局树
     computeLayout(renderTree);
@@ -161,6 +172,7 @@ export default class Layout extends Element {
     }
 
     setLayoutBox.call(this, this.children)
+    console.log(this.children);
     
     return this
   }
