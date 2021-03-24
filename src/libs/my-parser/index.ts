@@ -16,15 +16,14 @@ Attributes with quoted values: id="main"
 Text nodes: <Text>world</Text>
 */
 
-const fs = require('fs');
+// const fs = require('fs');
 export {
   parse
 }
 
 function parse(source: string) {
   const nodes = new Parser(0, source).parseNodes()
-  fs.writeFileSync('dist/my-parser/out.json', JSON.stringify(nodes,null, 2))
-  console.log(nodes);
+  // fs.writeFileSync('dist/my-parser/out.json', JSON.stringify(nodes,null, 2))
   return nodes
 }
 

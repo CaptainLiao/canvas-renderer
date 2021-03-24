@@ -598,7 +598,7 @@ Text nodes: <Text>world</Text>
 */
 function parse(source) {
     var nodes = new Parser(0, source).parseNodes();
-    console.log(nodes);
+    // fs.writeFileSync('dist/my-parser/out.json', JSON.stringify(nodes,null, 2))
     return nodes;
 }
 var XNodeName;
@@ -652,11 +652,11 @@ var Parser = /** @class */ (function () {
     };
     Parser.prototype.parseElement = function () {
         if (this.consumeChar() !== '<')
-            throw new Error('Invalid');
+            throw this.formatError('Invalid: not found start char <');
         var tagName = this.parseTagName();
         var attr = this.parseAttributes();
         if (this.consumeChar() !== '>')
-            throw new Error('Invalid tag name');
+            throw this.formatError('Invalid: not found end char >');
         var children = this.parseNodes();
         var text = void 0;
         if (children[0] && children[0].nodeName === XNodeName.Text) {
@@ -667,7 +667,7 @@ var Parser = /** @class */ (function () {
             this.consumeChar() !== '/' ||
             this.parseTagName() !== tagName ||
             this.consumeChar() !== '>')
-            throw new Error('Invalid tag name');
+            throw this.formatError('Invalid: not found valid close tag.');
         return XNode.createElemNode(tagName, attr, children, text);
     };
     Parser.prototype.currentChar = function () {
@@ -710,7 +710,7 @@ var Parser = /** @class */ (function () {
         var obj = {};
         while (true) {
             this.consumeWhiteSpace();
-            if (this.currentChar() === '>')
+            if (this.currentChar() === '>' || this.currentChar() === '<')
                 break;
             var _a = this.parseAttr(), name_1 = _a[0], value = _a[1];
             obj[name_1] = value;
@@ -719,19 +719,30 @@ var Parser = /** @class */ (function () {
     };
     Parser.prototype.parseAttr = function () {
         var name = this.parseTagName();
-        if (this.consumeChar() !== '=')
-            throw new Error('Invalid attributes');
-        var value = this.parseAttrValue();
+        var value = '';
+        if (this.currentChar() === '=') {
+            this.consumeChar();
+            value = this.parseAttrValue();
+        }
+        else {
+            value = 'true';
+        }
         return [name, value];
     };
     Parser.prototype.parseAttrValue = function () {
         var openQuote = this.consumeChar();
         if (openQuote !== '"' && openQuote !== '\'')
-            throw new Error('Invalid attributes');
+            throw this.formatError('Invalid attributes');
         var value = this.consumeWhile(function (c) { return c !== openQuote; });
         if (this.consumeChar() !== openQuote)
-            throw new Error('Invalid attributes');
+            throw this.formatError('Invalid attributes');
         return value;
+    };
+    Parser.prototype.formatError = function (message) {
+        return {
+            message: message,
+            context: this.input.substring(this.curIndex - 10, this.curIndex + 10)
+        };
     };
     return Parser;
 }());
