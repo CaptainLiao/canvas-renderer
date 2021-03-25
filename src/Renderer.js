@@ -86,12 +86,6 @@ function canvasInH5(canvasId) {
   canvasEle.style.height = `${h}px`
   ctx.scale(dpr, dpr)
 
-  canvasEle.addEventListener('click', e => {
-    console.log('canvasEle click');
-    const shape = 'test'
-    eventBus.emit('click', e, shape)
-  })
-
   return Promise.resolve({ctx, canvasEle, clientWidth: w, clientHeight: h})
 };
 

@@ -1,5 +1,6 @@
 import Element from './Element'
 import {getTextWidth} from './utils/measureText'
+import global from './utils/global'
 import * as parser from './libs/my-parser'
 import computeLayout from 'css-layout'
 
@@ -68,7 +69,7 @@ const createRenderTree = function (node, style, scripts) {
   (node.children || []).forEach(childNode => {
     const childElement = createRenderTree.call(this, childNode, style, scripts);
 
-    element.add(childElement);
+    element.$add(childElement);
   });
 
   return element;
@@ -160,7 +161,7 @@ export default class Layout extends Element {
     computeLayout(renderTree2);
     this.__cost_time.gather('layoutTree')
 
-    this.add(renderTree2);
+    this.$add(renderTree2);
 
     const rootEle = this.children[0];
 
@@ -186,19 +187,47 @@ export default class Layout extends Element {
     // TODO: 待优化
     const renderChildren = children => {
       return children.reduce((promise, child) => {
-        return promise.then(() => {
-          return Promise.resolve()
-            .then(() => child.render(ctx))
-            .then(() => renderChildren(child.children))
-        })
+        return promise
+          .then(() => child.render(ctx))
+          .then(() => renderChildren(child.children))
       }, Promise.resolve())
     }
     return renderChildren(this.children)
-      .then(() => this.__cost_time.gather('paintTree'))
+      .then(() => {
+        this.__cost_time.gather('paintTree')
+
+        const canvasEle = global.getCanvas()
+        if (canvasEle.addEventListener) {
+          canvasEle.addEventListener('click', e => {
+            e.stopPropagation = () => e.__stopPropagation = true;
+            const element = findEleByPosition({children: this.children}, e)
+            element && element.$emit('click', e)
+          })
+        }
+      })
   }
 }
 
 // helper
+
+// TODO: 暂不考虑元素重叠的情况
+function findEleByPosition(nodeTree, {x, y}) {
+  const children = nodeTree.children
+  for (let i = 0; i < children.length; i++) {
+    const child = children[i]
+    const box = child.layoutBox
+    if (x >= box.x && x <= box.width + box.x && y >= box.y && y <= box.height + box.y) {
+      if (child.children.length) {
+        return findEleByPosition(child, {x, y})
+      } else {
+        return child
+      }
+    }
+  }
+ 
+  return nodeTree
+}
+
 function reCalculate(list, layoutList) {
   list.forEach((child, index) => {
     // 处理文字换行

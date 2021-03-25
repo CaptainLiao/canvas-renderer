@@ -22,7 +22,7 @@ export default class View extends Element {
     this.ctx = ctx;
     
     ctx.save()
-    this.renderBox()
+    this.$renderBox()
 
     ctx.restore()
   }

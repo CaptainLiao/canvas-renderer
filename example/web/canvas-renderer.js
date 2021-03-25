@@ -238,85 +238,80 @@ function parseStyle(s) {
   return s;
 }
 
-var EventBus = {};
-var _ = {
-  cached: {},
-  handlers: {}
-};
-Object.defineProperties(EventBus, {
-  on: {
-    get: function get() {
-      var _this = this;
+var EventBus = /*#__PURE__*/function () {
+  function EventBus() {
+    _classCallCheck(this, EventBus);
 
-      return function (event) {
-        var args = arguments.length <= 1 ? undefined : arguments[1]; // 默认不使用cache。（缺省 undefined）
-
-        var isCallCache = arguments.length <= 2 ? undefined : arguments[2];
-
-        try {
-          if (typeof args === 'function') {
-            _this._listen(event, args, isCallCache);
-          } else {
-            _this._listen(event, args[event].bind(args), isCallCache);
-          }
-        } catch (e) {
-          throw new Error("".concat(event, " is not a function"));
-        }
-      };
-    }
-  },
-  '_listen': {
-    get: function get() {
-      return function (event, fn, isCallCache) {
-        var handlers = _.handlers;
-        handlers[event] = fn;
-
-        if (_.cached[event] && isCallCache) {
-          fn.apply(null, _.cached[event]);
-        }
-      };
-    }
-  },
-  off: {
-    get: function get() {
-      return function (event, fn) {
-        var handlers = _.handlers[event];
-        var cachedEvent = _.cached[event];
-
-        if (!fn) {
-          delete _.handlers[event];
-          delete _.cached[event];
-          return;
-        }
-
-        for (var i = 0, len = handlers.length; i < len; i++) {
-          if (handlers[i] === fn) {
-            handlers.splice(i, 1);
-            cachedEvent.splice(i, 1);
-            break;
-          }
-        }
-      };
-    }
-  },
-  emit: {
-    get: function get() {
-      return function (event) {
-        var handlers = _.handlers[event];
-
-        for (var _len = arguments.length, options = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-          options[_key - 1] = arguments[_key];
-        }
-
-        if (handlers) {
-          handlers.apply(null, options);
-        }
-
-        _.cached[event] = options;
-      };
-    }
+    this.cached = {};
+    this.handlers = {};
   }
-});
+
+  _createClass(EventBus, [{
+    key: "on",
+    value: function on(event) {
+      var args = arguments.length <= 1 ? undefined : arguments[1]; // 默认不使用cache。（缺省 undefined）
+
+      var isCallCache = arguments.length <= 2 ? undefined : arguments[2];
+
+      try {
+        if (typeof args === 'function') {
+          this._listen(event, args, isCallCache);
+        } else {
+          this._listen(event, args[event].bind(args), isCallCache);
+        }
+      } catch (e) {
+        throw new Error("".concat(event, " is not a function"));
+      }
+    }
+  }, {
+    key: "_listen",
+    value: function _listen(event, fn, isCallCache) {
+      var handlers = this.handlers;
+      handlers[event] = fn;
+
+      if (this.cached[event] && isCallCache) {
+        fn.apply(null, this.cached[event]);
+      }
+    }
+  }, {
+    key: "off",
+    value: function off(event, fn) {
+      var handlers = this.handlers[event];
+      var cachedEvent = this.cached[event];
+
+      if (!fn) {
+        delete this.handlers[event];
+        delete this.cached[event];
+        return;
+      }
+
+      for (var i = 0, len = handlers.length; i < len; i++) {
+        if (handlers[i] === fn) {
+          handlers.splice(i, 1);
+          cachedEvent.splice(i, 1);
+          break;
+        }
+      }
+    }
+  }, {
+    key: "emit",
+    value: function emit(event) {
+      var handlers = this.handlers[event];
+
+      for (var _len = arguments.length, options = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        options[_key - 1] = arguments[_key];
+      }
+
+      if (handlers) {
+        handlers.apply(null, options);
+      }
+
+      this.cached[event] = options;
+    }
+  }]);
+
+  return EventBus;
+}();
 
 var uuid = 0;
 
@@ -371,26 +366,44 @@ var Element = /*#__PURE__*/function () {
     if (style.opacity !== undefined && style.backgroundColor && style.backgroundColor.indexOf('#') > -1) {
       style.backgroundColor = getRgba(style.backgroundColor, style.opacity);
     }
+
+    this.eventBus = new EventBus();
   }
 
   _createClass(Element, [{
     key: "render",
     value: function render() {}
   }, {
-    key: "add",
-    value: function add(element) {
+    key: "addEventListener",
+    value: function addEventListener(eventName, listener) {
+      this.$on(eventName, listener);
+    }
+  }, {
+    key: "$emit",
+    value: function $emit(eventName, event) {
+      this.eventBus.emit(eventName, event);
+    }
+  }, {
+    key: "$on",
+    value: function $on(eventName, listener) {
+      var _this = this;
+
+      this.eventBus.on(eventName, function (event) {
+        if (event.__stopPropagation) return;
+        listener(event);
+        _this.parent && _this.parent.$emit(eventName, event);
+      });
+    }
+  }, {
+    key: "$add",
+    value: function $add(element) {
       element.parent = this;
       element.parentId = this.id;
       this.children.push(element);
     }
   }, {
-    key: "addEventListener",
-    value: function addEventListener(event, listener) {
-      EventBus.on(event, listener);
-    }
-  }, {
-    key: "renderBox",
-    value: function renderBox() {
+    key: "$renderBox",
+    value: function $renderBox() {
       var ctx = this.ctx;
 
       if (this.style.backgroundColor) {
@@ -2218,7 +2231,7 @@ var createRenderTree = function createRenderTree(node, style, scripts) {
   });
   (node.children || []).forEach(function (childNode) {
     var childElement = createRenderTree.call(_this, childNode, style, scripts);
-    element.add(childElement);
+    element.$add(childElement);
   });
   return element;
 };
@@ -2318,7 +2331,7 @@ var Layout = /*#__PURE__*/function (_Element) {
 
       this.__cost_time.gather('layoutTree');
 
-      this.add(renderTree2);
+      this.$add(renderTree2);
       var rootEle = this.children[0];
 
       if (rootEle.style.width === undefined || rootEle.style.height === undefined) {
@@ -2347,23 +2360,60 @@ var Layout = /*#__PURE__*/function (_Element) {
       var renderChildren = function renderChildren(children) {
         return children.reduce(function (promise, child) {
           return promise.then(function () {
-            return Promise.resolve().then(function () {
-              return child.render(ctx);
-            }).then(function () {
-              return renderChildren(child.children);
-            });
+            return child.render(ctx);
+          }).then(function () {
+            return renderChildren(child.children);
           });
         }, Promise.resolve());
       };
 
       return renderChildren(this.children).then(function () {
-        return _this4.__cost_time.gather('paintTree');
+        _this4.__cost_time.gather('paintTree');
+
+        var canvasEle = global$1.getCanvas();
+
+        if (canvasEle.addEventListener) {
+          canvasEle.addEventListener('click', function (e) {
+            e.stopPropagation = function () {
+              return e.__stopPropagation = true;
+            };
+
+            var element = findEleByPosition({
+              children: _this4.children
+            }, e);
+            element && element.$emit('click', e);
+          });
+        }
       });
     }
   }]);
 
   return Layout;
 }(Element); // helper
+
+function findEleByPosition(nodeTree, _ref2) {
+  var x = _ref2.x,
+      y = _ref2.y;
+  var children = nodeTree.children;
+
+  for (var i = 0; i < children.length; i++) {
+    var child = children[i];
+    var box = child.layoutBox;
+
+    if (x >= box.x && x <= box.width + box.x && y >= box.y && y <= box.height + box.y) {
+      if (child.children.length) {
+        return findEleByPosition(child, {
+          x: x,
+          y: y
+        });
+      } else {
+        return child;
+      }
+    }
+  }
+
+  return nodeTree;
+}
 
 function reCalculate(list, layoutList) {
   list.forEach(function (child, index) {
@@ -2498,11 +2548,6 @@ function canvasInH5(canvasId) {
   canvasEle.style.width = "".concat(w, "px");
   canvasEle.style.height = "".concat(h, "px");
   ctx.scale(dpr, dpr);
-  canvasEle.addEventListener('click', function (e) {
-    console.log('canvasEle click');
-    var shape = 'test';
-    EventBus.emit('click', e, shape);
-  });
   return Promise.resolve({
     ctx: ctx,
     canvasEle: canvasEle,
@@ -2707,7 +2752,7 @@ var Text = /*#__PURE__*/function (_Element) {
 
       this.ctx = ctx;
       ctx.save();
-      this.renderBox();
+      this.$renderBox();
       ctx.font = "".concat(this.style.fontWeight, " ").concat(this.style.fontSize, " ").concat(this.style.fontFamily);
       ctx.fillStyle = this.style.color;
       ctx.textBaseline = this.style.textBaseline;
@@ -2759,7 +2804,7 @@ var View = /*#__PURE__*/function (_Element) {
     value: function render(ctx) {
       this.ctx = ctx;
       ctx.save();
-      this.renderBox();
+      this.$renderBox();
       ctx.restore();
     }
   }]);
@@ -2771,10 +2816,16 @@ Renderer.usePlugin('Image', Image$1);
 Renderer.usePlugin('Text', Text);
 Renderer.usePlugin('View', View);
 
-var xmlData = "\n<View id=\"container\">\n  <Image src=\"https://img.yzcdn.cn/vant/cat.jpeg\" class=\"img\" @click=\"tapImage\"></Image>\n  <Image src=\"https://img.yzcdn.cn/vant/cat.jpeg\" class=\"img2\"></Image>\n  <Text class=\"t3\" value=\"\u8FD9\u662Ft2 value\">22\u8FD9\u771F\u7684\u662F\u4E00\u6761\u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38 \u957F\u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38\u957F \u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38\u957F\u7684\u5B57\u7B26\u4E32.</Text>\n\n  \n  <View class=\"redText\">123</View>\n</View>\n";
+var xmlData = "\n<View id=\"container\" @click=\"tapContainer\">\n  <View class=\"c-wrap\" @click=\"tapWrap\">\n    <Image src=\"https://img.yzcdn.cn/vant/cat.jpeg\" class=\"img\"></Image>\n    <Image src=\"https://img.yzcdn.cn/vant/cat.jpeg\" class=\"img2\" @click=\"tapImage\"></Image>\n  </View>\n  <Text class=\"t3\" value=\"\u8FD9\u662Ft2 value\">22\u8FD9\u771F\u7684\u662F\u4E00\u6761\u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38 \u957F\u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38\u957F \u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38\u957F\u975E\u5E38\u957F\u7684\u5B57\u7B26\u4E32.</Text>\n\n  \n  <View class=\"redText\">123</View>\n</View>\n";
 var scripts = {
+  tapWrap: function tapWrap(e) {
+    console.log('tapWrap', e);
+  },
   tapImage: function tapImage(e) {
     console.log('tapImage', e);
+  },
+  tapContainer: function tapContainer(e) {
+    console.log('tapContainer', e);
   }
 };
 var style = {
@@ -2790,11 +2841,14 @@ var style = {
     // borderWidth: 10
 
   },
+  cWrap: {
+    diplay: 'flex',
+    alignItems: 'center'
+  },
   img: {
-    position: 'absolute',
     top: 0,
-    width: 200,
-    height: 200,
+    width: 60,
+    height: 60,
     zIndex: 1,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20

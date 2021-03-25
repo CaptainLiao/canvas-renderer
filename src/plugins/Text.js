@@ -55,7 +55,7 @@ export default class Text extends Element {
 
     ctx.save()
 
-    this.renderBox()
+    this.$renderBox()
 
     ctx.font = `${this.style.fontWeight} ${this.style.fontSize} ${this.style.fontFamily}`
     ctx.fillStyle = this.style.color

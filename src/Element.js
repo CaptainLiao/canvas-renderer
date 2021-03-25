@@ -2,7 +2,7 @@ import {
   defaultStyle,
   parseStyle
 } from './utils/style';
-import eventBus from './libs/eventBus'
+import EventBus from './libs/eventBus'
 
 let uuid = 0;
 
@@ -56,22 +56,34 @@ export default class Element{
     if (style.opacity !== undefined && style.backgroundColor && style.backgroundColor.indexOf('#') > -1) {
       style.backgroundColor = getRgba(style.backgroundColor, style.opacity);
     }
+
+    this.eventBus = new EventBus();
   }
 
   render() {}
 
-  add(element) {
+  addEventListener(eventName, listener) {
+    this.$on(eventName, listener)
+  }
+  $emit(eventName, event) {
+    this.eventBus.emit(eventName, event)
+  }
+  $on(eventName, listener) {
+    this.eventBus.on(eventName, event => {
+      if (event.__stopPropagation) return
+      listener(event)
+      this.parent && this.parent.$emit(eventName, event)
+    })
+  }
+
+  $add(element) {
     element.parent = this;
     element.parentId = this.id;
 
     this.children.push(element)
   }
 
-  addEventListener(event, listener) {
-    eventBus.on(event, listener)
-  }
-
-  renderBox() {
+  $renderBox() {
     const ctx = this.ctx
     if (this.style.backgroundColor) {
       ctx.save()

@@ -1,9 +1,11 @@
 import Renderer from '../../src'
 
 const xmlData = `
-<View id="container">
-  <Image src="https://img.yzcdn.cn/vant/cat.jpeg" class="img" @click="tapImage"></Image>
-  <Image src="https://img.yzcdn.cn/vant/cat.jpeg" class="img2"></Image>
+<View id="container" @click="tapContainer">
+  <View class="c-wrap" @click="tapWrap">
+    <Image src="https://img.yzcdn.cn/vant/cat.jpeg" class="img"></Image>
+    <Image src="https://img.yzcdn.cn/vant/cat.jpeg" class="img2" @click="tapImage"></Image>
+  </View>
   <Text class="t3" value="这是t2 value">22这真的是一条非常长非常长非常 长非常长非常长非常长 非常长非常长非常长非常长的字符串.</Text>
 
   
@@ -12,8 +14,16 @@ const xmlData = `
 `;
 
 const scripts = {
+  tapWrap(e) {
+    console.log('tapWrap', e);
+    
+  },
   tapImage(e) {
+    
     console.log('tapImage', e);
+  },
+  tapContainer(e) {
+    console.log('tapContainer', e);
   }
 }
 
@@ -31,12 +41,14 @@ const style = {
     // borderRadius: 12,
     // borderWidth: 10
   },
-
+  cWrap: {
+    diplay: 'flex',
+    alignItems: 'center'
+  },
   img: {
-    position: 'absolute',
     top:0,
-    width: 200,
-    height: 200,
+    width: 60,
+    height: 60,
     zIndex: 1,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
